@@ -24,9 +24,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
-            home-manager.users.aleph = import ./hosts/cats/users/aleph.nix {
-              inherit pkgs;
-            };
+            home-manager.users.aleph = import ./hosts/cats/users/aleph.nix;
           }
         ];
       };
