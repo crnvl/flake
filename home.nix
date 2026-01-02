@@ -4,6 +4,7 @@
     home = {
         username = "aleph";
         homeDirectory = "/home/aleph";
+        stateVersion = "25.11";
 
         sessionVariables = {
             EDITOR = "code";
