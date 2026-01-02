@@ -5,6 +5,10 @@
     ./../../../home/firefox.nix
     ./../../../home/git.nix
     ./../../../home/zsh.nix
+    ./../../../home/alacritty.nix
+    ./../../../home/fuzzel.nix
+    ./../../../home/vscode.nix
+    ./../../../home/yazi.nix
   ];
 
   home.username = "aleph";
