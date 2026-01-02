@@ -6,12 +6,9 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
-    
-    niri-flake.url = "github:sodiboo/niri-flake";
-    niri-flake.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, home-manager, niri-flake, ... }:
+  outputs = { self, nixpkgs, home-manager, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -22,11 +19,6 @@
         modules = [
           ./hosts/cats/configuration.nix
           ./modules/nixos/common.nix
-
-          niri-flake.nixosModules.niri
-          { 
-            programs.niri.enable = true;
-          }
 
           home-manager.nixosModules.home-manager
           {
