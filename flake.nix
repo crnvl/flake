@@ -5,25 +5,22 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    inputs.sops-nix.url = "github:Mic92/sops-nix";
-    inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-
+    sops-nix.url = "github:Mic92/sops-nix";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix, ... }:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
   let
-    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
   in
   {
     nixosConfigurations = {
       cats = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-
+        specialArgs = { inherit inputs; };
         modules = [
           ./hosts/cats/configuration.nix
           ./modules/nixos/common.nix
-          sops-nix.nixosModules.sops
 
           home-manager.nixosModules.home-manager
           {

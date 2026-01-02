@@ -2,12 +2,18 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 {
   imports = [
       ./hardware-configuration.nix
+      inputs.sops-nix.nixosModules.sops
   ];
+
+  sops.defaultSopsFile = ./secrets/secrets.yaml;
+  sops.defaultSopsFormat = "yaml";
+
+  sops.age.keyFile = "/home/user/.config/sops/age/keys.txt";
   
   nixpkgs.config.allowUnfree = true;
 
@@ -19,8 +25,6 @@
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  console.keyMap = "de";
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
@@ -44,7 +48,6 @@
   services.xserver.videoDrivers = [ "modesetting" ];
 
   # Configure keymap in X11
-  services.xserver.xkb.layout = "de";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
 
   # Enable CUPS to print documents.

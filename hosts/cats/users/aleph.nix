@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports = [
@@ -15,13 +15,18 @@
   home.homeDirectory = "/home/aleph";
   home.stateVersion = "25.11";
 
-  home.file.".ssh/id_rsa" = {
-    source = /etc/nixos/secrets/id_rsa_git;
-    mode = "0600";
-  };
-  home.file.".ssh/id_rsa.pub".source = /etc/nixos/secrets/id_rsa_git.pub;
+  programs.git = {
+    signing = {
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
+      signByDefault = true;
+    };
 
-  home.sessionVariables.GIT_SSH_COMMAND = "ssh -i ~/.ssh/id_rsa_git -o IdentitiesOnly=yes";
+    settings = {
+      gpg = {
+        format = "ssh";
+      };
+    };
+  };
 
   home.sessionVariables = {
     EDITOR = "code";
