@@ -29,7 +29,20 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
-            home-manager.users.aleph = import ./hosts/cats/users/aleph.nix;
+            home-manager.users.aleph = {
+              home = {
+                username = "aleph";
+                homeDirectory = "/home/aleph";
+                stateVersion = "25.11";
+
+                sessionVariables = {
+                  EDITOR = "code";
+                  LANG = "en_US.UTF-8";
+                };
+              };
+
+              programs.firefox = import ./home/firefox.nix;
+            };
           }
         ];
       };
