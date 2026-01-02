@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 
 let
   lock-false = {
@@ -36,13 +36,6 @@ in
         id = 0;
         name = "default";
         isDefault = true;
-
-        settings = {
-          extensions = with inputs.firefox-addons.packages.${pkgs.system}; [
-            bitwarden
-            ublock-origin
-          ];
-        };
       };
     };
   };
