@@ -2,11 +2,11 @@
   description = "aleph's nixos flake :3";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";
-    nixosModules.url = "github:nixos/nixos";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    
   };
 
-  outputs = { self, nixpkgs, nixosModules }: {
+  outputs = { self, nixpkgs }: {
 
     # NixOS system configuration
     nixosConfigurations = {
