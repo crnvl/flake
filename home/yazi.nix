@@ -1,5 +1,5 @@
 { config, pkgs, ... }:
 
 {
-  programs.alacritty.enable = true;
+  programs.yazi.enable = true;
 }
