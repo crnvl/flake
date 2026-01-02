@@ -5,35 +5,20 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
+  imports = [
       ./hardware-configuration.nix
-    ];
+  ];
   
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];  
   nixpkgs.config.allowUnfree = true;
-
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "cats"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
-  time.timeZone = "Europe/Berlin";
-
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocales = [
-    "de_DE.UTF-8/UTF-8"
-  ];
 
   console.keyMap = "de";
 
@@ -90,12 +75,10 @@
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
-    wget
     alacritty
     fuzzel
     kdePackages.dolphin
     vscode
-    git
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -139,7 +122,5 @@
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "25.11"; # Did you read the comment?
-
 }
 

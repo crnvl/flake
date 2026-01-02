@@ -1,20 +1,32 @@
 {
-  description = "aleph's nixos flake :3";
+  description = "NixOS flake for cats (home PC), server-ready";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs }: {
-
-    # NixOS system configuration
+  outputs = { self, nixpkgs, home-manager, ... }: {
     nixosConfigurations = {
-      system = nixpkgs.lib.nixosSystem {
+
+      cats = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+
         modules = [
-          ./configuration.nix
-          ./hardware-configuration.nix
+          ./hosts/cats/configuration.nix
+          ./modules/nixos/common.nix
+
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+
+            home-manager.users.aleph = import ./home.nix;
+          }
         ];
       };
     };
