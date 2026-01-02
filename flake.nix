@@ -5,10 +5,13 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    inputs.sops-nix.url = "github:Mic92/sops-nix";
+    inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, sops-nix, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in
@@ -20,6 +23,7 @@
         modules = [
           ./hosts/cats/configuration.nix
           ./modules/nixos/common.nix
+          sops-nix.nixosModules.sops
 
           home-manager.nixosModules.home-manager
           {
