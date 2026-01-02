@@ -2,18 +2,12 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
       ./hardware-configuration.nix
-      inputs.sops-nix.nixosModules.sops
   ];
-
-  sops.defaultSopsFile = ./secrets/secrets.yaml;
-  sops.defaultSopsFormat = "yaml";
-
-  sops.age.keyFile = "/home/user/.config/sops/age/keys.txt";
   
   nixpkgs.config.allowUnfree = true;
 

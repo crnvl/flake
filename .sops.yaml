@@ -1,7 +1,0 @@
-keys:
-  - &git age1qfhp7pyjc9rnpfjctkee5yudeys8asse3j08qgcwmhxtc02dvg5sxcurgd
-creation_rules:
-  - path_regex: secrets/secrets.yaml$
-    key_groups:
-    - age:
-      - *git
