@@ -14,7 +14,7 @@
   services.xserver.enable = true;
   
   # Niri
-  programs.niri.enable = true;
+  #  programs.niri.enable = true;
 
   services.greetd = {
     enable = true;
