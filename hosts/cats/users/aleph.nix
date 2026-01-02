@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
     home = {
@@ -12,7 +12,7 @@
         };
     };
 
-    imports = [
-        ./home/firefox.nix
-    ];
+    programs.firefox = import ./home/firefox.nix {
+        inherit pkgs inputs;
+    };
 }

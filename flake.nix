@@ -15,7 +15,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, firefox-addons, ... }: {
+  outputs = { self, nixpkgs, home-manager, inputs, ... }: {
     nixosConfigurations = {
       cats = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -29,7 +29,9 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
-            home-manager.users.aleph = import ./home.nix;
+            home-manager.users.aleph = import ./hosts/cats/users/aleph.nix {
+              inputs = inputs;
+            };
           }
         ];
       };
