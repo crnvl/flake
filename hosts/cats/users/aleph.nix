@@ -9,6 +9,7 @@
     ./../../../home/fuzzel.nix
     ./../../../home/vscode.nix
     ./../../../home/yazi.nix
+    ./../../../home/niri.nix
   ];
 
   home.username = "aleph";
