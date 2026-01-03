@@ -10,6 +10,7 @@
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
     ./../../../home/waybar.nix
+    ./../../../home/signal.nix
   ];
 
   home.username = "aleph";
