@@ -15,6 +15,7 @@
   home.username = "aleph";
   home.homeDirectory = "/home/aleph";
   home.stateVersion = "25.11";
+  home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
   programs.git = {
     signing = {
