@@ -19,6 +19,7 @@
         modules = [
           ./hosts/cats/configuration.nix
           ./modules/nixos/common.nix
+          ./home/zsh.nix
 
           home-manager.nixosModules.home-manager
           {

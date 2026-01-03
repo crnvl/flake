@@ -10,6 +10,7 @@
     ./../../../home/vscode.nix
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
+    ./../../../home/zsh.nix
   ];
 
   home.username = "aleph";
