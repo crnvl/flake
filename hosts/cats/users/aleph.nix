@@ -4,13 +4,11 @@
   imports = [
     ./../../../home/firefox.nix
     ./../../../home/git.nix
-    ./../../../home/zsh.nix
     ./../../../home/alacritty.nix
     ./../../../home/fuzzel.nix
     ./../../../home/vscode.nix
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
-    ./../../../home/zsh.nix
   ];
 
   home.username = "aleph";
