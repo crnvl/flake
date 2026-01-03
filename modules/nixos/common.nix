@@ -43,6 +43,7 @@
     home-manager
     xwayland-satellite
     hyfetch
+    btop
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
