@@ -10,6 +10,8 @@
 
   i18n.defaultLocale = "en_US.UTF-8";
 
+  programs.niri.enable = true;
+
   environment.systemPackages = with pkgs; [
     wget
     git
