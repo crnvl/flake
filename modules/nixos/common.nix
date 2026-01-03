@@ -18,7 +18,18 @@
 
   programs.niri.enable = true;
   programs.zsh.enable = true;
-  programs.zsh.ohMyZsh.enable = true;
+
+  programs.zsh.ohMyZsh = {
+    enable = true;
+    theme = "agnoster";
+    plugins = [
+      "git"
+      "sudo"
+      "docker"
+      "kubectl"
+      "history"
+    ];
+  };
 
   users.users.aleph = {
     isNormalUser = true;
