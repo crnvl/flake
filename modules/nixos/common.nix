@@ -21,7 +21,7 @@
 
   programs.zsh.ohMyZsh = {
     enable = true;
-    theme = "agnoster";
+    theme = "gentoo";
     plugins = [
       "git"
       "sudo"
