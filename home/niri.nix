@@ -107,11 +107,14 @@
             }
         }
 
+        spawn-at-startup "xwayland-satellite"
         spawn-at-startup "waybar"
 
         hotkey-overlay {
             // skip-at-startup
         }
+
+        prefer-no-csd
 
         screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 

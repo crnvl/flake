@@ -16,6 +16,7 @@
     wget
     git
     home-manager
+    xwayland-satellite
   ];
 
   system.stateVersion = "25.11";
