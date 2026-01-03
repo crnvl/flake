@@ -1,7 +1,9 @@
 { config, ... }:
 
 {
-    xdg.configFile."niri/config.kdl".text = ''
+    xdg.configFile."niri/config.kdl" = {
+        force = true;
+        text = ''
         input {
             keyboard {
                 xkb {
@@ -295,4 +297,5 @@
             Mod+Shift+P { power-off-monitors; }
         }
     '';
+    };
 }
