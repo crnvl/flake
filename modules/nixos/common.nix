@@ -31,6 +31,7 @@
     home-manager
     xwayland-satellite
     hyfetch
+    htop
     btop
     waybar
 
