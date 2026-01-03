@@ -10,13 +10,16 @@
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
     ./../../../home/waybar.nix
-    ./../../../home/signal.nix
   ];
 
   home.username = "aleph";
   home.homeDirectory = "/home/aleph";
   home.stateVersion = "25.11";
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
+
+  home.packages = with pkgs; [
+    signal-desktop
+  ];
 
   programs.git = {
     signing = {
