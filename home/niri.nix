@@ -61,7 +61,7 @@
         }
 
         layout {
-            gaps 16
+            gaps 8
 
             center-focused-column "never"
 
