@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, config, ... }:
 
 {
   imports = [
@@ -16,6 +16,12 @@
   home.homeDirectory = "/home/aleph";
   home.stateVersion = "25.11";
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
+
+  home.pointerCursor = {
+    size = 24;
+    name = "Vimix-cursors";
+    package = pkgs.vimix-cursors;
+  };
 
   home.packages = with pkgs; [
     signal-desktop
