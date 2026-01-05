@@ -27,15 +27,23 @@
     signal-desktop
   ];
 
-  programs.git = {
-    signing = {
-      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
-      signByDefault = true;
+  programs = {
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
     };
 
-    settings = {
-      gpg = {
-        format = "ssh";
+    git = {
+      signing = {
+        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
+        signByDefault = true;
+      };
+
+      settings = {
+        gpg = {
+          format = "ssh";
+        };
       };
     };
   };
