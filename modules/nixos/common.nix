@@ -37,6 +37,7 @@
     nixfmt
     direnv
     android-tools
+    unzip
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
