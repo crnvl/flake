@@ -10,6 +10,7 @@
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
     ./../../../home/waybar.nix
+    ./../../../home/pokemmo.nix
   ];
 
   home.username = "aleph";

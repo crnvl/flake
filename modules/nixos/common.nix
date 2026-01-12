@@ -36,6 +36,7 @@
     waybar
     nixfmt
     direnv
+    android-tools
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
