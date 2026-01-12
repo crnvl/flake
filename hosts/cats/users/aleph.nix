@@ -26,6 +26,7 @@
   home.packages = with pkgs; [
     signal-desktop
     pokemmo-installer
+    httptoolkit
   ];
 
   programs = {
