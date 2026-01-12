@@ -10,7 +10,6 @@
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
     ./../../../home/waybar.nix
-    ./../../../home/pokemmo.nix
   ];
 
   home.username = "aleph";
@@ -26,6 +25,7 @@
 
   home.packages = with pkgs; [
     signal-desktop
+    pokemmo-installer
   ];
 
   programs = {
