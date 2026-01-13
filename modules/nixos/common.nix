@@ -19,9 +19,15 @@
   programs.niri.enable = true;
   programs.zsh.enable = true;
 
+  programs.wireshark = {
+    enable = true;
+    dumpcap.enable = true;
+  };
+
   users.users.aleph = {
     isNormalUser = true;
     shell = pkgs.zsh;
+    extraGroups = [ "wireshark" ];
   };
 
 
@@ -38,6 +44,7 @@
     direnv
     android-tools
     unzip
+    wireshark-qt
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
