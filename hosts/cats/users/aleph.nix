@@ -27,6 +27,7 @@
     signal-desktop
     pokemmo-installer
     httptoolkit
+    wireshark
   ];
 
   programs = {
