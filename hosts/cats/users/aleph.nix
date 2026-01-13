@@ -27,6 +27,7 @@
     signal-desktop
     pokemmo-installer
     httptoolkit
+    mitmproxy
   ];
 
   programs = {
