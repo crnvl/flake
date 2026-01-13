@@ -10,6 +10,7 @@
     ./../../../home/yazi.nix
     ./../../../home/niri.nix
     ./../../../home/waybar.nix
+    ./../../../home/wireshark.nix
   ];
 
   home.username = "aleph";
@@ -27,7 +28,6 @@
     signal-desktop
     pokemmo-installer
     httptoolkit
-    wireshark
   ];
 
   programs = {
