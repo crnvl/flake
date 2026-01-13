@@ -28,6 +28,7 @@
     pokemmo-installer
     httptoolkit
     mitmproxy
+    frida-tools
   ];
 
   programs = {
