@@ -1,7 +1,10 @@
 { lib, pkgs, ... }:
 
 {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];  
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -30,7 +33,6 @@
     extraGroups = [ "wireshark" ];
   };
 
-
   environment.systemPackages = with pkgs; [
     wget
     git
@@ -45,6 +47,7 @@
     android-tools
     unzip
     wireshark-qt
+    file
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
@@ -54,9 +57,7 @@
       sudo nixos-rebuild switch --flake /home/aleph/nixos-config && reboot
     '')
 
-
   ];
 
   system.stateVersion = "25.11";
 }
-
