@@ -30,6 +30,7 @@
     mitmproxy
     frida-tools
     jadx
+    apktool
   ];
 
   programs = {
