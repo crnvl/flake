@@ -34,6 +34,7 @@
     apksigner
     zulu8
     android-studio
+    vagrant
   ];
 
   programs = {

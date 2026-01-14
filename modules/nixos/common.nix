@@ -9,6 +9,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  virtualisation.libvirtd.enable = true;
+  boot.kernelModules = [
+    "kvm-amd"
+    "kvm-intel"
+  ];
+
   time.timeZone = "Europe/Berlin";
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -30,7 +36,16 @@
   users.users.aleph = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wireshark" ];
+    extraGroups = [
+      "wireshark"
+      "qemu-libvirtd"
+      "libvirtd"
+      "wheel"
+      "video"
+      "audio"
+      "disk"
+      "networkmanager"
+    ];
   };
 
   environment.systemPackages = with pkgs; [
