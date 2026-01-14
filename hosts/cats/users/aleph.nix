@@ -32,6 +32,7 @@
     jadx
     apktool
     apksigner
+    zulu8
   ];
 
   programs = {
