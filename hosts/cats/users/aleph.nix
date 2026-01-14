@@ -31,6 +31,7 @@
     frida-tools
     jadx
     apktool
+    apksigner
   ];
 
   programs = {
