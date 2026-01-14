@@ -33,6 +33,7 @@
     apktool
     apksigner
     zulu8
+    android-studio
   ];
 
   programs = {
