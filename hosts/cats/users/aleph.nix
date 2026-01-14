@@ -29,6 +29,7 @@
     httptoolkit
     mitmproxy
     frida-tools
+    jadx
   ];
 
   programs = {
