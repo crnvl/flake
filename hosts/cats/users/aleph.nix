@@ -35,6 +35,7 @@
     zulu8
     android-studio
     vagrant
+    python314Packages.httpx
   ];
 
   programs = {
