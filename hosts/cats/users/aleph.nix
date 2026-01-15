@@ -38,6 +38,7 @@
     python315
     python314Packages.pip
     httpx
+    ghidra-bin
   ];
 
   programs = {
