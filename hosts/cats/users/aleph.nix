@@ -39,6 +39,7 @@
     python314Packages.pip
     httpx
     ghidra-bin
+    spotify
   ];
 
   programs = {
