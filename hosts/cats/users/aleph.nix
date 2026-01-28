@@ -40,6 +40,7 @@
     httpx
     ghidra-bin
     spotify
+    vlc
   ];
 
   programs = {
