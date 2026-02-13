@@ -41,6 +41,7 @@
     ghidra-bin
     spotify
     vlc
+    qbittorrent
   ];
 
   programs = {

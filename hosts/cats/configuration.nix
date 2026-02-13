@@ -29,7 +29,8 @@
   hardware.graphics.enable = true;
 
   services.mullvad-vpn.enable = true;
-
+  services.mullvad-vpn.package = pkgs.mullvad-vpn;
+  
   # Intel/AMD
   services.xserver.videoDrivers = [ "modesetting" ];
 
