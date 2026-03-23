@@ -42,6 +42,7 @@
     spotify
     vlc
     qbittorrent
+    kdePackages.dolphin
   ];
 
   programs = {
