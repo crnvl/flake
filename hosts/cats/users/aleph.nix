@@ -43,7 +43,7 @@
     vlc
     qbittorrent
     kdePackages.dolphin
-    ftp
+    inetutils
   ];
 
   programs = {
