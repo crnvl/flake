@@ -75,6 +75,8 @@
     libxext
     libxrender
     libxtst
+    libxi
+    libxrandr
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
