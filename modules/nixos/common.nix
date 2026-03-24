@@ -33,6 +33,8 @@
     dumpcap.enable = true;
   };
 
+  programs.nix-ld.enable = true;
+
   users.users.aleph = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -61,8 +63,18 @@
     direnv
     android-tools
     unzip
-    wireshark-qt
+    wireshark
     file
+    stdenv.cc.cc
+    zlib
+    openssl
+    glib
+    libpulseaudio
+    libGL
+    libx11
+    libxext
+    libxrender
+    libxtst
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
