@@ -29,6 +29,7 @@
     stdenv.cc.cc
     openssl
     zlib
+    nixd
     nil
   ];
 }
