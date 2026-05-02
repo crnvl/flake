@@ -18,7 +18,6 @@
 
   users.users.aleph = {
     extraGroups = [
-      "wireshark"
       "qemu-libvirtd"
       "libvirtd"
       "disk"
@@ -27,9 +26,9 @@
 
   environment.systemPackages = with pkgs; [
     android-tools
-    wireshark
     stdenv.cc.cc
-    zlib
     openssl
+    zlib
+    nil
   ];
 }
