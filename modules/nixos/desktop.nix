@@ -14,8 +14,6 @@
       enable = true;
       package = pkgs.niri;
     };
-
-    ssh.startAgent = true;
   };
 
   services = {
