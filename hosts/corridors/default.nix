@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -19,8 +19,8 @@
       enable = true;
       settings = {
         default_session = {
-          command = "niri-session";
-          user = "aleph";
+          command = "${pkgs.greetd.tuigreet}/bin/tuigreet --cmd niri-session";
+          user = "greeter";
         };
       };
     };
