@@ -10,7 +10,6 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       home-manager,
       ...
@@ -21,7 +20,7 @@
           modules = [
             ./hosts/cats/configuration.nix
             ./modules/nixos/common.nix
-            ./home/zsh.nix
+            ./modules/nixos/zsh.nix
 
             home-manager.nixosModules.home-manager
             {

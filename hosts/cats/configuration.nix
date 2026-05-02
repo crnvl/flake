@@ -5,8 +5,6 @@
     ./hardware-configuration.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
-
   networking.hostName = "cats";
 
   networking.networkmanager.enable = true;
