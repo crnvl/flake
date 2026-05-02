@@ -2,18 +2,6 @@
 
 {
   programs.niri.settings = {
-    input = {
-      keyboard = {
-        xkb.layout = "de";
-        numlock = true;
-      };
-
-      touchpad = {
-        tap = true;
-        natural-scroll = true;
-      };
-    };
-
     layout = {
       gaps = 8;
       center-focused-column = "never";

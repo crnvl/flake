@@ -12,45 +12,60 @@
     ./../../../modules/home/waybar.nix
   ];
 
-  home.username = "aleph";
-  home.homeDirectory = "/home/aleph";
-  home.stateVersion = "25.11";
+  home = {
+    username = "aleph";
+    homeDirectory = "/home/aleph";
+    stateVersion = "25.11";
+    pointerCursor = {
+      size = 24;
+      name = "Vimix-cursors";
+      package = pkgs.vimix-cursors;
+    };
 
-  home.pointerCursor = {
-    size = 24;
-    name = "Vimix-cursors";
-    package = pkgs.vimix-cursors;
+    sessionVariables = {
+      EDITOR = "code";
+      LANG = "en_US.UTF-8";
+    };
+
+    packages = with pkgs; [
+      signal-desktop
+      pokemmo-installer
+      httptoolkit
+      mitmproxy
+      frida-tools
+      jadx
+      apktool
+      apksigner
+      zulu8
+      android-studio
+      vagrant
+      python315
+      python314Packages.pip
+      httpx
+      ghidra-bin
+      spotify
+      vlc
+      qbittorrent
+      kdePackages.dolphin
+      inetutils
+    ];
   };
-
-  home.sessionVariables = {
-    EDITOR = "code";
-    LANG = "en_US.UTF-8";
-  };
-
-  home.packages = with pkgs; [
-    signal-desktop
-    pokemmo-installer
-    httptoolkit
-    mitmproxy
-    frida-tools
-    jadx
-    apktool
-    apksigner
-    zulu8
-    android-studio
-    vagrant
-    python315
-    python314Packages.pip
-    httpx
-    ghidra-bin
-    spotify
-    vlc
-    qbittorrent
-    kdePackages.dolphin
-    inetutils
-  ];
 
   programs = {
+    niri.settings = {
+      input = {
+        keyboard = {
+          xkb.layout = "de";
+          numlock = true;
+        };
+
+        touchpad = {
+          tap = true;
+          natural-scroll = true;
+        };
+      };
+    };
+
     git = {
       settings = {
         user = {
