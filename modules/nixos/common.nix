@@ -57,6 +57,5 @@
     (pkgs.writeShellScriptBin "nix-reboot" ''
       sudo nixos-rebuild switch --flake ${self} && reboot
     '')
-
   ];
 }

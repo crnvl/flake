@@ -7,12 +7,14 @@
     "kvm-intel"
   ];
 
-  programs.wireshark = {
-    enable = true;
-    dumpcap.enable = true;
-  };
+  programs = {
+    wireshark = {
+      enable = true;
+      dumpcap.enable = true;
+    };
 
-  programs.nix-ld.enable = true;
+    nix-ld.enable = true;
+  };
 
   users.users.aleph = {
     extraGroups = [

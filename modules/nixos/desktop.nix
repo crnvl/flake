@@ -1,11 +1,13 @@
 { pkgs, ... }:
 
 {
-  fonts.fontDir.enable = true;
-  fonts.fontconfig.enable = true;
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-  ];
+  fonts = {
+    fontDir.enable = true;
+    fontconfig.enable = true;
+    packages = with pkgs; [
+      nerd-fonts.jetbrains-mono
+    ];
+  };
 
   programs.niri.enable = true;
 

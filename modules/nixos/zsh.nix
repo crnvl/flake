@@ -13,8 +13,6 @@
       plugins = [
         "git"
         "sudo"
-        "docker"
-        "kubectl"
         "history"
       ];
     };

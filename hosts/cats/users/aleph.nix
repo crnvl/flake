@@ -2,12 +2,9 @@
 
 {
   imports = [
+    ./../../../modules/home/desktop.nix
     ./../../../modules/home/firefox.nix
     ./../../../modules/home/git.nix
-    ./../../../modules/home/alacritty.nix
-    ./../../../modules/home/fuzzel.nix
-    ./../../../modules/home/vscode.nix
-    ./../../../modules/home/yazi.nix
     ./../../../modules/home/niri.nix
     ./../../../modules/home/waybar.nix
   ];
@@ -52,6 +49,8 @@
   };
 
   programs = {
+    vscode.enable = true;
+
     niri.settings = {
       input = {
         keyboard = {
