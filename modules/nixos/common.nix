@@ -1,4 +1,4 @@
-{ self, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   nix = {
@@ -51,11 +51,11 @@
     direnv
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
-      exec sudo nixos-rebuild switch --flake ${self}
+      exec sudo nixos-rebuild switch --flake /home/aleph/flake
     '')
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
-      sudo nixos-rebuild switch --flake ${self} && reboot
+      sudo nixos-rebuild switch --flake /home/aleph/flake && reboot
     '')
   ];
 }

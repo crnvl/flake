@@ -75,7 +75,7 @@
       };
 
       signing = {
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg";
+        key = "/home/aleph/.ssh/id_ed25519.pub";
         signByDefault = true;
       };
     };
