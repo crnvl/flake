@@ -21,6 +21,8 @@
           modules = [
             ./hosts/cats/configuration.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/desktop.nix
+            ./modules/nixos/dev.nix
             ./modules/nixos/zsh.nix
 
             home-manager.nixosModules.home-manager
