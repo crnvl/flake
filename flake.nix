@@ -13,10 +13,11 @@
       nixpkgs,
       home-manager,
       ...
-    }:
+    }@inputs:
     {
       nixosConfigurations = {
         cats = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
           modules = [
             ./hosts/cats/configuration.nix
             ./modules/nixos/common.nix
@@ -29,6 +30,7 @@
               home-manager.backupFileExtension = ".bak";
 
               home-manager.users.aleph = import ./hosts/cats/users/aleph.nix;
+              home-manager.extraSpecialArgs = { inherit inputs; };
             }
           ];
         };
