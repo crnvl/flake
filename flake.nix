@@ -23,7 +23,8 @@
         cats = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit self inputs; };
           modules = [
-            ./hosts/cats
+            ./hosts/chambers
+
             ./modules/nixos/common.nix
             ./modules/nixos/desktop.nix
             ./modules/nixos/dev.nix
@@ -37,7 +38,7 @@
                 useUserPackages = true;
                 backupFileExtension = ".bak";
 
-                users.aleph = import ./hosts/cats/users/aleph.nix;
+                users.aleph = import ./hosts/chambers/users/aleph.nix;
                 extraSpecialArgs = { inherit inputs; };
               };
             }
