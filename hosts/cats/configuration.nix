@@ -1,10 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
-      ./hardware-configuration.nix
+    ./hardware-configuration.nix
   ];
-  
+
   nixpkgs.config.allowUnfree = true;
 
   networking.hostName = "cats";
@@ -12,9 +12,6 @@
   networking.networkmanager.enable = true;
 
   services.xserver.enable = true;
-  
-  # Niri
-  #  programs.niri.enable = true;
 
   services.greetd = {
     enable = true;
@@ -30,7 +27,7 @@
 
   services.mullvad-vpn.enable = true;
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
-  
+
   # Intel/AMD
   services.xserver.videoDrivers = [ "modesetting" ];
 
@@ -42,4 +39,3 @@
     ];
   };
 }
-

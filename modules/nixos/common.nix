@@ -53,7 +53,6 @@
   environment.systemPackages = with pkgs; [
     wget
     git
-    home-manager
     xwayland-satellite
     hyfetch
     htop
