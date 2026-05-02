@@ -17,6 +17,11 @@
     enable32Bit = true;
   };
 
+  systemd.tmpfiles.rules = [
+    "d /mnt/storage1 0755 aleph users -"
+    "d /mnt/storage2 0755 aleph users -"
+  ];
+
   services = {
     greetd = {
       enable = true;
