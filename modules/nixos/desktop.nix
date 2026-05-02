@@ -14,10 +14,16 @@
     package = pkgs.niri;
   };
 
-  services.mullvad-vpn = {
-    enable = true;
-    package = pkgs.mullvad-vpn;
+  services = {
+    mullvad-vpn = {
+      enable = true;
+      package = pkgs.mullvad-vpn;
+    };
+
+    gnome.gnome-keyring.enable = true;
   };
+
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   users.users.aleph = {
     extraGroups = [
