@@ -1,5 +1,6 @@
 { ... }:
 {
+  home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
   programs.waybar = {
     enable = true;

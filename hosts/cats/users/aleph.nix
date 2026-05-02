@@ -15,12 +15,16 @@
   home.username = "aleph";
   home.homeDirectory = "/home/aleph";
   home.stateVersion = "25.11";
-  home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
   home.pointerCursor = {
     size = 24;
     name = "Vimix-cursors";
     package = pkgs.vimix-cursors;
+  };
+
+  home.sessionVariables = {
+    EDITOR = "code";
+    LANG = "en_US.UTF-8";
   };
 
   home.packages = with pkgs; [
@@ -63,10 +67,5 @@
         signByDefault = true;
       };
     };
-  };
-
-  home.sessionVariables = {
-    EDITOR = "code";
-    LANG = "en_US.UTF-8";
   };
 }
