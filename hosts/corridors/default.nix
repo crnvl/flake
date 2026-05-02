@@ -12,7 +12,10 @@
     networkmanager.enable = true;
   };
 
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
   services = {
     greetd = {
@@ -24,7 +27,5 @@
         };
       };
     };
-
-    xserver.videoDrivers = [ "modesetting" ];
   };
 }
