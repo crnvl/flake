@@ -50,11 +50,6 @@ in
           "browser.compactmode.show" = true;
           "browser.cache.disk.enable" = false; # Be kind to hard drive
 
-          "browser.topsites.contile.enabled" = false;
-          "browser.newtabpage.activity-stream.showSponsored" = false;
-          "browser.newtabpage.activity-stream.system.showSponsored" = false;
-          "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-
           # "mousewheel.default.delta_multiplier_x" = 20;
           # "mousewheel.default.delta_multiplier_y" = 20;
           # "mousewheel.default.delta_multiplier_z" = 20;
@@ -65,7 +60,6 @@ in
           "widget.disable-workspace-management" = true;
 
           "extensions.autoDisableScopes" = 0;
-          "extensions.pocket.enabled" = false;
           "identity.fxaccounts.enabled" = false;
 
           "toolkit.telemetry.server" = "data:,";

@@ -48,15 +48,19 @@
 
   programs = {
     git = {
-      signing = {
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
-        signByDefault = true;
-      };
-
       settings = {
+        user = {
+          name = "67";
+          email = "support@linux.com";
+        };
         gpg = {
           format = "ssh";
         };
+      };
+
+      signing = {
+        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
+        signByDefault = true;
       };
     };
   };
