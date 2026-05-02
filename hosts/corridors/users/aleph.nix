@@ -16,8 +16,6 @@
   };
 
   programs = {
-    vscode.enable = true;
-
     niri.settings = {
       input = {
         keyboard = {
