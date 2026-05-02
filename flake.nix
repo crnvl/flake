@@ -10,6 +10,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       home-manager,
       ...
@@ -17,7 +18,7 @@
     {
       nixosConfigurations = {
         cats = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit self inputs; };
           modules = [
             ./hosts/cats/configuration.nix
             ./modules/nixos/common.nix

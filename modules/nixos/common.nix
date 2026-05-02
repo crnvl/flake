@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ self, pkgs, ... }:
 
 {
   nix.settings.experimental-features = [
@@ -36,11 +36,11 @@
     direnv
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
-      exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
+      exec sudo nixos-rebuild switch --flake ${self}
     '')
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
-      sudo nixos-rebuild switch --flake /home/aleph/nixos-config && reboot
+      sudo nixos-rebuild switch --flake ${self} && reboot
     '')
 
   ];
