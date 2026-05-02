@@ -26,6 +26,12 @@
   };
 
   programs = {
+    fuzzel.settings = {
+      main = {
+        font = "monospace:size=14";
+      };
+    };
+
     niri.settings = {
       input = {
         keyboard = {
