@@ -5,9 +5,12 @@
     ./hardware-configuration.nix
   ];
 
-  networking.hostName = "cats";
+  system.stateVersion = "25.11";
 
+  networking.hostName = "cats";
   networking.networkmanager.enable = true;
+
+  hardware.graphics.enable = true;
 
   services.greetd = {
     enable = true;
@@ -18,12 +21,7 @@
       };
     };
   };
-
-  hardware.graphics.enable = true;
-
   services.mullvad-vpn.enable = true;
   services.mullvad-vpn.package = pkgs.mullvad-vpn;
-
-  # Intel/AMD
   services.xserver.videoDrivers = [ "modesetting" ];
 }
