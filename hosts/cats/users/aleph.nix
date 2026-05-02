@@ -2,14 +2,14 @@
 
 {
   imports = [
-    ./../../../home/firefox.nix
-    ./../../../home/git.nix
-    ./../../../home/alacritty.nix
-    ./../../../home/fuzzel.nix
-    ./../../../home/vscode.nix
-    ./../../../home/yazi.nix
-    ./../../../home/niri.nix
-    ./../../../home/waybar.nix
+    ./../../../modules/home/firefox.nix
+    ./../../../modules/home/git.nix
+    ./../../../modules/home/alacritty.nix
+    ./../../../modules/home/fuzzel.nix
+    ./../../../modules/home/vscode.nix
+    ./../../../modules/home/yazi.nix
+    ./../../../modules/home/niri.nix
+    ./../../../modules/home/waybar.nix
   ];
 
   home.username = "aleph";
