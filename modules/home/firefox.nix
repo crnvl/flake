@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 
 let
   lock-false = {
@@ -37,6 +37,13 @@ in
         id = 0;
         name = "default";
         isDefault = true;
+
+        extensions.packages = with inputs.firefox-addons.packages.x86_64-linux; [
+          ublock-origin
+          bitwarden
+          clearurls
+          darkreader
+        ];
 
         settings = {
           "browser.startup.homepage" = "https://duckduckgo.com";
