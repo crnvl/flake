@@ -9,8 +9,6 @@
 
   networking.networkmanager.enable = true;
 
-  services.xserver.enable = true;
-
   services.greetd = {
     enable = true;
     settings = {
