@@ -9,12 +9,4 @@
   home.packages = with pkgs; [
     zed-editor
   ];
-
-  dconf.settings."org/gnome/desktop/interface" = {
-    color-scheme = "prefer-dark";
-  };
-
-  xdg.configFile."zed/settings.json".text = builtins.toJSON {
-    theme = "Ayu Dark";
-  };
 }
