@@ -14,6 +14,8 @@
       enable = true;
       package = pkgs.niri;
     };
+
+    ssh.startAgent = true;
   };
 
   services = {
@@ -22,11 +24,7 @@
       package = pkgs.mullvad-vpn;
     };
 
-    gnome.gnome-keyring.enable = true;
-  };
-
-  security.pam.services = {
-    greetd.enableGnomeKeyring = true;
+    gnome.gcr-ssh-agent.enable = false;
   };
 
   users.users.aleph = {

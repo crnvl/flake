@@ -36,7 +36,7 @@
       };
 
       signing = {
-        key = ""; # generate on desktop: ssh-keygen -t ed25519
+        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIXBwAlJ0BxHk01MZ5QnVHbmS5tgO+Rubg0MyJsIk5dp";
         signByDefault = true;
       };
     };
