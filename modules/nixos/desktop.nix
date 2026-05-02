@@ -9,9 +9,13 @@
     ];
   };
 
-  programs.niri = {
-    enable = true;
-    package = pkgs.niri;
+  programs = {
+    niri = {
+      enable = true;
+      package = pkgs.niri;
+    };
+
+    ssh.startAgent = true;
   };
 
   services = {
@@ -32,18 +36,22 @@
     ];
   };
 
-  environment.systemPackages = with pkgs; [
-    xwayland-satellite
-    waybar
-    hyfetch
-    glib
-    libpulseaudio
-    libGL
-    libx11
-    libxext
-    libxrender
-    libxtst
-    libxi
-    libxrandr
-  ];
+  environment = {
+    variables.SSH_AUTH_SOCK = "/run/user/1000/ssh-agent";
+
+    systemPackages = with pkgs; [
+      xwayland-satellite
+      waybar
+      hyfetch
+      glib
+      libpulseaudio
+      libGL
+      libx11
+      libxext
+      libxrender
+      libxtst
+      libxi
+      libxrandr
+    ];
+  };
 }
