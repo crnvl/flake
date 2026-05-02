@@ -24,8 +24,13 @@
       package = pkgs.mullvad-vpn;
     };
 
-    gnome.gcr-ssh-agent.enable = false;
+    gnome = {
+      gcr-ssh-agent.enable = false;
+      gnome-keyring.enable = true;
+    };
   };
+
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   users.users.aleph = {
     extraGroups = [
