@@ -20,7 +20,7 @@
     };
 
     sessionVariables = {
-      EDITOR = "code";
+      EDITOR = "zeditor";
       LANG = "en_US.UTF-8";
     };
 

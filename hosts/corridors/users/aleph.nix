@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -13,6 +13,16 @@
     username = "aleph";
     homeDirectory = "/home/aleph";
     stateVersion = "25.11";
+    pointerCursor = {
+      size = 24;
+      name = "Vimix-cursors";
+      package = pkgs.vimix-cursors;
+    };
+
+    sessionVariables = {
+      EDITOR = "zeditor";
+      LANG = "en_US.UTF-8";
+    };
   };
 
   programs = {
