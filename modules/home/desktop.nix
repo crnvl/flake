@@ -7,7 +7,9 @@
 
     ssh = {
       enable = true;
-      addKeysToAgent = "yes";
+      matchBlocks."*" = {
+        addKeysToAgent = "yes";
+      };
     };
   };
 
