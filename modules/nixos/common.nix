@@ -13,8 +13,6 @@
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  programs.zsh.enable = true;
-
   users.users.aleph = {
     isNormalUser = true;
     shell = pkgs.zsh;

@@ -20,7 +20,7 @@
         cats = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit self inputs; };
           modules = [
-            ./hosts/cats/configuration.nix
+            ./hosts/cats
             ./modules/nixos/common.nix
             ./modules/nixos/desktop.nix
             ./modules/nixos/dev.nix
