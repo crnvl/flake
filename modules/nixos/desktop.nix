@@ -1,33 +1,33 @@
 { pkgs, ... }:
 
 {
-  virtualisation.libvirtd.enable = true;
-  boot.kernelModules = [
-    "kvm-amd"
-    "kvm-intel"
+  fonts.fontDir.enable = true;
+  fonts.fontconfig.enable = true;
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
   ];
 
-  programs.wireshark = {
-    enable = true;
-    dumpcap.enable = true;
-  };
-
-  programs.nix-ld.enable = true;
+  programs.niri.enable = true;
 
   users.users.aleph = {
     extraGroups = [
-      "wireshark"
-      "qemu-libvirtd"
-      "libvirtd"
-      "disk"
+      "video"
+      "audio"
     ];
   };
 
   environment.systemPackages = with pkgs; [
-    android-tools
-    wireshark
-    stdenv.cc.cc
-    zlib
-    openssl
+    xwayland-satellite
+    waybar
+    hyfetch
+    glib
+    libpulseaudio
+    libGL
+    libx11
+    libxext
+    libxrender
+    libxtst
+    libxi
+    libxrandr
   ];
 }
