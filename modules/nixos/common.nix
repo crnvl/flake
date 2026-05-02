@@ -52,6 +52,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    tree
     wget
     git
     xwayland-satellite

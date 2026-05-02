@@ -28,12 +28,4 @@
 
   # Intel/AMD
   services.xserver.videoDrivers = [ "modesetting" ];
-
-  users.users.aleph = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
-    packages = with pkgs; [
-      tree
-    ];
-  };
 }
