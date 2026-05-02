@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 let
   lock-false = {
@@ -15,7 +15,7 @@ in
   programs.firefox = {
     enable = true;
 
-        policies = {
+    policies = {
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
       DontCheckDefaultBrowser = true;
@@ -23,7 +23,6 @@ in
       SearchBar = "unified";
 
       Preferences = {
-        # Privacy settings
         "extensions.pocket.enabled" = lock-false;
         "browser.newtabpage.pinned" = lock-empty-string;
         "browser.topsites.contile.enabled" = lock-false;
@@ -32,7 +31,6 @@ in
         "browser.newtabpage.activity-stream.showSponsoredTopSites" = lock-false;
       };
     };
-
 
     profiles = {
       default = {
@@ -49,25 +47,11 @@ in
           "widget.use-xdg-desktop-portal.file-picker" = 1;
           "browser.aboutConfig.showWarning" = false;
           "browser.compactmode.show" = true;
-          "browser.cache.disk.enable" = false; # Be kind to hard drive
+          "browser.cache.disk.enable" = false;
 
-          "browser.topsites.contile.enabled" = false;
-          "browser.newtabpage.activity-stream.showSponsored" = false;
-          "browser.newtabpage.activity-stream.system.showSponsored" = false;
-          "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-
-
-          # "mousewheel.default.delta_multiplier_x" = 20;
-          # "mousewheel.default.delta_multiplier_y" = 20;
-          # "mousewheel.default.delta_multiplier_z" = 20;
-
-          # Firefox 75+ remembers the last workspace it was opened on as part of its session management.
-          # This is annoying, because I can have a blank workspace, click Firefox from the launcher, and
-          # then have Firefox open on some other workspace.
           "widget.disable-workspace-management" = true;
 
           "extensions.autoDisableScopes" = 0;
-          "extensions.pocket.enabled" = false;
           "identity.fxaccounts.enabled" = false;
 
           "toolkit.telemetry.server" = "data:,";

@@ -1,68 +1,85 @@
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
-    ./../../../home/firefox.nix
-    ./../../../home/git.nix
-    ./../../../home/alacritty.nix
-    ./../../../home/fuzzel.nix
-    ./../../../home/vscode.nix
-    ./../../../home/yazi.nix
-    ./../../../home/niri.nix
-    ./../../../home/waybar.nix
+    ./../../../modules/home/desktop.nix
+    ./../../../modules/home/firefox.nix
+    ./../../../modules/home/git.nix
+    ./../../../modules/home/niri.nix
+    ./../../../modules/home/waybar.nix
   ];
 
-  home.username = "aleph";
-  home.homeDirectory = "/home/aleph";
-  home.stateVersion = "25.11";
-  home.file.".config/waybar/style.css".source = ./waybar/style.css;
+  home = {
+    username = "aleph";
+    homeDirectory = "/home/aleph";
+    stateVersion = "25.11";
+    pointerCursor = {
+      size = 24;
+      name = "Vimix-cursors";
+      package = pkgs.vimix-cursors;
+    };
 
-  home.pointerCursor = {
-    size = 24;
-    name = "Vimix-cursors";
-    package = pkgs.vimix-cursors;
+    sessionVariables = {
+      EDITOR = "code";
+      LANG = "en_US.UTF-8";
+    };
+
+    packages = with pkgs; [
+      signal-desktop
+      pokemmo-installer
+      httptoolkit
+      mitmproxy
+      frida-tools
+      jadx
+      apktool
+      apksigner
+      zulu8
+      android-studio
+      vagrant
+      python315
+      python314Packages.pip
+      httpx
+      ghidra-bin
+      spotify
+      vlc
+      qbittorrent
+      kdePackages.dolphin
+      inetutils
+    ];
   };
 
-  home.packages = with pkgs; [
-    signal-desktop
-    pokemmo-installer
-    httptoolkit
-    mitmproxy
-    frida-tools
-    jadx
-    apktool
-    apksigner
-    zulu8
-    android-studio
-    vagrant
-    python315
-    python314Packages.pip
-    httpx
-    ghidra-bin
-    spotify
-    vlc
-    qbittorrent
-    kdePackages.dolphin
-    inetutils
-  ];
-
   programs = {
-    git = {
-      signing = {
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
-        signByDefault = true;
-      };
+    vscode.enable = true;
 
+    niri.settings = {
+      input = {
+        keyboard = {
+          xkb.layout = "de";
+          numlock = true;
+        };
+
+        touchpad = {
+          tap = true;
+          natural-scroll = true;
+        };
+      };
+    };
+
+    git = {
       settings = {
+        user = {
+          name = "67";
+          email = "support@linux.com";
+        };
         gpg = {
           format = "ssh";
         };
       };
-    };
-  };
 
-  home.sessionVariables = {
-    EDITOR = "code";
-    LANG = "en_US.UTF-8";
+      signing = {
+        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg aleph@cats";
+        signByDefault = true;
+      };
+    };
   };
 }

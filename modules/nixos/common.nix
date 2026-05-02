@@ -1,92 +1,61 @@
-{ lib, pkgs, ... }:
+{ self, pkgs, ... }:
 
 {
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      auto-optimise-store = true;
+    };
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  virtualisation.libvirtd.enable = true;
-  boot.kernelModules = [
-    "kvm-amd"
-    "kvm-intel"
-  ];
-
-  time.timeZone = "Europe/Berlin";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  fonts.fontDir.enable = true;
-  fonts.fontconfig.enable = true;
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-  ];
-
-  programs.niri.enable = true;
-  programs.zsh.enable = true;
-
-  programs.wireshark = {
-    enable = true;
-    dumpcap.enable = true;
+    gc = {
+      automatic = true;
+      dates = "weekly";
+    };
   };
 
-  programs.nix-ld.enable = true;
+  system.activationScripts.cleanupGenerations = ''
+    ${pkgs.nix}/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations +5
+  '';
+
+  nixpkgs.config.allowUnfree = true;
+
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
+
+  time.timeZone = "Europe/Berlin";
+  i18n.defaultLocale = "en_US.UTF-8";
 
   users.users.aleph = {
     isNormalUser = true;
     shell = pkgs.zsh;
     extraGroups = [
-      "wireshark"
-      "qemu-libvirtd"
-      "libvirtd"
       "wheel"
-      "video"
-      "audio"
-      "disk"
       "networkmanager"
     ];
   };
 
   environment.systemPackages = with pkgs; [
+    tree
     wget
     git
-    home-manager
-    xwayland-satellite
-    hyfetch
     htop
     btop
-    waybar
+    unzip
+    file
     nixfmt
     direnv
-    android-tools
-    unzip
-    wireshark
-    file
-    stdenv.cc.cc
-    zlib
-    openssl
-    glib
-    libpulseaudio
-    libGL
-    libx11
-    libxext
-    libxrender
-    libxtst
-    libxi
-    libxrandr
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
-      exec sudo nixos-rebuild switch --flake /home/aleph/nixos-config
+      exec sudo nixos-rebuild switch --flake ${self}
     '')
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
-      sudo nixos-rebuild switch --flake /home/aleph/nixos-config && reboot
+      sudo nixos-rebuild switch --flake ${self} && reboot
     '')
-
   ];
-
-  system.stateVersion = "25.11";
 }

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 {
   programs.zsh = {
@@ -13,8 +13,6 @@
       plugins = [
         "git"
         "sudo"
-        "docker"
-        "kubectl"
         "history"
       ];
     };
