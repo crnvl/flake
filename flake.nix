@@ -18,13 +18,14 @@
       home-manager,
       ...
     }@inputs:
-    {
-      nixosConfigurations = {
-        cats = nixpkgs.lib.nixosSystem {
+    let
+      # user host helper
+      mkHost =
+        hostname:
+        nixpkgs.lib.nixosSystem {
           specialArgs = { inherit self inputs; };
           modules = [
-            ./hosts/chambers
-
+            ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/desktop.nix
             ./modules/nixos/dev.nix
@@ -37,13 +38,29 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = ".bak";
-
-                users.aleph = import ./hosts/chambers/users/aleph.nix;
-                extraSpecialArgs = { inherit inputs; };
+                users.aleph = import ./hosts/${hostname}/users/aleph.nix;
+                extraSpecialArgs = { inherit self inputs; };
               };
             }
           ];
         };
+
+      # server host helper
+      mkServer =
+        hostname:
+        nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit self inputs; };
+          modules = [
+            ./hosts/${hostname}
+            ./modules/nixos/common.nix
+            ./modules/nixos/zsh.nix
+          ];
+        };
+    in
+    {
+      nixosConfigurations = {
+        chambers = mkHost "chambers";
+        corridors = mkHost "corridors";
       };
     };
 }

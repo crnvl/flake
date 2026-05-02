@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   imports = [
@@ -8,7 +8,7 @@
   system.stateVersion = "25.11";
 
   networking = {
-    hostName = "cats";
+    hostName = "chambers";
     networkmanager.enable = true;
   };
 
@@ -23,11 +23,6 @@
           user = "aleph";
         };
       };
-    };
-
-    mullvad-vpn = {
-      enable = true;
-      package = pkgs.mullvad-vpn;
     };
 
     xserver.videoDrivers = [ "modesetting" ];

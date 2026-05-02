@@ -11,6 +11,11 @@
 
   programs.niri.enable = true;
 
+  services.mullvad-vpn = {
+    enable = true;
+    package = pkgs.mullvad-vpn;
+  };
+
   users.users.aleph = {
     extraGroups = [
       "video"
