@@ -5,6 +5,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
 
@@ -26,6 +27,7 @@
             ./modules/nixos/dev.nix
             ./modules/nixos/zsh.nix
 
+            inputs.niri.nixosModules.niri
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
