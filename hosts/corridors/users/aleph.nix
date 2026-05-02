@@ -23,6 +23,13 @@
       EDITOR = "zeditor";
       LANG = "en_US.UTF-8";
     };
+
+    packages = with pkgs; [
+      signal-desktop
+      spotify
+      qbittorrent
+      vesktop
+    ];
   };
 
   programs = {
