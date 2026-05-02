@@ -29,7 +29,6 @@
       spotify
       qbittorrent
       vesktop
-      steam
     ];
   };
 
