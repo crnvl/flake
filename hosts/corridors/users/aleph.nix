@@ -66,7 +66,6 @@
             refresh = 75.0;
           };
 
-          scale = 0.8;
           position = {
             x = 0;
             y = 0;
@@ -80,10 +79,9 @@
             refresh = 60.0;
           };
 
-          scale = 0.8;
           position = {
             x = 0;
-            y = -1350;
+            y = -1080;
           };
         };
 
@@ -94,9 +92,8 @@
             refresh = 75.0;
           };
 
-          scale = 0.8;
           position = {
-            x = 2400;
+            x = 1920;
             y = 0;
           };
         };
