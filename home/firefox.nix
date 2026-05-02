@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 let
   lock-false = {
@@ -15,7 +15,7 @@ in
   programs.firefox = {
     enable = true;
 
-        policies = {
+    policies = {
       DisableTelemetry = true;
       DisableFirefoxStudies = true;
       DontCheckDefaultBrowser = true;
@@ -32,7 +32,6 @@ in
         "browser.newtabpage.activity-stream.showSponsoredTopSites" = lock-false;
       };
     };
-
 
     profiles = {
       default = {
@@ -55,7 +54,6 @@ in
           "browser.newtabpage.activity-stream.showSponsored" = false;
           "browser.newtabpage.activity-stream.system.showSponsored" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
-
 
           # "mousewheel.default.delta_multiplier_x" = 20;
           # "mousewheel.default.delta_multiplier_y" = 20;
