@@ -7,7 +7,6 @@
     settings = [
       {
         layer = "top";
-        style = "~/.config/waybar/style.css";
         position = "bottom";
         spacing = 0;
         height = 0;
