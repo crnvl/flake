@@ -4,6 +4,7 @@
   programs = {
     alacritty.enable = true;
     fuzzel.enable = true;
+    git.enable = true;
 
     ssh = {
       enable = true;
