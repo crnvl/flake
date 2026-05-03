@@ -87,7 +87,9 @@
             "https://seerr.shimme.rs/api/v1/auth/oidc-callback"
           ];
           originLanding = "https://seerr.shimme.rs";
+          allowInsecureClientDisablePkce = true;
           preferShortUsername = true;
+
           scopeMaps.seerr_users = [
             "openid"
             "profile"
