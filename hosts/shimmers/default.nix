@@ -11,6 +11,7 @@
     ../../modules/nixos/services/media/prowlarr.nix
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
+    ../../modules/nixos/services/media/jellyseer.nix
   ];
 
   system.stateVersion = "26.05";
