@@ -7,4 +7,5 @@ in
   "hosts/shimmers/secrets/kanidm-idm-admin-password.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-admin-password.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-oauth2-jellyfin-secret.age".publicKeys = users ++ [ shimmers ];
+  "hosts/shimmers/secrets/stalwart-admin-password.age".publicKeys = users ++ [ shimmers ];
 }

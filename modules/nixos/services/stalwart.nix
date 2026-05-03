@@ -1,10 +1,20 @@
-{ ... }:
+{ config, ... }:
 
 {
+  age.secrets.stalwart-admin-password = {
+    file = ../../../hosts/shimmers/secrets/stalwart-admin-password.age;
+    owner = "stalwart";
+    group = "stalwart";
+  };
+
   services.stalwart = {
     enable = true;
     stateVersion = "26.05";
     openFirewall = true;
+
+    credentials = {
+      admin-password = config.age.secrets.stalwart-admin-password.path;
+    };
 
     settings = {
       server = {
@@ -32,6 +42,11 @@
       certificate.default = {
         cert = "%{file:/var/lib/acme/mail.shimme.rs/fullchain.pem}%";
         private-key = "%{file:/var/lib/acme/mail.shimme.rs/key.pem}%";
+      };
+
+      authentication.fallback-admin = {
+        user = "admin";
+        password = "%{file:/run/credentials/stalwart.service/admin-password}%";
       };
     };
   };
