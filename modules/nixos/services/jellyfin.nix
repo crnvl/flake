@@ -6,6 +6,8 @@
     openFirewall = false;
   };
 
+  users.users.jellyfin.extraGroups = [ "media" ];
+
   services.nginx.virtualHosts."jellyfin.shimme.rs" = {
     enableACME = true;
     forceSSL = true;
