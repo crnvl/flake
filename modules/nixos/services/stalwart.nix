@@ -6,9 +6,15 @@
     owner = "stalwart";
     group = "stalwart";
   };
+  age.secrets.kanidm-oauth2-stalwart-secret = {
+    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-stalwart-secret.age;
+    owner = "stalwart";
+    group = "stalwart";
+  };
 
   systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
     "/run/agenix/stalwart-admin-password"
+    "/run/agenix/kanidm-oauth2-stalwart-secret"
   ];
 
   services.stalwart = {
@@ -58,6 +64,15 @@
           enable = true;
         };
       };
+
+      directory.oidc = {
+        type = "oidc";
+        issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
+        client-id = "stalwart";
+        client-secret = "%{file:/run/agenix/kanidm-oauth2-stalwart-secret}%";
+      };
+
+      storage.directory = "oidc";
     };
   };
 
