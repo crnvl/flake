@@ -48,6 +48,16 @@
         user = "admin";
         password = "%{file:/run/credentials/stalwart.service/admin-password}%";
       };
+
+      tracer = {
+        journal.enable = false;
+        stdout = {
+          type = "stdout";
+          level = "info";
+          ansi = false;
+          enable = true;
+        };
+      };
     };
   };
 
