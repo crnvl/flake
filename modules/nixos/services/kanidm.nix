@@ -3,7 +3,7 @@
 {
   services.kanidm = {
     package = pkgs.kanidm_1_9;
-    enableServer = true;
+    enable = true;
     serverSettings = {
       origin = "https://id.shimme.rs";
       domain = "id.shimme.rs";
