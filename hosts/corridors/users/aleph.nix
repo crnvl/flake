@@ -63,7 +63,7 @@
           mode = {
             width = 1920;
             height = 1080;
-            refresh = 75.0;
+            refresh = 75.002;
           };
 
           position = {
@@ -89,7 +89,7 @@
           mode = {
             width = 1920;
             height = 1080;
-            refresh = 75.0;
+            refresh = 75.002;
           };
 
           position = {
