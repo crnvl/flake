@@ -16,6 +16,12 @@ in
     };
   };
 
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    device = "/dev/sda";
+  };
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
