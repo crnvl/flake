@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  services.kanidm = {
+  services.kanidm_1_9 = {
     enableServer = true;
     serverSettings = {
       origin = "https://id.shimme.rs";
