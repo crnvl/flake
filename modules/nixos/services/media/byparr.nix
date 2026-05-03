@@ -2,7 +2,7 @@
 
 {
   virtualisation.oci-containers.containers.byparr = {
-    image = "ghcr.io/thephasdin/byparr:latest";
+    image = "ghcr.io/thephaseless/byparr:latest";
     ports = [ "8191:8191" ];
     environment = {
       LOG_LEVEL = "info";
