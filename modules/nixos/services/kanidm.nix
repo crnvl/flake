@@ -56,7 +56,7 @@
       systems.oauth2 = {
         jellyfin = {
           displayName = "jellyfin";
-          originUrl = "https://jellyfin.shimme.rs/sso/OID/redirect/kanidm";
+          originUrl = "https://jellyfin.shimme.rs";
           originLanding = "https://jellyfin.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-jellyfin-secret.path;
 
