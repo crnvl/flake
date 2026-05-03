@@ -4,6 +4,11 @@
   services.kanidm = {
     package = pkgs.kanidm_1_9;
 
+    client = {
+      enable = true;
+      settings.uri = "https://id.shimme.rs";
+    };
+
     server = {
       enable = true;
       settings = {
