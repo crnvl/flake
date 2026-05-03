@@ -9,6 +9,7 @@
 
   systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
     "/run/agenix/stalwart-admin-password"
+    "/run/agenix/kanidm-idm-admin-password"
   ];
 
   services.stalwart = {
@@ -59,11 +60,21 @@
         url = "ldaps://127.0.0.1:3636";
         tls.allow-invalid-certs = true;
         base-dn = "o=id.shimme.rs";
-        filter.name = "(&(objectClass=person)(spn=?))";
-        filter.email = "(&(objectClass=person)(mail=?))";
-        attributes.name = "name";
-        attributes.email = "mail";
-        attributes.secret = "userPassword";
+        bind = {
+          dn = "spn=idm_admin@id.shimme.rs,o=id.shimme.rs";
+          secret = "%{file:/run/agenix/kanidm-idm-admin-password}%";
+        };
+
+        filter = {
+          name = "(&(objectClass=person)(spn=?))";
+          email = "(&(objectClass=person)(mail=?))";
+        };
+
+        attributes = {
+          name = "name";
+          email = "mail";
+          secret = "userPassword";
+        };
       };
 
       storage.directory = "kanidm";
