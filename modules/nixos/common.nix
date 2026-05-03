@@ -50,9 +50,7 @@
     '')
 
     (pkgs.writeShellScriptBin "nix-update" ''
-      cd /home/aleph/flake
-      && git pull
-      && exec sudo nixos-rebuild switch --flake .
+      cd /home/aleph/flake && git pull && exec sudo nixos-rebuild switch --flake .
     '')
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
