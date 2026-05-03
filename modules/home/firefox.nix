@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 
 let
   lock-false = {
@@ -14,6 +14,7 @@ in
 {
   programs.firefox = {
     enable = true;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
 
     policies = {
       DisableTelemetry = true;
