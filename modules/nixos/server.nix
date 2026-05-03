@@ -1,11 +1,8 @@
 { ... }:
 
 let
-  sshKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIXBwAlJ0BxHk01MZ5QnVHbmS5tgO+Rubg0MyJsIk5dp" # corridors
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH++Jm6a+gQf5yEdTzT5ozuIQdkYb2w98UxsX2I1YJlg" # chambers
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICbVo7Bj9I6oZc8cM4IPDNhF6MSns8X8S8HrVhql/PxV" # macbook
-  ];
+  keys = import ../../keys.nix;
+  sshKeys = builtins.attrValues keys.users;
 in
 {
   services.openssh = {
