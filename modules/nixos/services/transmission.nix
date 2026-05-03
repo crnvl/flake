@@ -2,8 +2,8 @@
 
 let
   mullvadAddress = "10.71.119.114/32";
-  mullvadEndpoint = "135.136.19.130:51820";
-  mullvadPeerKey = "WPaUZB1eO0W/F4GMDk8uVgqQfS5q4P9F53/pbLmlDjs=";
+  mullvadEndpoint = "185.213.155.73:51820";
+  mullvadPeerKey = "HQHCrq4J6bSpdW1fI5hR/bvcrYa6HgGgwaa5ZY749ik=";
   mullvadDns = "10.64.0.1";
 in
 {
