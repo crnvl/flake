@@ -1,9 +1,10 @@
 { ... }:
 
 {
-  services.stalwart-mail = {
+  services.stalwart = {
     enable = true;
-    stateVersion = "0.1";
+    stateVersion = "26.05";
+    openFirewall = true;
 
     settings = {
       server = {
@@ -19,37 +20,36 @@
             protocol = "imap";
             tls.implicit = true;
           };
+          http = {
+            bind = [ "0.0.0.0:8080" ];
+            protocol = "http";
+          };
         };
 
-        tls = {
-          certificate = "default";
-        };
+        tls.certificate = "default";
       };
 
       certificate.default = {
         cert = "%{file:/var/lib/acme/mail.shimme.rs/fullchain.pem}%";
         private-key = "%{file:/var/lib/acme/mail.shimme.rs/key.pem}%";
       };
-
-      authentication.oauth = {
-        enable = true;
-        issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
-      };
     };
   };
 
   security.acme.certs."mail.shimme.rs" = {
     group = "acme";
-    reloadServices = [ "stalwart-mail" ];
+    reloadServices = [ "stalwart" ];
   };
+
+  users.users.stalwart.extraGroups = [ "acme" ];
 
   services.nginx.virtualHosts."mail.shimme.rs" = {
     enableACME = true;
     forceSSL = true;
-  };
 
-  networking.firewall.allowedTCPPorts = [
-    25
-    993
-  ];
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8080";
+      proxyWebsockets = true;
+    };
+  };
 }
