@@ -100,8 +100,14 @@ in
   users = {
     groups.media = { };
     users = {
-      radarr.extraGroups = [ "media" ];
-      sonarr.extraGroups = [ "media" ];
+      radarr.extraGroups = [
+        "media"
+        "transmission"
+      ];
+      sonarr.extraGroups = [
+        "media"
+        "transmission"
+      ];
       transmission.extraGroups = [ "media" ];
     };
   };
