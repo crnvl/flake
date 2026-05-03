@@ -23,6 +23,8 @@ in
     };
   };
 
+  boot.kernelModules = [ "wireguard" ];
+
   systemd.services = {
     transmission = {
       serviceConfig.NetworkNamespacePath = "/run/netns/mullvad";
