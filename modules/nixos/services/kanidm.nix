@@ -37,7 +37,7 @@
       systems.oauth2 = {
         jellyfin = {
           displayName = "jellyfin";
-          originUrl = "https://jellyfin.shimme.rs";
+          originUrl = "https://jellyfin.shimme.rs/sso/OID/redirect/kanidm";
           originLanding = "https://jellyfin.shimme.rs";
           scopeMaps.jellyfin_users = [
             "openid"
