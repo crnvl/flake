@@ -38,6 +38,7 @@
     tree
     wget
     git
+    hyfetch
     htop
     btop
     unzip

@@ -47,7 +47,6 @@
   environment.systemPackages = with pkgs; [
     xwayland-satellite
     waybar
-    hyfetch
     glib
     libpulseaudio
     libGL
