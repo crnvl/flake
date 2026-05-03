@@ -1,7 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
-  services.kanidm_1_9 = {
+  services.kanidm = {
+    package = pkgs.kanidm_1_9;
     enableServer = true;
     serverSettings = {
       origin = "https://id.shimme.rs";
@@ -13,8 +14,15 @@
   };
 
   security.acme.certs."id.shimme.rs" = {
-    group = "kanidm";
-    reloadServices = [ "kanidm" ];
+    group = "acme";
+    reloadServices = [
+      "kanidm"
+      "nginx"
+    ];
+  };
+
+  users.users = {
+    kanidm.extraGroups = [ "acme" ];
   };
 
   services.nginx.virtualHosts."id.shimme.rs" = {
