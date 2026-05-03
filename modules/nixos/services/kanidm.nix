@@ -64,6 +64,14 @@
             "jellyfin_users"
           ];
         };
+
+        klyk = {
+          displayName = "klyk";
+          mailAddresses = [ "klyk@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
