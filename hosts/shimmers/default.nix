@@ -6,6 +6,7 @@
   ];
 
   system.stateVersion = "25.11";
-
-  networking.hostName = "shimmers";
+  networking = {
+    hostName = "shimmers";
+  };
 }
