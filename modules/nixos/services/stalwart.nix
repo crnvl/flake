@@ -78,7 +78,7 @@
         };
       };
 
-      storage.directory = "oidc";
+      storage.directory = "internal";
     };
   };
 
