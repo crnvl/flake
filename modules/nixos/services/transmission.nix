@@ -87,8 +87,19 @@ in
     };
 
     tmpfiles.rules = [
-      "d /var/lib/transmission/downloads 0755 transmission transmission -"
+      "d /var/lib/transmission/downloads 0775 transmission media -"
       "d /var/lib/transmission/incomplete 0755 transmission transmission -"
+      "d /data/media/movies 0775 transmission media -"
+      "d /data/media/tv 0775 transmission media -"
     ];
+
+    users = {
+      groups.media = { };
+      users = {
+        radarr.extraGroups = [ "media" ];
+        sonarr.extraGroups = [ "media" ];
+        transmission.extraGroups = [ "media" ];
+      };
+    };
   };
 }
