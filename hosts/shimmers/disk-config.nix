@@ -2,6 +2,12 @@
 
 {
   nixpkgs.hostPlatform = "x86_64-linux";
+
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
+
   disko.devices.disk.main = {
     device = "/dev/sda";
     type = "disk";
