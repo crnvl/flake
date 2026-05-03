@@ -1,8 +1,12 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
+  age.secrets.kanidm-idm-admin-password.file = ../../../hosts/shimmers/secrets/kanidm-idm-admin-password.age;
+  age.secrets.kanidm-admin-password.file = ../../../hosts/shimmers/secrets/kanidm-admin-password.age;
+  age.secrets.kanidm-oauth2-jellyfin-secret.file = ../../../hosts/shimmers/secrets/kanidm-oauth2-jellyfin-secret.age;
+
   services.kanidm = {
-    package = pkgs.kanidm_1_9;
+    package = pkgs.kanidm_1_9.withSecretProvisioning;
 
     client = {
       enable = true;
@@ -23,6 +27,9 @@
     provision = {
       enable = true;
 
+      idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
+      adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
+
       groups.jellyfin_users = { };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -39,6 +46,8 @@
           displayName = "jellyfin";
           originUrl = "https://jellyfin.shimme.rs/sso/OID/redirect/kanidm";
           originLanding = "https://jellyfin.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-jellyfin-secret.path;
+
           scopeMaps.jellyfin_users = [
             "openid"
             "profile"

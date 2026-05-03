@@ -12,6 +12,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
@@ -57,6 +62,7 @@
           specialArgs = { inherit self inputs; };
           modules = [
             inputs.disko.nixosModules.disko
+            inputs.agenix.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix
