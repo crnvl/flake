@@ -6,7 +6,6 @@
     ../../modules/nixos/services/nginx.nix
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/jellyfin.nix
-    ../../modules/nixos/services/stalwart.nix
   ];
 
   system.stateVersion = "26.05";
