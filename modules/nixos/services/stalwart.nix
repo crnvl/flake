@@ -65,11 +65,17 @@
         };
       };
 
-      directory.oidc = {
-        type = "oidc";
-        issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
-        client-id = "stalwart";
-        client-secret = "%{file:/run/agenix/kanidm-oauth2-stalwart-secret}%";
+      directory = {
+        oidc = {
+          type = "oidc";
+          issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
+          client-id = "stalwart";
+          client-secret = "%{file:/run/agenix/kanidm-oauth2-stalwart-secret}%";
+        };
+        internal = {
+          type = "internal";
+          store = "db";
+        };
       };
 
       storage.directory = "oidc";
