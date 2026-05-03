@@ -41,6 +41,7 @@
     hyfetch
     htop
     btop
+    dig
     unzip
     file
     nixfmt
