@@ -1,4 +1,9 @@
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 let
   lock-false = {
@@ -39,7 +44,7 @@ in
         name = "default";
         isDefault = true;
 
-        extensions.packages = with inputs.firefox-addons.packages.x86_64-linux; [
+        extensions.packages = with inputs.firefox-addons.packages.${pkgs.system}; [
           ublock-origin
           bitwarden
           clearurls
