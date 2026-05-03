@@ -7,6 +7,10 @@
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/jellyfin.nix
     ../../modules/nixos/services/transmission.nix
+
+    ../../modules/nixos/services/media/prowlarr.nix
+    ../../modules/nixos/services/media/sonarr.nix
+    ../../modules/nixos/services/media/radarr.nix
   ];
 
   system.stateVersion = "26.05";
