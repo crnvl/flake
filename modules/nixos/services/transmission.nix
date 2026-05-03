@@ -92,14 +92,14 @@ in
       "d /data/media/movies 0775 transmission media -"
       "d /data/media/tv 0775 transmission media -"
     ];
+  };
 
+  users = {
+    groups.media = { };
     users = {
-      groups.media = { };
-      users = {
-        radarr.extraGroups = [ "media" ];
-        sonarr.extraGroups = [ "media" ];
-        transmission.extraGroups = [ "media" ];
-      };
+      radarr.extraGroups = [ "media" ];
+      sonarr.extraGroups = [ "media" ];
+      transmission.extraGroups = [ "media" ];
     };
   };
 }
