@@ -46,7 +46,8 @@
 
       authentication.fallback-admin = {
         user = "admin";
-        password = "%{file:/run/credentials/stalwart.service/admin-password}%";
+        type = "plain";
+        secret = "%{file:/run/credentials/stalwart.service/admin-password}%";
       };
 
       tracer = {
