@@ -25,6 +25,7 @@
 
       groups.jellyfin_users = { };
 
+      # create creds: sudo kanidm person credential create-reset-token aleph
       persons = {
         aleph = {
           displayName = "aleph";
