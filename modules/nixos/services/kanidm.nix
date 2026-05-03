@@ -72,6 +72,10 @@
     kanidm.extraGroups = [ "acme" ];
   };
 
+  systemd.services.kanidm.serviceConfig.BindReadOnlyPaths = [
+    "/var/lib/acme/id.shimme.rs/"
+  ];
+
   services.nginx.virtualHosts."id.shimme.rs" = {
     enableACME = true;
     forceSSL = true;
