@@ -86,7 +86,7 @@ in
       };
     };
 
-    systemd.tmpfiles.rules = [
+    tmpfiles.rules = [
       "d /var/lib/transmission/downloads 0775 transmission media -"
       "d /var/lib/transmission/downloads/radarr 0775 transmission media -"
       "d /var/lib/transmission/downloads/sonarr 0775 transmission media -"
