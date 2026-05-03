@@ -7,6 +7,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
@@ -51,6 +56,7 @@
         nixpkgs.lib.nixosSystem {
           specialArgs = { inherit self inputs; };
           modules = [
+            inputs.disko.nixosModules.disko
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix
