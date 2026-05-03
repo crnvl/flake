@@ -1,4 +1,4 @@
-{ config, ... }:
+{ ... }:
 
 {
   age.secrets.stalwart-admin-password = {
@@ -7,14 +7,14 @@
     group = "stalwart";
   };
 
+  systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
+    "/run/agenix/stalwart-admin-password"
+  ];
+
   services.stalwart = {
     enable = true;
     stateVersion = "26.05";
     openFirewall = true;
-
-    credentials = {
-      admin-password = config.age.secrets.stalwart-admin-password.path;
-    };
 
     settings = {
       server = {
@@ -46,7 +46,7 @@
 
       authentication.fallback-admin = {
         user = "admin";
-        secret = "%{file:/run/credentials/stalwart.service/admin-password}%";
+        secret = "%{file:/run/agenix/stalwart-admin-password}%";
       };
 
       tracer = {
