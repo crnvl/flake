@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  environment.systemPackages = [ pkgs.kanidm_1_9 ];
+
   services.kanidm = {
     package = pkgs.kanidm_1_9;
 
