@@ -59,7 +59,7 @@
         url = "ldaps://127.0.0.1:3636";
         tls.allow-invalid-certs = true;
         base-dn = "o=id.shimme.rs";
-        filter.name = "(&(objectClass=person)(name=?))";
+        filter.name = "(&(objectClass=person)(spn=?))";
         filter.email = "(&(objectClass=person)(mail=?))";
         attributes.name = "name";
         attributes.email = "mail";
