@@ -6,10 +6,15 @@
     owner = "stalwart";
     group = "stalwart";
   };
+  age.secrets.stalwart-ldap-bind-token = {
+    file = ../../../hosts/shimmers/secrets/stalwart-ldap-bind-token.age;
+    owner = "stalwart";
+    group = "stalwart";
+  };
 
   systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
     "/run/agenix/stalwart-admin-password"
-    "/run/agenix/kanidm-idm-admin-password"
+    "/run/agenix/stalwart-ldap-bind-token"
   ];
 
   services.stalwart = {
@@ -61,8 +66,8 @@
         tls.allow-invalid-certs = true;
         base-dn = "o=id.shimme.rs";
         bind = {
-          dn = "spn=idm_admin@id.shimme.rs,o=id.shimme.rs";
-          secret = "%{file:/run/agenix/kanidm-idm-admin-password}%";
+          dn = "spn=stalwart-ldap@id.shimme.rs,o=id.shimme.rs";
+          secret = "%{file:/run/agenix/stalwart-ldap-bind-token}%";
         };
 
         filter = {
