@@ -12,6 +12,7 @@
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
     ../../modules/nixos/services/media/seerr.nix
+    ../../modules/nixos/services/media/byparr.nix
   ];
 
   system.stateVersion = "26.05";
