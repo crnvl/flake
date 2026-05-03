@@ -54,7 +54,14 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
-            "seerr_users"
+          ];
+        };
+
+        jil = {
+          displayName = "jil";
+          mailAddresses = [ "jil@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
           ];
         };
       };
@@ -73,24 +80,6 @@
           preferShortUsername = true;
 
           scopeMaps.jellyfin_users = [
-            "openid"
-            "profile"
-            "email"
-            "groups"
-          ];
-        };
-
-        seerr = {
-          displayName = "seerr";
-          originUrl = [
-            "https://seerr.shimme.rs"
-            "https://seerr.shimme.rs/api/v1/auth/oidc-callback"
-          ];
-          originLanding = "https://seerr.shimme.rs";
-          allowInsecureClientDisablePkce = true;
-          preferShortUsername = true;
-
-          scopeMaps.seerr_users = [
             "openid"
             "profile"
             "email"
