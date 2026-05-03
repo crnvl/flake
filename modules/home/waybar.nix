@@ -17,7 +17,6 @@
         margin-left = 0;
 
         modules-left = [
-          "custom/grrr"
           "niri/workspaces"
           "tray"
           "custom/notification"
@@ -116,10 +115,6 @@
           "on-click" = "swaync-client -t -sw";
           "on-click-right" = "swaync-client -d -sw";
           "escape" = true;
-        };
-
-        "custom/grrr" = {
-          "exec" = "bash print_grrr.sh";
         };
 
         "custom/weather" = {
