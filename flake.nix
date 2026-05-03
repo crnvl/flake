@@ -53,6 +53,7 @@
           modules = [
             ./hosts/${hostname}
             ./modules/nixos/common.nix
+            ./modules/nixos/server.nix
             ./modules/nixos/zsh.nix
           ];
         };
@@ -61,6 +62,7 @@
       nixosConfigurations = {
         chambers = mkHost "chambers";
         corridors = mkHost "corridors";
+        shimmers = mkServer "shimmers";
       };
     };
 }
