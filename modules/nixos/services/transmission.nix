@@ -59,8 +59,8 @@ in
         ip link add wg0 type wireguard
         ip link set wg0 netns mullvad
 
-        # Configure WireGuard
-        wg set wg0 \
+        # Configure WireGuard (inside namespace since wg0 is there now)
+        ip netns exec mullvad wg set wg0 \
           private-key ${config.age.secrets.mullvad-wg-private-key.path} \
           peer ${mullvadPeerKey} \
           endpoint ${mullvadEndpoint} \
@@ -74,7 +74,7 @@ in
         mkdir -p /etc/netns/mullvad
         echo "nameserver ${mullvadDns}" > /etc/netns/mullvad/resolv.conf
 
-        # Port forward: host:9091 → namespace:9091 (for Sonarr/Radarr)
+        # Port forward: host:9091 -> namespace:9091 (for Sonarr/Radarr)
         ip link add veth-host type veth peer name veth-mullvad
         ip link set veth-mullvad netns mullvad
         ip addr add 10.200.0.1/24 dev veth-host
