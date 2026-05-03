@@ -49,6 +49,12 @@
       exec sudo nixos-rebuild switch --flake /home/aleph/flake
     '')
 
+    (pkgs.writeShellScriptBin "nix-update" ''
+      cd /home/aleph/flake
+      && git pull
+      && exec sudo nixos-rebuild switch --flake .
+    '')
+
     (pkgs.writeShellScriptBin "nix-reboot" ''
       sudo nixos-rebuild switch --flake /home/aleph/flake && reboot
     '')
