@@ -50,9 +50,12 @@
         private-key = "%{file:/var/lib/acme/mail.shimme.rs/key.pem}%";
       };
 
-      authentication.fallback-admin = {
-        user = "admin";
-        secret = "%{file:/run/agenix/stalwart-admin-password}%";
+      authentication = {
+        fallback-admin = {
+          user = "admin";
+          secret = "%{file:/run/agenix/stalwart-admin-password}%";
+        };
+        directory = "oidc";
       };
 
       tracer = {
