@@ -3,6 +3,7 @@
 {
   services.stalwart-mail = {
     enable = true;
+    stateVersion = "0.1";
 
     settings = {
       server = {

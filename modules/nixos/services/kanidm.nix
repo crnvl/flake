@@ -42,14 +42,20 @@
       idmAdminPasswordFile = config.age.secrets.kanidm-idm-admin-password.path;
       adminPasswordFile = config.age.secrets.kanidm-admin-password.path;
 
-      groups.jellyfin_users = { };
+      groups = {
+        jellyfin_users = { };
+        mail_users = { };
+      };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
       persons = {
         aleph = {
           displayName = "aleph";
           mailAddresses = [ "aleph@shimme.rs" ];
-          groups = [ "jellyfin_users" ];
+          groups = [
+            "jellyfin_users"
+            "mail_users"
+          ];
         };
       };
 
@@ -71,6 +77,19 @@
             "profile"
             "email"
             "groups"
+          ];
+        };
+
+        stalwart = {
+          displayName = "mail";
+          originUrl = "https://mail.shimme.rs";
+          originLanding = "https://mail.shimme.rs";
+          allowInsecureClientDisablePkce = true;
+
+          scopeMaps.mail_users = [
+            "openid"
+            "profile"
+            "email"
           ];
         };
       };
