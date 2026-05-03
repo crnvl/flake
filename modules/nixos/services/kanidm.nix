@@ -18,6 +18,13 @@
     };
   };
 
+  systemd.services.kanidm.serviceConfig = {
+    StateDirectory = "kanidm";
+    StateDirectoryModule = "0750";
+    User = "kanidm";
+    Group = "kanidm";
+  };
+
   security.acme.certs."id.shimme.rs" = {
     group = "acme";
     reloadServices = [
