@@ -6,15 +6,9 @@
     owner = "stalwart";
     group = "stalwart";
   };
-  age.secrets.kanidm-oauth2-stalwart-secret = {
-    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-stalwart-secret.age;
-    owner = "stalwart";
-    group = "stalwart";
-  };
 
   systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
     "/run/agenix/stalwart-admin-password"
-    "/run/agenix/kanidm-oauth2-stalwart-secret"
   ];
 
   services.stalwart = {
@@ -50,14 +44,6 @@
         private-key = "%{file:/var/lib/acme/mail.shimme.rs/key.pem}%";
       };
 
-      authentication = {
-        fallback-admin = {
-          user = "admin";
-          secret = "%{file:/run/agenix/stalwart-admin-password}%";
-        };
-        directory = "oidc";
-      };
-
       tracer = {
         journal.enable = false;
         stdout = {
@@ -68,24 +54,27 @@
         };
       };
 
-      directory = {
-        oidc = {
-          type = "oidc";
-          issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
-          client-id = "stalwart";
-          client-secret = "%{file:/run/agenix/kanidm-oauth2-stalwart-secret}%";
-          field.email = "email";
-          field.name = "name";
-          field.username = "preferred_username";
-          catch-all.directory = "internal";
-        };
-        internal = {
-          type = "internal";
-          store = "db";
-        };
+      directory.kanidm = {
+        type = "ldap";
+        url = "ldaps://127.0.0.1:3636";
+        tls.allow-invalid-certs = true;
+        base-dn = "o=id.shimme.rs";
+        filter.name = "(&(objectClass=person)(name=?))";
+        filter.email = "(&(objectClass=person)(mail=?))";
+        attributes.name = "name";
+        attributes.email = "mail";
+        attributes.secret = "userPassword";
       };
 
-      storage.directory = "internal";
+      storage.directory = "kanidm";
+
+      authentication = {
+        directory = "kanidm";
+        fallback-admin = {
+          user = "admin";
+          secret = "%{file:/run/agenix/stalwart-admin-password}%";
+        };
+      };
     };
   };
 
