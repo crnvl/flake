@@ -18,6 +18,33 @@
     };
   };
 
+  provision = {
+    enable = true;
+
+    groups.jellyfin_users = { };
+
+    persons = {
+      aleph = {
+        displayName = "aleph";
+        mailAddresses = [ "aleph@shimme.rs" ];
+        groups = [ "jellyfin_users" ];
+      };
+    };
+
+    systems.oauth2 = {
+      jellyfin = {
+        displayName = "jellyfin";
+        originUrl = "https://jellyfin.shimme.rs";
+        originLanding = "https://jellyfin.shimme.rs";
+        scopeMaps.jellyfin_users = [
+          "openid"
+          "profile"
+          "email"
+        ];
+      };
+    };
+  };
+
   security.acme.certs."id.shimme.rs" = {
     group = "acme";
     reloadServices = [
