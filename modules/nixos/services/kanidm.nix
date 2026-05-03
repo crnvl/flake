@@ -31,7 +31,6 @@
         origin = "https://id.shimme.rs";
         domain = "id.shimme.rs";
         bindaddress = "127.0.0.1:8443";
-        ldapbindaddress = "127.0.0.1:3636";
         tls_chain = "/var/lib/acme/id.shimme.rs/fullchain.pem";
         tls_key = "/var/lib/acme/id.shimme.rs/key.pem";
       };
@@ -45,7 +44,6 @@
 
       groups = {
         jellyfin_users = { };
-        mail_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -55,7 +53,6 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
-            "mail_users"
           ];
         };
       };
@@ -78,19 +75,6 @@
             "profile"
             "email"
             "groups"
-          ];
-        };
-
-        stalwart = {
-          displayName = "mail";
-          originUrl = "https://mail.shimme.rs";
-          originLanding = "https://mail.shimme.rs";
-          allowInsecureClientDisablePkce = true;
-
-          scopeMaps.mail_users = [
-            "openid"
-            "profile"
-            "email"
           ];
         };
       };

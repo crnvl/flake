@@ -6,15 +6,9 @@
     owner = "stalwart";
     group = "stalwart";
   };
-  age.secrets.stalwart-ldap-bind-token = {
-    file = ../../../hosts/shimmers/secrets/stalwart-ldap-bind-token.age;
-    owner = "stalwart";
-    group = "stalwart";
-  };
 
   systemd.services.stalwart.serviceConfig.BindReadOnlyPaths = [
     "/run/agenix/stalwart-admin-password"
-    "/run/agenix/stalwart-ldap-bind-token"
   ];
 
   services.stalwart = {
@@ -60,32 +54,10 @@
         };
       };
 
-      directory.kanidm = {
-        type = "ldap";
-        url = "ldaps://127.0.0.1:3636";
-        tls.allow-invalid-certs = true;
-        base-dn = "o=id.shimme.rs";
-        bind = {
-          dn = "spn=stalwart-ldap@id.shimme.rs,o=id.shimme.rs";
-          secret = "%{file:/run/agenix/stalwart-ldap-bind-token}%";
-        };
-
-        filter = {
-          name = "(&(objectClass=person)(spn=?))";
-          email = "(&(objectClass=person)(mail=?))";
-        };
-
-        attributes = {
-          name = "name";
-          email = "mail";
-          secret = "userPassword";
-        };
-      };
-
-      storage.directory = "kanidm";
+      storage.directory = "internal";
 
       authentication = {
-        directory = "kanidm";
+        directory = "internal";
         fallback-admin = {
           user = "admin";
           secret = "%{file:/run/agenix/stalwart-admin-password}%";
