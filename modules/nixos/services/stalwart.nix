@@ -44,6 +44,11 @@
         private-key = "%{file:/var/lib/acme/mail.shimme.rs/key.pem}%";
       };
 
+      authentication.fallback-admin = {
+        user = "admin";
+        secret = "%{file:/run/credentials/stalwart.service/admin-password}%";
+      };
+
       tracer = {
         journal.enable = false;
         stdout = {
