@@ -44,6 +44,7 @@
 
       groups = {
         jellyfin_users = { };
+        seerr_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -53,6 +54,7 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "seerr_users"
           ];
         };
       };
@@ -75,6 +77,21 @@
             "profile"
             "email"
             "groups"
+          ];
+        };
+
+        seerr = {
+          displayName = "seerr";
+          originUrl = [
+            "https://seerr.shimme.rs"
+            "https://seerr.shimme.rs/api/v1/auth/oidc-callback"
+          ];
+          originLanding = "https://seerr.shimme.rs";
+          preferShortUsername = true;
+          scopeMaps.seerr_users = [
+            "openid"
+            "profile"
+            "email"
           ];
         };
       };
