@@ -84,11 +84,11 @@ in
           ip -n mullvad link set veth-mullvad up
         '';
       };
-
-      tmpfiles.rules = [
-        "d /var/lib/transmission/downloads 0755 transmission transmission -"
-        "d /var/lib/transmission/incomplete 0755 transmission transmission -"
-      ];
     };
+
+    tmpfiles.rules = [
+      "d /var/lib/transmission/downloads 0755 transmission transmission -"
+      "d /var/lib/transmission/incomplete 0755 transmission transmission -"
+    ];
   };
 }
