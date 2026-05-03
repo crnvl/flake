@@ -94,6 +94,7 @@
             "openid"
             "profile"
             "email"
+            "groups"
           ];
         };
       };
