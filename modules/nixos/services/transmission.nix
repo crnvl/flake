@@ -86,12 +86,15 @@ in
       };
     };
 
-    tmpfiles.rules = [
+    systemd.tmpfiles.rules = [
       "d /var/lib/transmission/downloads 0775 transmission media -"
+      "d /var/lib/transmission/downloads/radarr 0775 transmission media -"
+      "d /var/lib/transmission/downloads/sonarr 0775 transmission media -"
       "d /var/lib/transmission/incomplete 0755 transmission transmission -"
       "d /data/media/movies 0775 transmission media -"
       "d /data/media/tv 0775 transmission media -"
     ];
+
   };
 
   users = {
