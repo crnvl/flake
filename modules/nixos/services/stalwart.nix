@@ -71,6 +71,10 @@
           issuer-url = "https://id.shimme.rs/oauth2/openid/stalwart";
           client-id = "stalwart";
           client-secret = "%{file:/run/agenix/kanidm-oauth2-stalwart-secret}%";
+          field.email = "email";
+          field.name = "name";
+          field.username = "preferred_username";
+          catch-all.directory = "internal";
         };
         internal = {
           type = "internal";
