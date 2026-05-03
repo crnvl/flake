@@ -1,8 +1,6 @@
 { pkgs, ... }:
 
 {
-  environment.systemPackages = [ pkgs.kanidm_1_9 ];
-
   services.kanidm = {
     package = pkgs.kanidm_1_9;
 
@@ -16,34 +14,36 @@
         tls_key = "/var/lib/acme/id.shimme.rs/key.pem";
       };
     };
-  };
 
-  provision = {
-    enable = true;
+    provision = {
+      enable = true;
 
-    groups.jellyfin_users = { };
+      groups.jellyfin_users = { };
 
-    persons = {
-      aleph = {
-        displayName = "aleph";
-        mailAddresses = [ "aleph@shimme.rs" ];
-        groups = [ "jellyfin_users" ];
+      persons = {
+        aleph = {
+          displayName = "aleph";
+          mailAddresses = [ "aleph@shimme.rs" ];
+          groups = [ "jellyfin_users" ];
+        };
+      };
+
+      systems.oauth2 = {
+        jellyfin = {
+          displayName = "jellyfin";
+          originUrl = "https://jellyfin.shimme.rs";
+          originLanding = "https://jellyfin.shimme.rs";
+          scopeMaps.jellyfin_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
       };
     };
-
-    systems.oauth2 = {
-      jellyfin = {
-        displayName = "jellyfin";
-        originUrl = "https://jellyfin.shimme.rs";
-        originLanding = "https://jellyfin.shimme.rs";
-        scopeMaps.jellyfin_users = [
-          "openid"
-          "profile"
-          "email"
-        ];
-      };
-    };
   };
+
+  environment.systemPackages = [ pkgs.kanidm_1_9 ];
 
   security.acme.certs."id.shimme.rs" = {
     group = "acme";
