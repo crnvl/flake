@@ -11,5 +11,8 @@
   system.stateVersion = "26.05";
   networking = {
     hostName = "shimmers";
+    hosts = {
+      "127.0.0.1" = [ "id.shimme.rs" ];
+    };
   };
 }
