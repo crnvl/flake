@@ -56,15 +56,21 @@
       systems.oauth2 = {
         jellyfin = {
           displayName = "jellyfin";
-          originUrl = "https://jellyfin.shimme.rs";
+          originUrl = [
+            "https://jellyfin.shimme.rs"
+            "https://jellyfin.shimme.rs/sso/OID/redirect/kanidm"
+            "https://jellyfin.shimme.rs/sso/OID/r/kanidm"
+          ];
           originLanding = "https://jellyfin.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-jellyfin-secret.path;
           allowInsecureClientDisablePkce = true;
+          preferShortUsername = true;
 
           scopeMaps.jellyfin_users = [
             "openid"
             "profile"
             "email"
+            "groups"
           ];
         };
       };
