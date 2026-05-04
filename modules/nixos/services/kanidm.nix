@@ -72,6 +72,14 @@
             "jellyfin_users"
           ];
         };
+
+        megu = {
+          displayName = "megu";
+          mailAddresses = [ "megu@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
