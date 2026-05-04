@@ -14,6 +14,8 @@ in
       rpc-whitelist = "127.0.0.1,${wgNamespace.bridgeAddress}";
       ratio-limit = 0;
       ratio-limit-enabled = true;
+      download-queue-size = 10;
+      download-queue-enabled = true;
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
       incomplete-dir-enabled = true;
