@@ -17,6 +17,7 @@ in
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
       incomplete-dir-enabled = true;
+      umask = 2;
     };
   };
 
