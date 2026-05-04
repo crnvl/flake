@@ -17,6 +17,9 @@ in
       rpc-bind-address = "10.200.0.2";
       rpc-port = 9091;
       rpc-whitelist-enabled = false;
+      ratio-limit = 0;
+      ratio-limit-enabled = true;
+      seed-queue-enabled = false;
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
       incomplete-dir-enabled = true;
