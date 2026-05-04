@@ -17,6 +17,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    vpn-confinement = {
+      url = "github:Maroka-chan/VPN-Confinement";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
@@ -63,6 +68,7 @@
           modules = [
             inputs.disko.nixosModules.disko
             inputs.agenix.nixosModules.default
+            inputs.vpn-confinement.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix

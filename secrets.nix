@@ -4,8 +4,8 @@ let
   shimmers = keys.hosts.shimmers;
 in
 {
-  "hosts/shimmers/secrets/mullvad-wg-private-key.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-idm-admin-password.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-admin-password.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-oauth2-jellyfin-secret.age".publicKeys = users ++ [ shimmers ];
+  "hosts/shimmers/secrets/mullvad-wg.conf.age".publicKeys = users ++ [ shimmers ];
 }

@@ -7,6 +7,7 @@
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/jellyfin.nix
     ../../modules/nixos/services/transmission.nix
+    ../../modules/nixos/services/vpn.nix
 
     ../../modules/nixos/services/media/prowlarr.nix
     ../../modules/nixos/services/media/sonarr.nix
