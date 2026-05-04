@@ -20,6 +20,13 @@ in
     };
   };
 
+  my.vpn.portMappings = [
+    {
+      from = 9091;
+      to = 9091;
+    }
+  ];
+
   systemd = {
     services.transmission.vpnConfinement = {
       enable = true;
