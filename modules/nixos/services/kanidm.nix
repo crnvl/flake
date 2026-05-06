@@ -88,6 +88,14 @@
             "jellyfin_users"
           ];
         };
+
+        dwcs = {
+          displayName = "dwcs";
+          mailAddresses = [ "dwcs@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
