@@ -80,6 +80,14 @@
             "jellyfin_users"
           ];
         };
+
+        zeldafangirl = {
+          displayName = "zeldafangirl";
+          mailAddresses = [ "zeldafangirl@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
