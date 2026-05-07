@@ -56,5 +56,6 @@
     libxtst
     libxi
     libxrandr
+    protontricks
   ];
 }
