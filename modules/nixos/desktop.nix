@@ -35,6 +35,11 @@
     };
   };
 
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
+
   security.pam.services.greetd.enableGnomeKeyring = true;
 
   users.users.aleph = {
