@@ -1,7 +1,12 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   virtualisation.libvirtd.enable = true;
+
+  systemd.services.libvirtd.serviceConfig = {
+    LoadCredentialEncrypted = lib.mkForce [ "" ];
+  };
+
   boot.kernelModules = [
     "kvm-amd"
     "kvm-intel"
