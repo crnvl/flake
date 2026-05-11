@@ -57,5 +57,6 @@
     libxi
     libxrandr
     protontricks
+    bluez
   ];
 }
