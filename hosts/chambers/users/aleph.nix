@@ -44,6 +44,7 @@
       qbittorrent
       kdePackages.dolphin
       inetutils
+      bitwig-studio
     ];
   };
 
