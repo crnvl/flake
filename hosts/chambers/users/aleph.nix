@@ -45,6 +45,7 @@
       kdePackages.dolphin
       inetutils
       bitwig-studio
+      vital
     ];
   };
 
