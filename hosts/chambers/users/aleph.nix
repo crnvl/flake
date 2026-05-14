@@ -46,6 +46,7 @@
       inetutils
       bitwig-studio
       vital
+      whatsapp-electron
     ];
   };
 
