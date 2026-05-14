@@ -64,22 +64,5 @@
         };
       };
     };
-
-    git = {
-      settings = {
-        user = {
-          name = "67";
-          email = "support@linux.com";
-        };
-        gpg = {
-          format = "ssh";
-        };
-      };
-
-      signing = {
-        key = "/home/aleph/.ssh/id_ed25519.pub";
-        signByDefault = true;
-      };
-    };
   };
 }
