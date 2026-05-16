@@ -96,6 +96,14 @@
             "jellyfin_users"
           ];
         };
+
+        liegfra = {
+          displayName = "liegfra";
+          mailAddresses = [ "liegfra@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
