@@ -10,6 +10,17 @@
   networking = {
     hostName = "corridors";
     networkmanager.enable = true;
+
+    firewall = {
+      allowedTCPPorts = [
+        27036
+        27037
+      ];
+      allowedUDPPorts = [
+        27031
+        27036
+      ];
+    };
   };
 
   programs.steam = {
