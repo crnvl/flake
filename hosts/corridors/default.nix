@@ -57,6 +57,9 @@
       enable = true;
       openFirewall = true;
       autoStart = true;
+
+      steam.enable = true;
+      steam.importOXRRuntimes = true;
     };
   };
 }

@@ -33,6 +33,13 @@
       gcr-ssh-agent.enable = false;
       gnome-keyring.enable = true;
     };
+
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+    };
   };
 
   xdg.portal = {
