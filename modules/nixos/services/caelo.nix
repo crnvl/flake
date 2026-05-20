@@ -77,17 +77,38 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
     };
-    path = [ pkgs.podman ];
+    path = with pkgs; [
+      podman
+      nodejs_22
+      coreutils
+    ];
     script = ''
+      set -euo pipefail
+
+      # Copy source to a writable directory and patch for pnpm v10+
+      BUILD_DIR=$(mktemp -d)
+      cp -r ${caelo-src}/. "$BUILD_DIR/"
+      chmod -R u+w "$BUILD_DIR"
+
+      # Approve all dependency build scripts (pnpm v10+ requirement)
+      node -e "
+        const fs = require('fs');
+        const p = JSON.parse(fs.readFileSync('$BUILD_DIR/package.json', 'utf8'));
+        if (!p.pnpm) p.pnpm = {};
+        p.pnpm.onlyBuiltDependencies = ['*'];
+        fs.writeFileSync('$BUILD_DIR/package.json', JSON.stringify(p, null, 2) + '\n');
+      "
+
       echo "Building caelo-webapp image..."
-      podman build -t localhost/caelo-webapp:latest -f ${caelo-src}/webapp/Dockerfile ${caelo-src}
+      podman build --no-cache -t localhost/caelo-webapp:latest -f "$BUILD_DIR/webapp/Dockerfile" "$BUILD_DIR"
 
       echo "Building caelo-worker image..."
-      podman build -t localhost/caelo-worker:latest -f ${caelo-src}/worker/Dockerfile ${caelo-src}
+      podman build --no-cache -t localhost/caelo-worker:latest -f "$BUILD_DIR/worker/Dockerfile" "$BUILD_DIR"
 
       echo "Building caelo-socket image..."
-      podman build -t localhost/caelo-socket:latest -f ${caelo-src}/socket/Dockerfile ${caelo-src}
+      podman build --no-cache -t localhost/caelo-socket:latest -f "$BUILD_DIR/socket/Dockerfile" "$BUILD_DIR"
 
+      rm -rf "$BUILD_DIR"
       echo "All caelo images built successfully."
     '';
   };
