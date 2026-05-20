@@ -14,6 +14,12 @@ in
     "minio-2025-10-15T17-29-55Z"
   ];
 
+  # --- SSH (let root use aleph's key for fetching the private repo) ---
+  programs.ssh.extraConfig = ''
+    Host github.com
+      IdentityFile /home/aleph/.ssh/id_ed25519
+  '';
+
   # --- Secrets ---
   age.secrets."caelo-env" = {
     file = ../../../hosts/shimmers/secrets/caelo-env.age;
