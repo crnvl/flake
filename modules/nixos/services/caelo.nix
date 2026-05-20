@@ -38,7 +38,8 @@ in
         ensureDBOwnership = true;
       }
     ];
-    authentication = ''
+    # mkBefore ensures our trust rules come before the default md5 rules
+    authentication = pkgs.lib.mkBefore ''
       local caelo caelo trust
       host caelo caelo 127.0.0.1/32 trust
     '';
