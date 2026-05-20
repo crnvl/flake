@@ -26,11 +26,11 @@
     "caelo": {
       "flake": false,
       "locked": {
-        "lastModified": 1779262531,
-        "narHash": "sha256-dl2nC7ge/Xx3hYxckIWOQW6rpb/EWgdnwQL6I6VPqQ8=",
+        "lastModified": 1779263056,
+        "narHash": "sha256-31whWhyyrI2cNvysBUZggkxjC5yFz42H8BHJj2Zsh+o=",
         "ref": "refs/heads/main",
-        "rev": "f14a7c9123c8f5b755bff057710594567c568c05",
-        "revCount": 173,
+        "rev": "14430be064feb6ecc62db90fb99f475ecfd14495",
+        "revCount": 174,
         "type": "git",
         "url": "ssh://git@github.com/crnvl/caelo"
       },
