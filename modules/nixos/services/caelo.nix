@@ -81,11 +81,12 @@ in
       podman
       nodejs_22
       coreutils
+      gnused
     ];
     script = ''
       set -euo pipefail
 
-      # Copy source to a writable directory and patch for pnpm v10+
+      # Copy source to a writable directory
       BUILD_DIR=$(mktemp -d)
       cp -r ${caelo-src}/. "$BUILD_DIR/"
       chmod -R u+w "$BUILD_DIR"
@@ -98,6 +99,11 @@ in
         p.pnpm.onlyBuiltDependencies = ['*'];
         fs.writeFileSync('$BUILD_DIR/package.json', JSON.stringify(p, null, 2) + '\n');
       "
+
+      # Also patch Dockerfiles: remove --frozen-lockfile (incompatible with patched package.json)
+      sed -i 's/--frozen-lockfile //' "$BUILD_DIR/webapp/Dockerfile"
+      sed -i 's/--frozen-lockfile //' "$BUILD_DIR/worker/Dockerfile"
+      sed -i 's/--frozen-lockfile //' "$BUILD_DIR/socket/Dockerfile"
 
       echo "Building caelo-webapp image..."
       podman build --no-cache -t localhost/caelo-webapp:latest -f "$BUILD_DIR/webapp/Dockerfile" "$BUILD_DIR"
