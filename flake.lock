@@ -23,6 +23,22 @@
         "type": "github"
       }
     },
+    "caelo": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776355272,
+        "narHash": "sha256-6Ub2ALmrEY7kqJPuiEaVoMzApJKL81PzC6UqOcbR2nM=",
+        "ref": "refs/heads/main",
+        "rev": "741d4a870e5a7c13eb3e62ac3fcda77c401699c7",
+        "revCount": 166,
+        "type": "git",
+        "url": "ssh://git@github.com/crnvl/caelo"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/crnvl/caelo"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -249,6 +265,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "caelo": "caelo",
         "disko": "disko",
         "firefox-addons": "firefox-addons",
         "home-manager": "home-manager_2",
