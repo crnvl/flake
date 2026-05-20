@@ -42,6 +42,7 @@ in
     authentication = pkgs.lib.mkBefore ''
       local caelo caelo trust
       host caelo caelo 127.0.0.1/32 trust
+      host caelo caelo ::1/128 trust
     '';
   };
 
