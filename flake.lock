@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779353913,
-        "narHash": "sha256-MIrqEg4Rn2Vx4V76KVR1aALHTT3+2SgdPOofYBdAXgo=",
+        "lastModified": 1779354395,
+        "narHash": "sha256-XPqw+QVVym2Zw+u0ruEy14gfebMQ/orv/4aNl6pcI6A=",
         "ref": "refs/heads/main",
-        "rev": "31d33948059566f55b6b2657b8e106349c0aaff4",
-        "revCount": 5,
+        "rev": "79394eb355cf838de6bce7cd4e1d15826882b68c",
+        "revCount": 6,
         "type": "git",
         "url": "https://git.gay/67/catshift"
       },
