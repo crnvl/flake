@@ -19,6 +19,7 @@
       clientId = "catshift";
       clientSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
     };
+    adminUsers = [ "aleph" ];
   };
 
   services.nginx.virtualHosts."shift.shimme.rs" = {
