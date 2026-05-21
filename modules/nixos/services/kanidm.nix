@@ -82,7 +82,6 @@
           mailAddresses = [ "megu@shimme.rs" ];
           groups = [
             "jellyfin_users"
-            "catshift_users"
           ];
         };
 
@@ -107,6 +106,15 @@
         liegfra = {
           displayName = "liegfra";
           mailAddresses = [ "liegfra@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "catshift_users"
+          ];
+        };
+
+        judi = {
+          displayName = "judi";
+          mailAddresses = [ "judi@shimme.rs" ];
           groups = [
             "jellyfin_users"
             "catshift_users"
