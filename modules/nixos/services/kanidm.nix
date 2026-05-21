@@ -45,6 +45,7 @@
       groups = {
         jellyfin_users = { };
         seerr_users = { };
+        catshift_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -54,6 +55,7 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -62,6 +64,7 @@
           mailAddresses = [ "jil@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -70,6 +73,7 @@
           mailAddresses = [ "klyk@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -78,6 +82,7 @@
           mailAddresses = [ "megu@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -86,6 +91,7 @@
           mailAddresses = [ "zeldafangirl@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -94,6 +100,7 @@
           mailAddresses = [ "dwcs@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -102,6 +109,7 @@
           mailAddresses = [ "liegfra@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
       };

@@ -39,6 +39,43 @@
         "url": "ssh://git@github.com/crnvl/caelo"
       }
     },
+    "catshift": {
+      "inputs": {
+        "crane": "crane",
+        "fenix": "fenix",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779351972,
+        "narHash": "sha256-6ijYuAK7d13MM03e3GKYURVqXy/+BzDCTSDlb1OI9p0=",
+        "ref": "refs/heads/main",
+        "rev": "be7f676c29a319bff3df31cd52d3331068032454",
+        "revCount": 4,
+        "type": "git",
+        "url": "https://git.gay/67/catshift"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.gay/67/catshift"
+      }
+    },
+    "crane": {
+      "locked": {
+        "lastModified": 1779130139,
+        "narHash": "sha256-BLrtr42azquO7MdGFU5a7KiMl3YpFlTeIXqy1fT5GlQ=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "edb38893982a3338972bb4a2ec7ce7c29ba10fd9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -78,6 +115,28 @@
       "original": {
         "owner": "nix-community",
         "repo": "disko",
+        "type": "github"
+      }
+    },
+    "fenix": {
+      "inputs": {
+        "nixpkgs": [
+          "catshift",
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src"
+      },
+      "locked": {
+        "lastModified": 1779007028,
+        "narHash": "sha256-AIbVmDAJFVRl+PUkgoOHVvzulVLQW0pcltKNrBVWxww=",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "3c09e6c592c6ebfb9cde94bba990af23b2c06a87",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "fenix",
         "type": "github"
       }
     },
@@ -266,12 +325,30 @@
       "inputs": {
         "agenix": "agenix",
         "caelo": "caelo",
+        "catshift": "catshift",
         "disko": "disko",
         "firefox-addons": "firefox-addons",
         "home-manager": "home-manager_2",
         "niri": "niri",
         "nixpkgs": "nixpkgs_3",
         "vpn-confinement": "vpn-confinement"
+      }
+    },
+    "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778958756,
+        "narHash": "sha256-bNCTsqjqpSVXDKsCKHTyNEaw6LpaiRUoUVKlVDSzjHk=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "ace47025ddfc7fec399e11594318e64443c0e1c2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
       }
     },
     "systems": {
