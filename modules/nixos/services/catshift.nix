@@ -9,7 +9,7 @@
 
   services.catshift = {
     enable = true;
-    port = 3080;
+    listenAddr = "127.0.0.1:3080";
     domain = "shift.shimme.rs";
     oidc = {
       issuerUrl = "https://id.shimme.rs/oauth2/openid/catshift";
