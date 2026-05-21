@@ -134,6 +134,21 @@
             "groups"
           ];
         };
+
+        catshift = {
+          displayName = "Catshift";
+          originUrl = "https://shift.shimme.rs/auth/callback";
+          originLanding = "https://shift.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
+          allowInsecureClientDisablePkce = true;
+          preferShortUsername = true;
+
+          scopeMaps.catshift_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
       };
     };
   };

@@ -7,15 +7,21 @@
     group = "kanidm";
   };
 
+  age.secrets.catshift-oidc-secret = {
+    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-catshift-secret.age;
+    owner = "catshift";
+    group = "catshift";
+  };
+
   services.catshift = {
     enable = true;
     listenAddr = "127.0.0.1:3080";
     domain = "shift.shimme.rs";
     oidc = {
       issuerUrl = "https://id.shimme.rs/oauth2/openid/catshift";
-      clientSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
+      clientId = "catshift";
+      clientSecretFile = config.age.secrets.catshift-oidc-secret.path;
     };
-    kanidm.provision = true;
   };
 
   services.nginx.virtualHosts."shift.shimme.rs" = {
