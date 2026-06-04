@@ -45,6 +45,7 @@
       groups = {
         jellyfin_users = { };
         seerr_users = { };
+        catshift_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -54,6 +55,7 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -62,6 +64,7 @@
           mailAddresses = [ "jil@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -70,6 +73,7 @@
           mailAddresses = [ "klyk@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -86,6 +90,7 @@
           mailAddresses = [ "zeldafangirl@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -94,6 +99,7 @@
           mailAddresses = [ "dwcs@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
           ];
         };
 
@@ -102,6 +108,16 @@
           mailAddresses = [ "liegfra@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "catshift_users"
+          ];
+        };
+
+        judi = {
+          displayName = "judi";
+          mailAddresses = [ "judi@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "catshift_users"
           ];
         };
       };
@@ -124,6 +140,21 @@
             "profile"
             "email"
             "groups"
+          ];
+        };
+
+        catshift = {
+          displayName = "Catshift";
+          originUrl = "https://shift.shimme.rs/auth/callback";
+          originLanding = "https://shift.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
+          allowInsecureClientDisablePkce = true;
+          preferShortUsername = true;
+
+          scopeMaps.catshift_users = [
+            "openid"
+            "profile"
+            "email"
           ];
         };
       };

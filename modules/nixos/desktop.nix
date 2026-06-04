@@ -33,6 +33,13 @@
       gcr-ssh-agent.enable = false;
       gnome-keyring.enable = true;
     };
+
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+    };
   };
 
   xdg.portal = {
@@ -41,6 +48,7 @@
       xdg-desktop-portal-gtk
       xdg-desktop-portal-gnome
     ];
+    config.common.default = [ "gtk" ];
   };
 
   security.pam.services.greetd.enableGnomeKeyring = true;

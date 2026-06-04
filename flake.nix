@@ -19,6 +19,16 @@
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
 
+    caelo = {
+      url = "git+ssh://git@github.com/crnvl/caelo";
+      flake = false;
+    };
+
+    catshift = {
+      url = "git+https://git.gay/67/catshift";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
   };
@@ -66,6 +76,7 @@
             inputs.disko.nixosModules.disko
             inputs.agenix.nixosModules.default
             inputs.vpn-confinement.nixosModules.default
+            inputs.catshift.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix
