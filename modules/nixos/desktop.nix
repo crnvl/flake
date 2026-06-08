@@ -74,5 +74,6 @@
     libxrandr
     protontricks
     bluez
+    obsidian
   ];
 }
