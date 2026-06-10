@@ -46,6 +46,7 @@
     file
     nixfmt
     direnv
+    steam-run
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
       exec sudo nixos-rebuild switch --flake /home/aleph/flake
@@ -57,6 +58,11 @@
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
       sudo nixos-rebuild switch --flake /home/aleph/flake && reboot
+    '')
+
+    (writeShellScriptBin "android-emulator" ''
+      exec ${steam-run}/bin/steam-run \
+        /home/aleph/Android/Sdk/emulator/emulator "$@" -gpu host
     '')
   ];
 }
