@@ -21,6 +21,13 @@
     };
 
     ssh.startAgent = true;
+
+    steam = {
+      enable = true;
+      extraCompatPackages = with pkgs; [
+        proton-ge-bin
+      ];
+    };
   };
 
   services = {
