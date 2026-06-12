@@ -33,5 +33,6 @@
   home.packages = with pkgs; [
     zed-editor
     kdePackages.dolphin
+    feather
   ];
 }

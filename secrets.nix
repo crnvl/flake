@@ -9,5 +9,6 @@ in
   "hosts/shimmers/secrets/kanidm-oauth2-jellyfin-secret.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/kanidm-oauth2-catshift-secret.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/mullvad-wg.conf.age".publicKeys = users ++ [ shimmers ];
+  "hosts/shimmers/secrets/monero-rpc.env.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/caelo-env.age".publicKeys = users ++ [ shimmers ];
 }
