@@ -82,5 +82,6 @@
     protontricks
     bluez
     obsidian
+    agenix-cli
   ];
 }
