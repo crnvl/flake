@@ -37,10 +37,8 @@
 
     (tor-browser.override {
       extraPrefs = ''
-        // Core "Safest" behavior: no web-content JavaScript anywhere.
         lockPref("javascript.enabled", false);
 
-        // Rest of the "Safest" attack-surface reduction.
         lockPref("javascript.options.ion", false);
         lockPref("javascript.options.baselinejit", false);
         lockPref("javascript.options.native_regexp", false);
