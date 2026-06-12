@@ -10,8 +10,6 @@
     };
   };
 
-  environmentFile = config.age.secrets.monero-rpc.path;
-
   extraConfig = ''
     restricted-rpc=1
     prune-blockchain=1
