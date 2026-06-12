@@ -8,17 +8,17 @@
       address = "127.0.0.1";
       port = 18089;
     };
-  };
 
-  extraConfig = ''
-    restricted-rpc=1
-    prune-blockchain=1
-    sync-pruned-blocks=1
-    tx-proxy=tor,127.0.0.1:9050,16
-    no-igd=1
-    enable-dns-blocklist=1
-    pad-transactions=1
-  '';
+    extraConfig = ''
+      restricted-rpc=1
+      prune-blockchain=1
+      sync-pruned-blocks=1
+      tx-proxy=tor,127.0.0.1:9050,16
+      no-igd=1
+      enable-dns-blocklist=1
+      pad-transactions=1
+    '';
+  };
 
   systemd.services.monero.after = [ "tor.service" ];
 
