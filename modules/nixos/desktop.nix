@@ -1,5 +1,6 @@
 {
   pkgs,
+  inputs,
   lib,
   config,
   ...
@@ -88,7 +89,7 @@
     protontricks
     bluez
     obsidian
-    agenix-cli
+    inputs.agenix.packages.${pkgs.system}.default
   ];
 
   systemd.services.mullvad-autoconnect = {
