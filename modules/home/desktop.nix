@@ -34,6 +34,7 @@
     zed-editor
     kdePackages.dolphin
     feather
+    fluffychat
 
     (tor-browser.override {
       extraPrefs = ''
