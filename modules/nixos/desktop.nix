@@ -15,9 +15,16 @@
     ];
   };
 
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
+  boot = {
+    kernelParams = [
+      "init_on_alloc=1"
+      "init_on_free=1"
+    ];
+
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
   };
 
   zramSwap = {
