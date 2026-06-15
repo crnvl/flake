@@ -35,7 +35,6 @@
     kdePackages.dolphin
     feather
     fluffychat
-    bisq2
 
     (tor-browser.override {
       extraPrefs = ''
