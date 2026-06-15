@@ -20,6 +20,11 @@
     efi.canTouchEfiVariables = true;
   };
 
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+  };
+
   programs = {
     niri = {
       enable = true;
