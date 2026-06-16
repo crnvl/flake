@@ -3,6 +3,9 @@
 {
   imports = [
     ./disk-config.nix
+
+    ../../modules/nixos/boxes/chroma.nix
+
     ../../modules/nixos/services/nginx.nix
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/jellyfin.nix
