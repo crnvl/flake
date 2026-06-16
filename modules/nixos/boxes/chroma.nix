@@ -3,7 +3,7 @@
 {
   age.secrets.chroma-smb.file = ../../../hosts/shimmers/secrets/chroma-smb.age;
 
-  environment.systemPackages = [ pkgs.cifs-cifs-utils ];
+  environment.systemPackages = [ pkgs.cifs-utils ];
 
   fileSystems."/mnt/chroma" = {
     device = "//u615907.your-storagebox.de/backup";
