@@ -26,4 +26,8 @@
       "x-systemd.mount-timeout=15s"
     ];
   };
+
+  systemd.services.jellyfin.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+  systemd.services.radarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+  systemd.services.sonarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
 }
