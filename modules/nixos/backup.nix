@@ -40,6 +40,7 @@
 
     extraCreateArgs = [
       "--stats"
+      "--progress"
     ];
 
     exclude = [
