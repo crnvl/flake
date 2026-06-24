@@ -19,11 +19,6 @@
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
 
-    caelo = {
-      url = "git+ssh://git@github.com/crnvl/caelo";
-      flake = false;
-    };
-
     catshift = {
       url = "git+https://git.gay/67/catshift";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,6 +26,7 @@
 
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+    helium-nix.url = "github:penal-colony/helium-nix";
   };
 
   outputs =

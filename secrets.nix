@@ -11,4 +11,5 @@ in
   "hosts/shimmers/secrets/mullvad-wg.conf.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/caelo-env.age".publicKeys = users ++ [ shimmers ];
   "hosts/shimmers/secrets/chroma-smb.age".publicKeys = users ++ [ shimmers ];
+  "hosts/shimmers/secrets/radarr-api-key.age".publicKeys = users ++ [ shimmers ];
 }

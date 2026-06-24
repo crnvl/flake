@@ -18,8 +18,8 @@
     ../../modules/nixos/services/media/radarr.nix
     ../../modules/nixos/services/media/seerr.nix
     ../../modules/nixos/services/media/byparr.nix
+    ../../modules/nixos/services/media/recyclarr.nix
 
-    ../../modules/nixos/services/caelo.nix
     ../../modules/nixos/services/catshift.nix
   ];
 

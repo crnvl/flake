@@ -23,22 +23,6 @@
         "type": "github"
       }
     },
-    "caelo": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1779264076,
-        "narHash": "sha256-jdri+mt1b2+bLai0QfdZtTDh21Vj9LVSQpPrt85iadc=",
-        "ref": "refs/heads/main",
-        "rev": "60e81c1cc423db3351f67624068a4c71a0725d14",
-        "revCount": 176,
-        "type": "git",
-        "url": "ssh://git@github.com/crnvl/caelo"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/crnvl/caelo"
-      }
-    },
     "catshift": {
       "inputs": {
         "crane": "crane",
@@ -160,6 +144,24 @@
         "type": "gitlab"
       }
     },
+    "helium-nix": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1782022846,
+        "narHash": "sha256-OdUUVz+CZfPlsrdy4Nprn53JP/tccWTLhsc0iGOJr7c=",
+        "owner": "penal-colony",
+        "repo": "helium-nix",
+        "rev": "73afc17b6285242545452fa3c3f737993f807b18",
+        "type": "github"
+      },
+      "original": {
+        "owner": "penal-colony",
+        "repo": "helium-nix",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -205,7 +207,7 @@
       "inputs": {
         "niri-stable": "niri-stable",
         "niri-unstable": "niri-unstable",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_3",
         "nixpkgs-stable": "nixpkgs-stable",
         "xwayland-satellite-stable": "xwayland-satellite-stable",
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
@@ -291,11 +293,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1781577229,
-        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
+        "lastModified": 1780749050,
+        "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
         "type": "github"
       },
       "original": {
@@ -321,16 +323,32 @@
         "type": "github"
       }
     },
+    "nixpkgs_4": {
+      "locked": {
+        "lastModified": 1781577229,
+        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "caelo": "caelo",
         "catshift": "catshift",
         "disko": "disko",
         "firefox-addons": "firefox-addons",
+        "helium-nix": "helium-nix",
         "home-manager": "home-manager_2",
         "niri": "niri",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "vpn-confinement": "vpn-confinement"
       }
     },
