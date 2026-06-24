@@ -1,6 +1,12 @@
 { pkgs, ... }:
 
 {
+  imports = [
+    ./firefox.nix
+    ./niri.nix
+    ./waybar.nix
+  ];
+
   programs = {
     alacritty.enable = true;
     fuzzel.enable = true;

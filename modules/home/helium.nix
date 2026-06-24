@@ -7,12 +7,7 @@
     enable = true;
     defaultBrowser = true;
 
-    extensions = [
-      {
-        id = "nngceckbapebfimnlniiiahkandclblb";
-        hash = "sha256-...";
-      } # Bitwarden
-    ];
+    extensions = [ ];
 
     extraFlags = [ "--force-dark-mode" ];
 

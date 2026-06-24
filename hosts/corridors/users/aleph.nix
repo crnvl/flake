@@ -3,9 +3,6 @@
 {
   imports = [
     ./../../../modules/home/desktop.nix
-    ./../../../modules/home/firefox.nix
-    ./../../../modules/home/niri.nix
-    ./../../../modules/home/waybar.nix
   ];
 
   home = {
