@@ -8,7 +8,7 @@
       HostName u615907.your-storagebox.de
       User u615907
       Port 23
-      ProxyJump shimme.rs
+      ProxyCommand ssh -i /home/aleph/.ssh/id_ed25519 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -W %h:%p aleph@shimme.rs
       IdentityFile /home/aleph/.ssh/id_ed25519
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
@@ -17,7 +17,7 @@
 
   services.restic.backups.home = {
     initialize = true;
-    repository = "sftp:backup-box:/mnt/chroma/backups/${config.networking.hostName}";
+    repository = "sftp:backup-box:/backups/${config.networking.hostName}";
     passwordFile = "/etc/restic-home-password";
 
     paths = [ "/home/aleph" ];
