@@ -7,6 +7,10 @@
 }:
 
 {
+  imports = [
+    ../../modules/nixos/backup.nix
+  ];
+
   fonts = {
     fontDir.enable = true;
     fontconfig.enable = true;
