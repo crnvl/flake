@@ -62,6 +62,7 @@
       "pp:/home/aleph/.ollama/models"
       "pp:/home/aleph/.BitwigStudio/installed-packages"
       "pp:/home/aleph/.BitwigStudio/cache"
+      "pp:/home/aleph/.vscode/extensions"
 
       "sh:**/.direnv"
 

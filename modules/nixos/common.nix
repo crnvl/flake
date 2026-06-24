@@ -21,6 +21,7 @@
   '';
 
   nixpkgs.config.allowUnfree = true;
+  nix.settings.use-xdg-base-directories = true;
 
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "en_US.UTF-8";
