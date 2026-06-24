@@ -59,6 +59,9 @@
 
       "pp:/home/aleph/.local/share/Steam"
       "pp:/home/aleph/.steam"
+      "pp:/home/aleph/.ollama/models"
+      "pp:/home/aleph/.BitwigStudio/installed-packages"
+      "pp:/home/aleph/.BitwigStudio/cache"
 
       "sh:**/.direnv"
 
