@@ -36,4 +36,9 @@
       };
     };
   };
+
+  systemd.services.recyclarr.vpnConfinement = {
+    enable = true;
+    vpnNamespace = "wg";
+  };
 }
