@@ -44,9 +44,7 @@
       qbittorrent
       kdePackages.dolphin
       inetutils
-      bitwig-studio
-      vital
-      whatsapp-electron
+      vesktop
     ];
   };
 
