@@ -20,13 +20,6 @@
       LANG = "en_US.UTF-8";
       GTK_USE_PORTAL = "1";
     };
-
-    packages = with pkgs; [
-      signal-desktop
-      spotify
-      qbittorrent
-      vesktop
-    ];
   };
 
   programs = {

@@ -13,6 +13,8 @@
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
       BatchMode yes
+      ServerAliveInterval 15
+      ServerAliveCountMax 3
   '';
 
   services.borgbackup.jobs.home = {
@@ -43,14 +45,35 @@
 
     exclude = [
       "pp:/home/aleph/.cache"
+      "pp:/home/aleph/.local/share/Trash"
+
       "pp:/home/aleph/.android/avd"
       "pp:/home/aleph/Android"
+
       "pp:/home/aleph/.local/share/Steam"
-      "pp:/home/aleph/.vagrant.d/boxes"
-      "pp:/home/aleph/.gradle"
+      "pp:/home/aleph/.steam"
+
+      "sh:**/.direnv"
+
       "sh:**/node_modules"
       "sh:**/target"
       "sh:**/__pycache__"
+      "sh:**/venv"
+      "sh:**/.venv"
+      "sh:**/.mypy_cache"
+      "sh:**/.pytest_cache"
+      "sh:**/.tox"
+
+      "pp:/home/aleph/.cargo/registry"
+      "pp:/home/aleph/.cargo/git"
+      "pp:/home/aleph/.gradle"
+      "pp:/home/aleph/.m2"
+      "pp:/home/aleph/.npm"
+      "pp:/home/aleph/.pnpm-store"
+
+      "sh:**/*.iso"
+      "sh:**/*.qcow2"
+      "sh:**/*.vmdk"
     ];
 
     doInit = true;

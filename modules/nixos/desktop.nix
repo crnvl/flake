@@ -108,30 +108,32 @@
     inputs.agenix.packages.${pkgs.system}.default
   ];
 
-  systemd.services.mullvad-autoconnect = {
-    description = "Enforce Mullvad auto-connect";
-    after = [ "mullvad-daemon.service" ];
-    requires = [ "mullvad-daemon.service" ];
-    wantedBy = [ "multi-user.target" ];
+  systemd.services = {
+    mullvad-autoconnect = {
+      description = "Enforce Mullvad auto-connect";
+      after = [ "mullvad-daemon.service" ];
+      requires = [ "mullvad-daemon.service" ];
+      wantedBy = [ "multi-user.target" ];
 
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script =
+        let
+          mullvad = lib.getExe' config.services.mullvad-vpn.package "mullvad";
+        in
+        ''
+          for _ in $(seq 1 30); do
+            ${mullvad} status >/dev/null 2>&1 && break
+            sleep 1
+          done
+
+          ${mullvad} lockdown-mode set on
+          ${mullvad} auto-connect set on
+          ${mullvad} lan set allow
+        '';
     };
-
-    script =
-      let
-        mullvad = lib.getExe' config.services.mullvad-vpn.package "mullvad";
-      in
-      ''
-        for _ in $(seq 1 30); do
-          ${mullvad} status >/dev/null 2>&1 && break
-          sleep 1
-        done
-
-        ${mullvad} lockdown-mode set on
-        ${mullvad} auto-connect set on
-        ${mullvad} lan set allow
-      '';
   };
 }

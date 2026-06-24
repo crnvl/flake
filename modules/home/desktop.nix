@@ -41,6 +41,10 @@
     kdePackages.dolphin
     feather
     fluffychat
+    signal-desktop
+    spotify
+    qbittorrent
+    vesktop
 
     (tor-browser.override {
       extraPrefs = ''

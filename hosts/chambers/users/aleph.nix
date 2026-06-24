@@ -21,24 +21,18 @@
     };
 
     packages = with pkgs; [
-      signal-desktop
-      pokemmo-installer
       httptoolkit
       mitmproxy
-      frida-tools
       jadx
       apktool
       apksigner
-      zulu8
       android-studio
-      vagrant
       python315
       python314Packages.pip
       httpx
       ghidra-bin
       spotify
       vlc
-      qbittorrent
       kdePackages.dolphin
       inetutils
       vesktop
