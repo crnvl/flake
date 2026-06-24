@@ -5,8 +5,10 @@
 
   programs.ssh.extraConfig = ''
     Host backup-box
-      HostName shimme.rs
-      User aleph
+      HostName u615907.your-storagebox.de
+      User u615907
+      Port 23
+      ProxyJump shimme.rs
       IdentityFile /home/aleph/.ssh/id_ed25519
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
