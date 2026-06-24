@@ -35,6 +35,8 @@
       monthly = 6;
     };
 
+    extraArgs = "--stats --progress";
+
     exclude = [
       "pp:/home/aleph/.cache"
       "pp:/home/aleph/.android/avd"
