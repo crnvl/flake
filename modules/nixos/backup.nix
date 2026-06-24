@@ -38,6 +38,7 @@
     compression = "auto,zstd";
     startAt = "daily";
     persistentTimer = true;
+    failOnWarnings = false;
 
     prune.keep = {
       daily = 7;
