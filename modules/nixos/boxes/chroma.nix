@@ -26,7 +26,11 @@
     ];
   };
 
-  systemd.services.jellyfin.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
-  systemd.services.radarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
-  systemd.services.sonarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+  users.users.aleph.extraGroups = [ "media" ];
+
+  systemd.services = {
+    jellyfin.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+    radarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+    sonarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+  };
 }
