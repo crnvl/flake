@@ -35,7 +35,10 @@
       monthly = 6;
     };
 
-    extraArgs = "--stats --progress";
+    extraCreateArgs = [
+      "--stats"
+      "--progress"
+    ];
 
     exclude = [
       "pp:/home/aleph/.cache"
