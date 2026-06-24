@@ -1,4 +1,9 @@
-{ config, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 {
   systemd.tmpfiles.rules = [ "d /root/.ssh 0700 root root -" ];
@@ -16,6 +21,8 @@
       ServerAliveInterval 15
       ServerAliveCountMax 3
   '';
+
+  services.borgbackup.package = inputs.nixpkgs-2311.legacyPackages.${pkgs.system}.borgbackup;
 
   services.borgbackup.jobs.home = {
     paths = [ "/home/aleph" ];
