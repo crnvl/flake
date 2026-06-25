@@ -22,11 +22,31 @@
             name = "cryptroot";
             settings.allowDiscards = true;
             content = {
-              type = "filesystem";
-              format = "ext4";
-              mountpoint = "/";
+              type = "lvm_pv";
+              vg = "vg0";
             };
           };
+        };
+      };
+    };
+  };
+
+  disko.devices.lvm_vg.vg0 = {
+    type = "lvm_vg";
+    lvs = {
+      swap = {
+        size = "16G";
+        content = {
+          type = "swap";
+          resumeDevice = true;
+        };
+      };
+      root = {
+        size = "100%FREE";
+        content = {
+          type = "filesystem";
+          format = "ext4";
+          mountpoint = "/";
         };
       };
     };
