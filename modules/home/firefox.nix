@@ -102,7 +102,6 @@ in
           "network.http.speculative-parallel-limit" = 0;
           "browser.places.speculativeConnect.enabled" = false;
           "network.gio.supported-protocols" = "";
-          "network.file.disable_unc_paths" = true;
           "permissions.manager.defaultsUrl" = "";
           "network.IDN_show_punycode" = true;
           "network.auth.subresource-http-auth-allow" = 0;
