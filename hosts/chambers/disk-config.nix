@@ -20,6 +20,7 @@
           content = {
             type = "luks";
             name = "cryptroot";
+            enrollFido2 = true;
             settings.allowDiscards = true;
             content = {
               type = "lvm_pv";
