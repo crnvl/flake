@@ -26,9 +26,9 @@
       };
     };
 
-    logind = {
-      lidSwitch = "suspend-then-hibernate";
-      powerKey = "suspend-then-hibernate";
+    logind.settings.Login = {
+      HandleLidSwitch = "suspend-then-hibernate";
+      HandlePowerKey = "suspend-then-hibernate";
     };
 
     xserver.videoDrivers = [ "modesetting" ];
