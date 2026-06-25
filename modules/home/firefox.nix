@@ -86,7 +86,6 @@ in
           "app.normandy.enabled" = false;
           "breakpad.reportURL" = "";
           "browser.tabs.crashReporting.sendReport" = false;
-          "datareporting.policy.dataSubmissionEnabled" = false;
           "datareporting.healthreport.uploadEnabled" = false;
 
           "browser.safebrowsing.malware.enabled" = false;
@@ -106,7 +105,7 @@ in
           "network.file.disable_unc_paths" = true;
           "permissions.manager.defaultsUrl" = "";
           "network.IDN_show_punycode" = true;
-          "network.auth.subresource-http-auth-allow" = false;
+          "network.auth.subresource-http-auth-allow" = 0;
 
           "browser.search.suggest.enabled" = false;
           "browser.urlbar.suggest.searches" = false;
@@ -120,7 +119,6 @@ in
           "extensions.formautofill.creditCards.enabled" = false;
           "extensions.formautofill.heuristics.enabled" = false;
 
-          "browser.urlbar.quicksuggest.scenario" = "history";
           "browser.urlbar.quicksuggest.enabled" = false;
           "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
           "browser.urlbar.suggest.quicksuggest.sponsored" = false;
