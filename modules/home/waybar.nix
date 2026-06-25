@@ -14,6 +14,7 @@
         modules-left = [
           "niri/workspaces"
           "tray"
+          "custom/flake"
           "custom/notification"
         ];
 
@@ -122,6 +123,14 @@
           "exec-if" = "systemctl is-active --quiet borgbackup-job-home.service";
           "exec" = "echo '󰋊'";
           "interval" = 5;
+          "tooltip" = false;
+        };
+
+        "custom/flake" = {
+          "exec-if" =
+            "git -C /home/aleph/flake status --porcelain 2>/dev/null | grep -q . || [ \"$(git -C /home/aleph/flake rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)\" != 0 ]";
+          "exec" = "echo '󰘬'";
+          "interval" = 15;
           "tooltip" = false;
         };
       }
