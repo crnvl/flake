@@ -26,6 +26,15 @@
       };
     };
 
+    logind = {
+      lidSwitch = "suspend-then-hibernate";
+      powerKey = "suspend-then-hibernate";
+    };
+
     xserver.videoDrivers = [ "modesetting" ];
   };
+
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=30min
+  '';
 }
