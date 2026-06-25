@@ -29,6 +29,7 @@
           "memory"
           "network"
           "pulseaudio"
+          "custom/backup"
           "battery"
         ];
 
@@ -115,6 +116,13 @@
         "custom/weather" = {
           "exec" = "curl -s 'wttr.in/Bielefeld?format=1'";
           "interval" = 600;
+        };
+
+        "custom/backup" = {
+          "exec-if" = "systemctl is-active --quiet borgbackup-job-home.service";
+          "exec" = "echo '󰋊'";
+          "interval" = 5;
+          "tooltip" = false;
         };
       }
     ];
