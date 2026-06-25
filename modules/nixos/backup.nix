@@ -91,4 +91,44 @@
 
     doInit = true;
   };
+
+  systemd.services.borgbackup-check-home = {
+    description = "BorgBackup integrity check (home repo)";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    path = [
+      config.services.borgbackup.package
+      pkgs.openssh
+    ];
+    environment = {
+      BORG_REPO = config.services.borgbackup.jobs.home.repo;
+      BORG_PASSCOMMAND = config.services.borgbackup.jobs.home.encryption.passCommand;
+      BORG_RSH = config.services.borgbackup.jobs.home.environment.BORG_RSH;
+    };
+    serviceConfig = {
+      Type = "oneshot";
+      # Stay out of the way of foreground work.
+      CPUSchedulingPolicy = "idle";
+      IOSchedulingClass = "idle";
+    };
+    script = ''
+      if (( 10#$(date +%d) <= 7 )); then
+        echo "First week of the month -> full --verify-data (slow, reads every chunk)"
+        exec borg check --verbose --verify-data
+      else
+        echo "Routine --repository-only structure check"
+        exec borg check --verbose --repository-only
+      fi
+    '';
+  };
+
+  systemd.timers.borgbackup-check-home = {
+    description = "Weekly BorgBackup integrity check (home repo)";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "Sun 05:00";
+      Persistent = true;
+      RandomizedDelaySec = "30m";
+    };
+  };
 }
