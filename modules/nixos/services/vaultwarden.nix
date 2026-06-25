@@ -31,6 +31,12 @@ in
       PASSWORD_HINTS_ALLOWED = false;
       SHOW_PASSWORD_HINT = false;
       ROCKET_LOG = "critical";
+
+      SSO_ENABLED = true;
+      SSO_ONLY = false;
+      SSO_AUTHORITY = "https://id.shimme.rs/oauth2/openid/vaultwarden";
+      SSO_CLIENT_ID = "vaultwarden";
+      SSO_SCOPES = "email profile";
     };
   };
 

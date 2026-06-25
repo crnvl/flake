@@ -16,6 +16,11 @@
     owner = "kanidm";
     group = "kanidm";
   };
+  age.secrets.kanidm-oauth2-vaultwarden-secret = {
+    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-vaultwarden-secret.age;
+    owner = "kanidm";
+    group = "kanidm";
+  };
 
   services.kanidm = {
     package = pkgs.kanidm_1_10.withSecretProvisioning;
@@ -47,6 +52,7 @@
         jellyfin_admins = { };
         seerr_users = { };
         catshift_users = { };
+        vaultwarden_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -58,6 +64,7 @@
             "jellyfin_users"
             "jellyfin_admins"
             "catshift_users"
+            "vaultwarden_users"
           ];
         };
 
@@ -159,6 +166,19 @@
           preferShortUsername = true;
 
           scopeMaps.catshift_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
+
+        vaultwarden = {
+          displayName = "Vaultwarden";
+          originUrl = "https://vault.shimme.rs/identity/connect/oidc-signin";
+          originLanding = "https://vault.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-vaultwarden-secret.path;
+          preferShortUsername = true;
+          scopeMaps.vaultwarden_users = [
             "openid"
             "profile"
             "email"
