@@ -158,7 +158,7 @@
         };
 
         catshift = {
-          displayName = "Catshift";
+          displayName = "catshift";
           originUrl = "https://shift.shimme.rs/auth/callback";
           originLanding = "https://shift.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
@@ -173,7 +173,7 @@
         };
 
         vaultwarden = {
-          displayName = "Vaultwarden";
+          displayName = "vaultwarden";
           originUrl = "https://vault.shimme.rs/identity/connect/oidc-signin";
           originLanding = "https://vault.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-vaultwarden-secret.path;
