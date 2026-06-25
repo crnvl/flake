@@ -51,6 +51,7 @@
             ./modules/nixos/zsh.nix
 
             inputs.niri.nixosModules.niri
+            inputs.disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             {
               home-manager = {
