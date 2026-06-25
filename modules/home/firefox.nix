@@ -1,7 +1,6 @@
 {
   inputs,
   pkgs,
-  config,
   ...
 }:
 
@@ -19,7 +18,6 @@ in
 {
   programs.firefox = {
     enable = true;
-    configPath = "${config.xdg.configHome}/mozilla/firefox";
 
     policies = {
       DisableTelemetry = true;
@@ -54,6 +52,7 @@ in
         settings = {
           "browser.startup.homepage" = "https://kagi.com";
           "ui.systemUsesDarkTheme" = 1;
+          "browser.startup.homepage_override.mstone" = "ignore";
 
           "signon.rememberSignons" = false;
           "signon.autofillForms" = false;
