@@ -18,6 +18,7 @@ in
 {
   programs.firefox = {
     enable = true;
+    configPath = ".mozilla/firefox";
 
     policies = {
       DisableTelemetry = true;
