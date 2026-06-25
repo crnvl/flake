@@ -74,11 +74,19 @@
       HISTFILE = "$HOME/.local/state/zsh/history";
     };
 
-    activation.zshStateDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      mkdir -p "$HOME/.local/state/zsh"
-      if [ -f "$HOME/.zsh_history" ] && [ ! -f "$HOME/.local/state/zsh/history" ]; then
-        mv "$HOME/.zsh_history" "$HOME/.local/state/zsh/history"
-      fi
-    '';
+    activation = {
+      zshStateDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        mkdir -p "$HOME/.local/state/zsh"
+        if [ -f "$HOME/.zsh_history" ] && [ ! -f "$HOME/.local/state/zsh/history" ]; then
+          mv "$HOME/.zsh_history" "$HOME/.local/state/zsh/history"
+        fi
+      '';
+      setWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if ${pkgs.procps}/bin/pgrep -x awww-daemon > /dev/null 2>&1; then
+          ${pkgs.awww}/bin/awww img "$HOME/.config/wallpaper" \
+            --transition-type grow --transition-fps 60 --transition-duration 1 || true
+        fi
+      '';
+    };
   };
 }
