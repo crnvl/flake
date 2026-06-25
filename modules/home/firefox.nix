@@ -29,7 +29,6 @@ in
       SearchBar = "unified";
 
       Preferences = {
-        "extensions.pocket.enabled" = lock-false;
         "browser.newtabpage.pinned" = lock-empty-string;
         "browser.topsites.contile.enabled" = lock-false;
         "browser.newtabpage.activity-stream.showSponsored" = lock-false;
@@ -85,7 +84,6 @@ in
           "browser.ping-centre.telemetry" = false;
           "beacon.enabled" = false;
           "app.normandy.enabled" = false;
-          "app.normandy.api_url" = "";
           "breakpad.reportURL" = "";
           "browser.tabs.crashReporting.sendReport" = false;
           "datareporting.policy.dataSubmissionEnabled" = false;
@@ -94,14 +92,8 @@ in
           "browser.safebrowsing.malware.enabled" = false;
           "browser.safebrowsing.phishing.enabled" = false;
           "browser.safebrowsing.blockedURIs.enabled" = false;
-          "browser.safebrowsing.provider.google4.gethashURL" = "";
-          "browser.safebrowsing.provider.google4.updateURL" = "";
-          "browser.safebrowsing.provider.google.gethashURL" = "";
-          "browser.safebrowsing.provider.google.updateURL" = "";
-          "browser.safebrowsing.provider.google4.dataSharingURL" = "";
           "browser.safebrowsing.downloads.enabled" = false;
           "browser.safebrowsing.downloads.remote.enabled" = false;
-          "browser.safebrowsing.downloads.remote.url" = "";
           "browser.safebrowsing.downloads.remote.block_potentially_unwanted" = false;
           "browser.safebrowsing.downloads.remote.block_uncommon" = false;
 
@@ -123,8 +115,8 @@ in
           "browser.urlbar.speculativeConnect.enabled" = false;
           "browser.formfill.enable" = false;
           "extensions.formautofill.addresses.enabled" = false;
-          "extensions.formautofill.available" = false;
-          "extensions.formautofill.creditCards.available" = false;
+          "extensions.formautofill.available" = "off";
+          "extensions.formautofill.creditCards.available" = "off";
           "extensions.formautofill.creditCards.enabled" = false;
           "extensions.formautofill.heuristics.enabled" = false;
 
