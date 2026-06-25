@@ -29,7 +29,7 @@
     paths = [ "/home/aleph" ];
     repo = "ssh://u615907@u615907.your-storagebox.de:23/./backups/${config.networking.hostName}";
 
-    environment.BORG_RSH = "ssh -i /home/aleph/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ProxyCommand='ssh -i /home/aleph/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -W %%h:%%p aleph@shimme.rs'";
+    environment.BORG_RSH = "ssh -i /home/aleph/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ProxyCommand='ssh -i /home/aleph/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new -W u615907.your-storagebox.de:23 aleph@shimme.rs'";
 
     encryption = {
       mode = "repokey-blake2";
