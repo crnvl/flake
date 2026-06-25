@@ -39,7 +39,10 @@
   };
 
   home = {
+    file.".config/wallpaper".source = ../../assets/wallpaper.jpg;
+
     packages = with pkgs; [
+      awww
       zed-editor
       kdePackages.dolphin
       feather

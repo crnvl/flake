@@ -41,6 +41,14 @@
     spawn-at-startup = [
       { argv = [ "xwayland-satellite" ]; }
       { argv = [ "waybar" ]; }
+      { argv = [ "swww-daemon" ]; }
+      {
+        argv = [
+          "sh"
+          "-c"
+          "swww wait && swww img \"$HOME/.config/wallpaper\" --transition-type grow --transition-fps 60 --transition-duration 1"
+        ];
+      }
     ];
 
     window-rules = [
