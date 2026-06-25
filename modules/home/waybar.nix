@@ -25,6 +25,7 @@
         ];
 
         modules-right = [
+          "custom/check"
           "custom/backup"
           "cpu"
           "custom/temp"
@@ -131,6 +132,13 @@
             "git -C /home/aleph/flake status --porcelain 2>/dev/null | grep -q . || [ \"$(git -C /home/aleph/flake rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)\" != 0 ]";
           "exec" = "echo '󰘬'";
           "interval" = 15;
+          "tooltip" = false;
+        };
+
+        "custom/check" = {
+          "exec-if" = "systemctl is-failed --quiet borgbackup-check-home.service";
+          "exec" = "echo '󰀦 backup check failed'";
+          "interval" = 30;
           "tooltip" = false;
         };
       }
