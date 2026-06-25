@@ -44,6 +44,7 @@
 
       groups = {
         jellyfin_users = { };
+        jellyfin_admins = { };
         seerr_users = { };
         catshift_users = { };
       };
@@ -55,6 +56,7 @@
           mailAddresses = [ "aleph@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "jellyfin_admins"
             "catshift_users"
           ];
         };
@@ -141,6 +143,11 @@
             "email"
             "groups"
           ];
+
+          claimMaps.jellyfin_role = {
+            joinType = "array";
+            valuesByGroup.jellyfin_admins = [ "admin" ];
+          };
         };
 
         catshift = {
