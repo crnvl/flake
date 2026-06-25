@@ -34,7 +34,5 @@
     xserver.videoDrivers = [ "modesetting" ];
   };
 
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=30min
-  '';
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "30min";
 }
