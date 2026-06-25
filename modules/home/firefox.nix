@@ -49,10 +49,11 @@ in
           bitwarden
           clearurls
           darkreader
+          kagi-search
         ];
 
         settings = {
-          "browser.startup.homepage" = "https://duckduckgo.com";
+          "browser.startup.homepage" = "https://kagi.com";
 
           "signon.rememberSignons" = false;
           "signon.autofillForms" = false;
@@ -83,7 +84,6 @@ in
           "toolkit.coverage.endpoint.base" = "";
           "browser.ping-centre.telemetry" = false;
           "beacon.enabled" = false;
-          "app.shield.optoutstudies.enabled" = true;
           "app.normandy.enabled" = false;
           "app.normandy.api_url" = "";
           "breakpad.reportURL" = "";
@@ -104,7 +104,6 @@ in
           "browser.safebrowsing.downloads.remote.url" = "";
           "browser.safebrowsing.downloads.remote.block_potentially_unwanted" = false;
           "browser.safebrowsing.downloads.remote.block_uncommon" = false;
-          "browser.safebrowsing.allowOverride" = false;
 
           "network.prefetch-next" = false;
           "network.dns.disablePrefetch" = true;
@@ -133,6 +132,20 @@ in
           "browser.urlbar.quicksuggest.enabled" = false;
           "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
           "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+
+          "media.peerconnection.enabled" = false;
+          "dom.security.https_only_mode" = true;
+          "privacy.resistFingerprinting" = true;
+          "geo.enabled" = false;
+          "telemetry.fog.enabled" = false;
+          "browser.newtabpage.activity-stream.feeds.telemetry" = false;
+          "browser.newtabpage.activity-stream.telemetry" = false;
+          "privacy.globalprivacycontrol.enabled" = true;
+          "privacy.globalprivacycontrol.functionality.enabled" = true;
+          "privacy.trackingprotection.enabled" = true;
+          "privacy.trackingprotection.socialtracking.enabled" = true;
+          "privacy.trackingprotection.fingerprinting.enabled" = true;
+          "privacy.trackingprotection.cryptomining.enabled" = true;
         };
       };
     };
