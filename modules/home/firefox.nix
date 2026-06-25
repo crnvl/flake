@@ -53,6 +53,7 @@ in
 
         settings = {
           "browser.startup.homepage" = "https://kagi.com";
+          "ui.systemUsesDarkTheme" = 1;
 
           "signon.rememberSignons" = false;
           "signon.autofillForms" = false;

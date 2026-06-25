@@ -50,6 +50,8 @@
         proton-ge-bin
       ];
     };
+
+    dconf.enable = true;
   };
 
   services = {
