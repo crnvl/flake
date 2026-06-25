@@ -32,7 +32,11 @@
     ssh = {
       enable = true;
       enableDefaultConfig = false;
-      settings.AddKeysToAgent = "yes";
+      settings = {
+        "Host *" = {
+          AddKeysToAgent = "yes";
+        };
+      };
     };
   };
 
