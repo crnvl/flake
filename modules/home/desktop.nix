@@ -32,9 +32,7 @@
     ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks."*" = {
-        addKeysToAgent = "yes";
-      };
+      settings.AddKeysToAgent = "yes";
     };
   };
 

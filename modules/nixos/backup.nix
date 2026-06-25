@@ -22,7 +22,8 @@
       ServerAliveCountMax 3
   '';
 
-  services.borgbackup.package = inputs.nixpkgs-2311.legacyPackages.${pkgs.system}.borgbackup;
+  services.borgbackup.package =
+    inputs.nixpkgs-2311.legacyPackages.${pkgs.stdenv.hostPlatform.system}.borgbackup;
 
   services.borgbackup.jobs.home = {
     paths = [ "/home/aleph" ];
