@@ -24,12 +24,12 @@
         ];
 
         modules-right = [
+          "custom/backup"
           "cpu"
           "custom/temp"
           "memory"
           "network"
           "pulseaudio"
-          "custom/backup"
           "battery"
         ];
 
