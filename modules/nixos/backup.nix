@@ -112,6 +112,12 @@
       IOSchedulingClass = "idle";
     };
     script = ''
+      # Persistent catch-up can fire at boot before DNS is ready.
+      for _ in $(seq 1 30); do
+        ${pkgs.glibc.bin}/bin/getent hosts shimme.rs >/dev/null 2>&1 && break
+        sleep 2
+      done
+
       if (( 10#$(date +%d) <= 7 )); then
         echo "First week of the month -> full --verify-data (slow, reads every chunk)"
         exec borg check --verbose --verify-data
