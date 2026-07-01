@@ -151,16 +151,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1782554864,
-        "narHash": "sha256-pKSHFlhPI4sAVBVFb/hJTKwmrDc5fs0ue05AhgBFhOU=",
-        "owner": "oxcl",
-        "repo": "nix-flake-helium-browser",
-        "rev": "48b890e472394476a673d3c8d872aec05099210b",
+        "lastModified": 1782022846,
+        "narHash": "sha256-OdUUVz+CZfPlsrdy4Nprn53JP/tccWTLhsc0iGOJr7c=",
+        "owner": "penal-colony",
+        "repo": "helium-nix",
+        "rev": "73afc17b6285242545452fa3c3f737993f807b18",
         "type": "github"
       },
       "original": {
-        "owner": "oxcl",
-        "repo": "nix-flake-helium-browser",
+        "owner": "penal-colony",
+        "repo": "helium-nix",
         "type": "github"
       }
     },

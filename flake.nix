@@ -29,7 +29,7 @@
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 
     helium-nix = {
-      url = "github:oxcl/nix-flake-helium-browser";
+      url = "github:penal-colony/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
