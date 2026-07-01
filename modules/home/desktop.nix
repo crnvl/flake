@@ -55,6 +55,7 @@
       vesktop
       ncdu
       xdg-ninja
+      google-chrome
 
       (tor-browser.override {
         extraPrefs = ''
