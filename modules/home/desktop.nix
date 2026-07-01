@@ -5,7 +5,6 @@
     ./firefox.nix
     ./niri.nix
     ./waybar.nix
-    ./helium.nix
   ];
 
   xdg.enable = true;
