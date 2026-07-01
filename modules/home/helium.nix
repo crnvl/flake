@@ -1,25 +1,14 @@
-{ inputs, ... }:
+{ ... }:
 
 {
-  imports = [ inputs.helium-nix.homeManagerModules.helium ];
-
-  programs.helium = {
+  xdg.mimeApps = {
     enable = true;
-    defaultBrowser = true;
-
-    extensions = [ ];
-
-    extraFlags = [ "--force-dark-mode" ];
-
-    extraPolicies = {
-      PasswordManagerEnabled = false;
-      BrowserSignin = 0;
-    };
-
-    preferences = {
-      browser.show_home_button = true;
-      bookmark_bar.show_on_all_tabs = true;
+    defaultApplications = {
+      "text/html" = "helium.desktop";
+      "x-scheme-handler/http" = "helium.desktop";
+      "x-scheme-handler/https" = "helium.desktop";
+      "x-scheme-handler/about" = "helium.desktop";
+      "x-scheme-handler/unknown" = "helium.desktop";
     };
   };
-
 }
