@@ -42,7 +42,13 @@
       package = pkgs.niri;
     };
 
-    ssh.startAgent = true;
+    ssh = {
+      startAgent = false;
+      extraConfig = ''
+        Host *
+          AddKeysToAgent yes
+      '';
+    };
 
     steam = {
       enable = true;
@@ -62,7 +68,7 @@
     };
 
     gnome = {
-      gcr-ssh-agent.enable = false;
+      gcr-ssh-agent.enable = true;
       gnome-keyring.enable = true;
     };
 
