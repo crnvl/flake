@@ -14,6 +14,7 @@
   users.users.sonarr.extraGroups = [
     "media"
     "transmission"
+    "sabnzbd"
   ];
 
   my.vpn.portMappings = [

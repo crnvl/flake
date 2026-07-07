@@ -14,6 +14,7 @@
     ../../modules/nixos/services/monero.nix
     ../../modules/nixos/services/vaultwarden.nix
 
+    ../../modules/nixos/services/media/sabnzbd.nix
     ../../modules/nixos/services/media/prowlarr.nix
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
