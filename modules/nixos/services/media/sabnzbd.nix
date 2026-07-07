@@ -1,7 +1,13 @@
 { ... }:
 
 {
-  services.sabnzbd.enable = true;
+  services.sabnzbd = {
+    enable = true;
+    settings = {
+      allowConfigWrite = true;
+      misc.host = "0.0.0.0";
+    };
+  };
 
   systemd.services.sabnzbd.vpnConfinement = {
     enable = true;
