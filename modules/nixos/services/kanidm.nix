@@ -129,6 +129,15 @@
             "catshift_users"
           ];
         };
+
+        feinwaage = {
+          displayName = "feinwaage";
+          mailAddresses = [ "feinwaage@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "vaultwarden_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
