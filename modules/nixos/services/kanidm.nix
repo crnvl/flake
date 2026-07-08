@@ -197,7 +197,7 @@
     };
   };
 
-  environment.systemPackages = [ pkgs.kanidm_1_9 ];
+  environment.systemPackages = [ pkgs.kanidm_1_10 ];
 
   security.acme.certs."id.shimme.rs" = {
     group = "acme";
