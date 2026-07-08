@@ -10,6 +10,7 @@
     homeDirectory = "/home/aleph";
     stateVersion = "25.11";
     pointerCursor = {
+      enable = true;
       size = 24;
       name = "Vimix-cursors";
       package = pkgs.vimix-cursors;
