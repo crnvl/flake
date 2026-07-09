@@ -36,6 +36,8 @@
         touchpad = {
           tap = true;
           natural-scroll = true;
+          dwt = true;
+          dwtp = true;
         };
       };
     };
