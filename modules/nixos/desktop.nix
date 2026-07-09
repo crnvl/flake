@@ -78,6 +78,8 @@
       alsa.support32Bit = true;
       pulse.enable = true;
     };
+
+    udev.packages = [ pkgs.brightnessctl ];
   };
 
   xdg.portal = {
@@ -99,6 +101,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    brightnessctl
     xwayland-satellite
     waybar
     glib
