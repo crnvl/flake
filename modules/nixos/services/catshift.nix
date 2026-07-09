@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, mkProxyHost, ... }:
 
 {
   age.secrets.kanidm-oauth2-catshift-secret = {
@@ -22,10 +22,9 @@
     adminUsers = [ "aleph" ];
   };
 
-  services.nginx.virtualHosts."shift.shimme.rs" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."/".proxyPass = "http://127.0.0.1:3080";
+  services.nginx.virtualHosts."shift.shimme.rs" = mkProxyHost {
+    port = 3080;
+    websockets = false;
   };
 
   systemd.services.catshift = {

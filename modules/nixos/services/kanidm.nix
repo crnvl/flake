@@ -2,6 +2,7 @@
   pkgs,
   config,
   lib,
+  mkProxyHost,
   ...
 }:
 
@@ -213,13 +214,8 @@
     "/var/lib/acme/id.shimme.rs/"
   ];
 
-  services.nginx.virtualHosts."id.shimme.rs" = {
-    enableACME = true;
-    forceSSL = true;
-
-    locations."/" = {
-      proxyPass = "https://127.0.0.1:8443";
-      proxyWebsockets = true;
-    };
+  services.nginx.virtualHosts."id.shimme.rs" = mkProxyHost {
+    port = 8443;
+    scheme = "https";
   };
 }

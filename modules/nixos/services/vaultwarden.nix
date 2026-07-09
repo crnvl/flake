@@ -1,8 +1,6 @@
 {
   config,
-  pkgs,
   lib,
-  inputs,
   ...
 }:
 
@@ -45,9 +43,6 @@ in
   };
 
   systemd.timers.backup-vaultwarden.timerConfig.OnCalendar = lib.mkForce "*-*-* 04:00:00";
-
-  services.borgbackup.package =
-    inputs.nixpkgs-2311.legacyPackages.${pkgs.stdenv.hostPlatform.system}.borgbackup;
 
   services.borgbackup.jobs.vaultwarden = {
     paths = [ backupDir ];

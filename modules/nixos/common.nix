@@ -1,5 +1,8 @@
 { pkgs, ... }:
 
+let
+  flakePath = "/home/aleph/flake";
+in
 {
   nix = {
     settings = {
@@ -54,15 +57,15 @@
     steam-run
 
     (pkgs.writeShellScriptBin "nix-rebuild" ''
-      exec sudo nixos-rebuild switch --flake /home/aleph/flake
+      exec sudo nixos-rebuild switch --flake ${flakePath}
     '')
 
     (pkgs.writeShellScriptBin "nix-update" ''
-      cd /home/aleph/flake && git pull && exec sudo nixos-rebuild switch --flake .
+      cd ${flakePath} && git pull && exec sudo nixos-rebuild switch --flake .
     '')
 
     (pkgs.writeShellScriptBin "nix-reboot" ''
-      sudo nixos-rebuild switch --flake /home/aleph/flake && reboot
+      sudo nixos-rebuild switch --flake ${flakePath} && reboot
     '')
 
     (writeShellScriptBin "android-emulator" ''
