@@ -11,10 +11,8 @@
     vpnNamespace = "wg";
   };
 
-  my.vpn.portMappings = [
-    {
-      from = 9696;
-      to = 9696;
-    }
-  ];
+  my.vpn = {
+    confinedServices = [ "prowlarr" ];
+    ports = [ 9696 ];
+  };
 }

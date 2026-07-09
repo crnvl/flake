@@ -23,19 +23,12 @@ in
     };
   };
 
-  my.vpn.portMappings = [
-    {
-      from = 9091;
-      to = 9091;
-    }
-  ];
+  my.vpn = {
+    confinedServices = [ "transmission" ];
+    ports = [ 9091 ];
+  };
 
   systemd = {
-    services.transmission.vpnConfinement = {
-      enable = true;
-      vpnNamespace = "wg";
-    };
-
     tmpfiles.rules = [
       "d /var/lib/transmission/downloads 0775 transmission media -"
       "d /var/lib/transmission/downloads/radarr 0775 transmission media -"

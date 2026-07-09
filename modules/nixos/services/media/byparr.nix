@@ -19,8 +19,5 @@
     flags = [ "--all" ];
   };
 
-  systemd.services.podman-byparr.vpnConfinement = {
-    enable = true;
-    vpnNamespace = "wg";
-  };
+  my.vpn.confinedServices = [ "podman-byparr" ];
 }
