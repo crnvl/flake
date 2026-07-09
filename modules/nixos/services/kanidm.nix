@@ -1,26 +1,24 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 {
-  age.secrets.kanidm-idm-admin-password = {
-    file = ../../../hosts/shimmers/secrets/kanidm-idm-admin-password.age;
-    owner = "kanidm";
-    group = "kanidm";
-  };
-  age.secrets.kanidm-admin-password = {
-    file = ../../../hosts/shimmers/secrets/kanidm-admin-password.age;
-    owner = "kanidm";
-    group = "kanidm";
-  };
-  age.secrets.kanidm-oauth2-jellyfin-secret = {
-    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-jellyfin-secret.age;
-    owner = "kanidm";
-    group = "kanidm";
-  };
-  age.secrets.kanidm-oauth2-vaultwarden-secret = {
-    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-vaultwarden-secret.age;
-    owner = "kanidm";
-    group = "kanidm";
-  };
+  age.secrets =
+    lib.genAttrs
+      [
+        "kanidm-idm-admin-password"
+        "kanidm-admin-password"
+        "kanidm-oauth2-jellyfin-secret"
+        "kanidm-oauth2-vaultwarden-secret"
+      ]
+      (name: {
+        file = ../../../hosts/shimmers/secrets/${name}.age;
+        owner = "kanidm";
+        group = "kanidm";
+      });
 
   services.kanidm = {
     package = pkgs.kanidm_1_10.withSecretProvisioning;
