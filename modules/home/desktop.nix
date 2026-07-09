@@ -43,6 +43,24 @@
   home = {
     file.".config/wallpaper".source = ../../assets/wallpaper.jpg;
 
+    username = "aleph";
+    homeDirectory = "/home/aleph";
+    stateVersion = "25.11";
+
+    pointerCursor = {
+      enable = true;
+      size = 24;
+      name = "Vimix-cursors";
+      package = pkgs.vimix-cursors;
+    };
+
+    sessionVariables = {
+      EDITOR = "zeditor";
+      LANG = "en_US.UTF-8";
+      CARGO_HOME = "$HOME/.local/share/cargo";
+      HISTFILE = "$HOME/.local/state/zsh/history";
+    };
+
     packages = with pkgs; [
       awww
       zed-editor
@@ -71,11 +89,6 @@
         '';
       })
     ];
-
-    sessionVariables = {
-      CARGO_HOME = "$HOME/.local/share/cargo";
-      HISTFILE = "$HOME/.local/state/zsh/history";
-    };
 
     activation = {
       zshStateDir = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -6,21 +6,6 @@
   ];
 
   home = {
-    username = "aleph";
-    homeDirectory = "/home/aleph";
-    stateVersion = "25.11";
-    pointerCursor = {
-      enable = true;
-      size = 24;
-      name = "Vimix-cursors";
-      package = pkgs.vimix-cursors;
-    };
-
-    sessionVariables = {
-      EDITOR = "zeditor";
-      LANG = "en_US.UTF-8";
-    };
-
     packages = with pkgs; [
       httptoolkit
       mitmproxy
