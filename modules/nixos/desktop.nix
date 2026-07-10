@@ -16,6 +16,20 @@
     fontconfig.enable = true;
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
+      # Phosphor icon font (bold weight), vendored for the waybar icons.
+      (stdenvNoCC.mkDerivation {
+        pname = "phosphor-icons-font";
+        version = "2.1.2";
+        src = fetchurl {
+          url = "https://raw.githubusercontent.com/phosphor-icons/web/v2.1.2/src/bold/Phosphor-Bold.ttf";
+          hash = "sha256-EKChy0+BVqQg+fhM80xOmHHljtLd6h9qgHmtByQ6f7I=";
+        };
+        dontUnpack = true;
+        installPhase = ''
+          mkdir -p $out/share/fonts/truetype
+          cp $src $out/share/fonts/truetype/Phosphor-Bold.ttf
+        '';
+      })
     ];
   };
 

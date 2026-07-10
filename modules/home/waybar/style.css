@@ -2,7 +2,7 @@
     border: none;
     border-radius: 1px;
     min-height: 0;
-    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-family: "JetBrainsMono Nerd Font", "Phosphor-Bold", monospace;
     font-weight: 500;
     font-size: 14px;
     padding: 0;
@@ -10,6 +10,20 @@
 
 window#waybar {
     background-color: #c4c0c1;
+}
+
+/*
+ * These widgets are icon-only and their Phosphor glyphs sit in a PUA range
+ * that JetBrainsMono Nerd Font also occupies, so give Phosphor priority here.
+ * Widgets that mix icons with (lower-case) text keep JetBrains first and let
+ * their icons fall through to Phosphor, which only works for glyphs the Nerd
+ * Font does not itself map.
+ */
+#network,
+#battery,
+#custom-flake,
+#custom-backup {
+    font-family: "Phosphor-Bold", "JetBrainsMono Nerd Font", monospace;
 }
 
 #clock,

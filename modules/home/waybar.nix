@@ -4,7 +4,7 @@ let
   recordingStatus = pkgs.writeShellScript "waybar-recording" ''
     pidfile="$XDG_RUNTIME_DIR/niri-record.pid"
     if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
-      printf '{"text":"● REC","class":"recording"}\n'
+      printf '{"text":" REC","class":"recording"}\n'
     else
       printf '{"text":""}\n'
     fi
@@ -262,27 +262,26 @@ in
         };
 
         clock = {
-          "format" = "  {:%I:%M:%S %p}";
+          "format" = "  {:%I:%M:%S %p}";
           "interval" = 1;
           "tooltip" = false;
         };
 
         "clock#secondary" = {
-          "format" = "  {:%a, %d %b %Y}";
+          "format" = "  {:%a, %d %b %Y}";
           "interval" = 1;
           "tooltip" = false;
         };
 
         network = {
           "format-wifi" = "{icon}";
-          "format-ethernet" = "󰈁";
-          "format-disconnected" = "󰤮";
+          "format-ethernet" = "";
+          "format-disconnected" = "";
           "format-icons" = [
-            "󰤯"
-            "󰤟"
-            "󰤢"
-            "󰤥"
-            "󰤨"
+            ""
+            ""
+            ""
+            ""
           ];
           "interval" = 5;
           "tooltip" = false;
@@ -290,12 +289,12 @@ in
 
         pulseaudio = {
           "format" = "{icon}";
-          "format-muted" = "󰝟";
+          "format-muted" = "";
           "format-icons" = {
             "default" = [
-              "󰕿"
-              "󰖀"
-              "󰕾"
+              ""
+              ""
+              ""
             ];
           };
           "on-scroll-up" = "${volumeControl}/bin/volume-notify up";
@@ -308,20 +307,14 @@ in
         battery = {
           "bat" = "BAT0";
           "format" = "{icon}";
-          "format-charging" = "󰂄";
-          "format-full" = "󰁹";
+          "format-charging" = "";
+          "format-full" = "";
           "format-icons" = [
-            "󰂎"
-            "󰁺"
-            "󰁻"
-            "󰁼"
-            "󰁽"
-            "󰁾"
-            "󰁿"
-            "󰂀"
-            "󰂁"
-            "󰂂"
-            "󰁹"
+            ""
+            ""
+            ""
+            ""
+            ""
           ];
           "tooltip" = false;
         };
@@ -342,7 +335,7 @@ in
 
         "custom/backup" = {
           "exec-if" = "systemctl is-active --quiet borgbackup-job-home.service";
-          "exec" = "echo '󰋊'";
+          "exec" = "echo ''";
           "interval" = 5;
           "tooltip" = false;
         };
@@ -350,14 +343,14 @@ in
         "custom/flake" = {
           "exec-if" =
             "git -C /home/aleph/flake status --porcelain 2>/dev/null | grep -q . || [ \"$(git -C /home/aleph/flake rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)\" != 0 ]";
-          "exec" = "echo '󰘬'";
+          "exec" = "echo ''";
           "interval" = 15;
           "tooltip" = false;
         };
 
         "custom/check" = {
           "exec-if" = "systemctl is-failed --quiet borgbackup-check-home.service";
-          "exec" = "echo '󰀦 backup check failed'";
+          "exec" = "echo ' backup check failed'";
           "interval" = 30;
           "tooltip" = false;
         };
