@@ -140,6 +140,27 @@ let
       "Volume" "$body"
   '';
 
+  # Adjusts the backlight and fires a notification (shown in the ticker).
+  # Exposed on PATH as `brightness-notify` for the niri brightness keys.
+  brightnessControl = pkgs.writeShellScriptBin "brightness-notify" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.brightnessctl
+        pkgs.libnotify
+        pkgs.gawk
+        pkgs.coreutils
+      ]
+    }
+    case "$1" in
+      up)   brightnessctl --class=backlight set 10%+ >/dev/null ;;
+      down) brightnessctl --class=backlight set 10%- >/dev/null ;;
+    esac
+    pct=$(brightnessctl --class=backlight -m | awk -F, '{print $4}')
+    notify-send -a Brightness -t 2000 \
+      -h string:x-canonical-private-synchronous:brightness \
+      "Brightness" "$pct"
+  '';
+
   # Notifies (into the ticker) when the battery crosses low thresholds.
   batteryMonitor = pkgs.writeShellScript "battery-monitor" ''
     export PATH=${
@@ -198,7 +219,10 @@ in
 
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
-  home.packages = [ volumeControl ];
+  home.packages = [
+    volumeControl
+    brightnessControl
+  ];
 
   programs.waybar = {
     enable = true;

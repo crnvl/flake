@@ -159,21 +159,11 @@ in
       # brightness
       "XF86MonBrightnessUp" = {
         allow-when-locked = true;
-        action.spawn = [
-          "brightnessctl"
-          "--class=backlight"
-          "set"
-          "+10%"
-        ];
+        action.spawn-sh = "brightness-notify up";
       };
       "XF86MonBrightnessDown" = {
         allow-when-locked = true;
-        action.spawn = [
-          "brightnessctl"
-          "--class=backlight"
-          "set"
-          "10%-"
-        ];
+        action.spawn-sh = "brightness-notify down";
       };
 
       # general
