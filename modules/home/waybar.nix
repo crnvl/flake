@@ -9,6 +9,44 @@ let
       printf '{"text":""}\n'
     fi
   '';
+
+  notificationFeed = pkgs.writeShellScript "waybar-notification-feed" ''
+    printf '{"text":""}\n'
+
+    ${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.dbus}/bin/dbus-monitor \
+      "interface='org.freedesktop.Notifications',member='Notify'" 2>/dev/null \
+      | ${pkgs.gawk}/bin/awk '
+          function jesc(s) {
+            gsub(/\\/, "\\\\", s)
+            gsub(/"/, "\\\"", s)
+            gsub(/\n/, " ", s)
+            gsub(/\t/, " ", s)
+            return s
+          }
+          # Notify args in order: string app_name, uint32 id, string app_icon,
+          # string summary, string body, ... -> summary is string #3, body #4.
+          /member=Notify/ { n = 0; summary = ""; body = ""; cap = 1; next }
+          cap && /^[[:space:]]*string/ {
+            n++
+            line = $0
+            sub(/^[[:space:]]*string "/, "", line)
+            sub(/"[[:space:]]*$/, "", line)
+            if (n == 3) summary = line
+            else if (n == 4) {
+              body = line
+              text = summary
+              if (body != "") text = summary "  " body
+              if (length(text) > 64) text = substr(text, 1, 61) "..."
+              tip = summary
+              if (body != "") tip = summary ": " body
+              printf "{\"text\":\"%s\",\"tooltip\":\"%s\",\"class\":\"active\"}\n", jesc(text), jesc(tip)
+              fflush()
+              cap = 0
+            }
+          }
+        '
+  '';
+
 in
 {
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
@@ -106,24 +144,13 @@ in
         };
 
         "custom/notification" = {
-          "tooltip" = false;
-          "format" = "{icon}";
-          "format-icons" = {
-            "notification" = "<span foreground='#d65d0e'><sup></sup></span>";
-            "none" = "";
-            "dnd-notification" = "󰂛<span foreground='#d65d0e'><sup></sup></span>";
-            "dnd-none" = "󰂛";
-            "inhibited-notification" = "<span foreground='#d65d0e'><sup></sup></span>";
-            "inhibited-none" = "";
-            "dnd-inhibited-notification" = "󰂛<span foreground='#d65d0e'><sup></sup></span>";
-            "dnd-inhibited-none" = "󰂛";
-          };
+          "exec" = "${notificationFeed}";
           "return-type" = "json";
-          "exec-if" = "which swaync-client";
-          "exec" = "swaync-client -swb";
           "on-click" = "swaync-client -t -sw";
           "on-click-right" = "swaync-client -d -sw";
           "escape" = true;
+          "max-length" = 70;
+          "tooltip" = true;
         };
 
         "custom/weather" = {
