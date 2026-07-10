@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -13,7 +13,14 @@
     networkmanager.enable = true;
   };
 
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+    ];
+  };
+
+  environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
 
   services = {
     logind.settings.Login = {
