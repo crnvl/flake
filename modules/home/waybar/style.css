@@ -69,8 +69,8 @@ window#waybar {
     border-left: 1px solid white;
     margin: 6px 6px 6px 0px;
     padding: 2px 8px;
-    background-color: #cc241d;
-    color: #ffffff;
+    background-color: #1d2021;
+    color: #c4c0c1;
 }
 
 #cpu.critical,
@@ -85,12 +85,9 @@ window#waybar {
 #cpu,
 #memory,
 #battery,
-#pulseaudio {
-    min-width: 54px;
-}
-
+#pulseaudio,
 #network {
-    min-width: 150px;
+    min-width: 54px;
 }
 
 #tray {
@@ -142,30 +139,25 @@ window#waybar {
     color: #1d2021;
 }
 
-@keyframes spread {
-    50% {
-        margin: 0 5px 0 5px;
-        text-shadow: 2px 2px 10px rgba(214, 93, 14, 0.8);
-    }
-}
-
 #workspaces button.focused {
-    color: #008083;
-    animation: spread 0.3s ease-out;
+    background-color: #1d2021;
+    color: #c4c0c1;
 }
 
 #workspaces button.urgent {
-    background-color: #e78a4e;
+    background-color: #ffffff;
+    color: #1d2021;
 }
 
 #custom-notification {
-    border-top: 1px solid #7f7f7f;
-    border-left: 1px solid #7f7f7f;
+    border-top: 1px solid #1d2021;
+    border-left: 1px solid #1d2021;
     border-bottom: 1px solid #ffffff;
     border-right: 1px solid #ffffff;
-    box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.35);
-    background-color: #bcb8b9;
-    color: #1d2021;
+    box-shadow: inset 2px 2px 0px 0px rgba(0, 0, 0, 0.5);
+    background-color: #1d2021;
+    color: #c4c0c1;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
     margin: 6px 6px 6px 0px;
     padding: 2px 10px;
 }
@@ -177,7 +169,7 @@ window#waybar {
 }
 
 #custom-recording.recording {
-    color: #cc241d;
+    color: #1d2021;
     margin: 0 6px;
     animation: rec-blink 1s linear infinite alternate;
 }

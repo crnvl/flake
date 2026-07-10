@@ -49,8 +49,8 @@ let
   '';
 
   # Scrolls the current message inside a fixed-width window for waybar.
-  # Flushes every frame (bash buffers stdout on a pipe) and pauses after each
-  # full scroll cycle so the start of the message is readable.
+  # Flushes every frame, pauses at the start of each cycle, keeps a constant
+  # width (blank when idle), and clears the text 30s after the last update.
   notificationTicker = pkgs.writeScript "notification-feed-ticker" ''
     #!${pkgs.python3}/bin/python3
     import json
@@ -61,14 +61,14 @@ let
     runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
     statefile = os.path.join(runtime, "waybar-notification")
     width = 42
-    gap = "          "
+    gap = "     •     "
     step = 0.25
     pause = 3.0
+    timeout = 30.0
     cur = ""
     offset = 0
-
-    sys.stdout.write('{"text":""}\n')
-    sys.stdout.flush()
+    shown_at = 0.0
+    expired = False
 
     while True:
         try:
@@ -80,26 +80,30 @@ let
         if msg != cur:
             cur = msg
             offset = 0
+            shown_at = time.time()
+            expired = False
 
-        if not cur:
-            payload = {"text": ""}
+        if cur and not expired and time.time() - shown_at > timeout:
+            expired = True
+
+        if not cur or expired:
+            text = " " * width
+            tip = ""
             delay = 0.5
         elif len(cur) <= width:
-            payload = {"text": cur.ljust(width), "tooltip": cur, "class": "active"}
+            text = cur.ljust(width)
+            tip = cur
             delay = 1.0
         else:
             loop = cur + gap
             doubled = loop + loop
             start = offset % len(loop)
-            payload = {
-                "text": doubled[start:start + width],
-                "tooltip": cur,
-                "class": "active",
-            }
-            # Pause when a full cycle brings us back to the start.
+            text = doubled[start:start + width]
+            tip = cur
             delay = pause if start == 0 else step
             offset += 1
 
+        payload = {"text": text, "tooltip": tip, "class": "active"}
         sys.stdout.write(json.dumps(payload) + "\n")
         sys.stdout.flush()
         time.sleep(delay)
@@ -192,10 +196,10 @@ in
         };
 
         network = {
-          "format-wifi" = "  {bandwidthDownBytes} {bandwidthUpBytes}";
-          "format-ethernet" = "  {bandwidthDownBytes} {bandwidthUpBytes}";
-          "format-disconnected" = "󱚼  no network";
-          "interval" = 1;
+          "format-wifi" = "  {signalStrength}%";
+          "format-ethernet" = "  wired";
+          "format-disconnected" = "󱚼  off";
+          "interval" = 5;
           "tooltip" = false;
         };
 
