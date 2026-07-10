@@ -40,6 +40,8 @@
     };
   };
 
+  services.swaync.enable = true;
+
   home = {
     file.".config/wallpaper".source = ../../assets/wallpaper.jpg;
 

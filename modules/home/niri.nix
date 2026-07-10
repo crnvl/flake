@@ -14,11 +14,10 @@ let
       pidfile="$XDG_RUNTIME_DIR/niri-record.pid"
       mkdir -p "$outdir"
 
-      # Second press: stop and finalize the current recording.
       if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
         kill -INT "$(cat "$pidfile")"
         rm -f "$pidfile"
-        notify-send "Screen recording" "Stopped — saved to $outdir"
+        notify-send "Screen recording" "Stopped — saved to $outdir" || true
         exit 0
       fi
       rm -f "$pidfile"
@@ -27,13 +26,13 @@ let
 
       if [ "''${1:-}" = "area" ]; then
         geometry="$(slurp)" || exit 0
-        wl-screenrec --geometry "$geometry" --filename "$file" &
+        setsid wl-screenrec --geometry "$geometry" --filename "$file" &
       else
-        wl-screenrec --filename "$file" &
+        setsid wl-screenrec --filename "$file" &
       fi
 
       echo $! > "$pidfile"
-      notify-send "Screen recording" "Started — $file"
+      notify-send "Screen recording" "Started — $file" || true
     '';
   };
 in

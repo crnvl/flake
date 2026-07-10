@@ -29,7 +29,6 @@
           "custom/check"
           "custom/backup"
           "cpu"
-          "custom/temp"
           "memory"
           "network"
           "pulseaudio"
@@ -144,7 +143,8 @@
         };
 
         "custom/recording" = {
-          "exec-if" = "kill -0 \"$(cat \"$XDG_RUNTIME_DIR/niri-record.pid\" 2>/dev/null)\" 2>/dev/null";
+          "exec-if" =
+            "[ -f \"$XDG_RUNTIME_DIR/niri-record.pid\" ] && kill -0 \"$(cat \"$XDG_RUNTIME_DIR/niri-record.pid\")\" 2>/dev/null";
           "exec" = "echo '<span foreground=\"#cc241d\"></span> REC'";
           "interval" = 1;
           "on-click" = "niri-record";
