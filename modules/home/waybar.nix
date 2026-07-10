@@ -1,4 +1,15 @@
-{ ... }:
+{ pkgs, ... }:
+
+let
+  recordingStatus = pkgs.writeShellScript "waybar-recording" ''
+    pidfile="$XDG_RUNTIME_DIR/niri-record.pid"
+    if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+      printf '{"text":"● REC","class":"recording"}\n'
+    else
+      printf '{"text":""}\n'
+    fi
+  '';
+in
 {
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
@@ -143,9 +154,8 @@
         };
 
         "custom/recording" = {
-          "exec-if" =
-            "[ -f \"$XDG_RUNTIME_DIR/niri-record.pid\" ] && kill -0 \"$(cat \"$XDG_RUNTIME_DIR/niri-record.pid\")\" 2>/dev/null";
-          "exec" = "echo '<span foreground=\"#cc241d\"></span> REC'";
+          "exec" = "${recordingStatus}";
+          "return-type" = "json";
           "interval" = 1;
           "on-click" = "niri-record";
           "tooltip" = false;

@@ -164,3 +164,8 @@ window#waybar {
 #custom-recording {
     animation: rec-blink 1s steps(1) infinite alternate;
 }
+
+#custom-recording.recording {
+    color: #cc241d;
+    margin: 0 6px;
+}
