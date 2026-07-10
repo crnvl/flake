@@ -4,7 +4,7 @@ let
   recordingStatus = pkgs.writeShellScript "waybar-recording" ''
     pidfile="$XDG_RUNTIME_DIR/niri-record.pid"
     if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
-      printf '{"text":" REC","class":"recording"}\n'
+      printf "{\"text\":\"<span size='large' rise='-1720'></span> REC\",\"class\":\"recording\"}\n"
     else
       printf '{"text":""}\n'
     fi
@@ -262,13 +262,13 @@ in
         };
 
         clock = {
-          "format" = "  {:%I:%M:%S %p}";
+          "format" = "<span size='large' rise='-1720'></span>  {:%I:%M:%S %p}";
           "interval" = 1;
           "tooltip" = false;
         };
 
         "clock#secondary" = {
-          "format" = "  {:%a, %d %b %Y}";
+          "format" = "<span size='large' rise='-1720'></span>  {:%a, %d %b %Y}";
           "interval" = 1;
           "tooltip" = false;
         };
@@ -350,7 +350,7 @@ in
 
         "custom/check" = {
           "exec-if" = "systemctl is-failed --quiet borgbackup-check-home.service";
-          "exec" = "echo ' backup check failed'";
+          "exec" = "echo '<span size=\"large\" rise=\"-1720\"></span> backup check failed'";
           "interval" = 30;
           "tooltip" = false;
         };

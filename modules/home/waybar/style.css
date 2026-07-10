@@ -26,6 +26,15 @@ window#waybar {
     font-family: "Phosphor-Bold", "JetBrainsMono Nerd Font", monospace;
 }
 
+/* Icon-only widgets: render their glyphs a little larger than the base text. */
+#network,
+#pulseaudio,
+#battery,
+#custom-flake,
+#custom-backup {
+    font-size: 17px;
+}
+
 #clock,
 #tray,
 #network,
