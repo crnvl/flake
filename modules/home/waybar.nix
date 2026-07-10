@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   recordingStatus = pkgs.writeShellScript "waybar-recording" ''
@@ -10,21 +10,22 @@ let
     fi
   '';
 
-  notificationFeed = pkgs.writeShellScript "waybar-notification-feed" ''
-    printf '{"text":""}\n'
+  # Writes the latest notification text to a state file (run as a user service).
+  notificationWriter = pkgs.writeShellScript "notification-feed-writer" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.coreutils
+        pkgs.dbus
+        pkgs.gawk
+      ]
+    }
+    statefile="$XDG_RUNTIME_DIR/waybar-notification"
+    : > "$statefile"
 
-    ${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.dbus}/bin/dbus-monitor \
-      "interface='org.freedesktop.Notifications',member='Notify'" 2>/dev/null \
-      | ${pkgs.gawk}/bin/awk '
-          function jesc(s) {
-            gsub(/\\/, "\\\\", s)
-            gsub(/"/, "\\\"", s)
-            gsub(/\n/, " ", s)
-            gsub(/\t/, " ", s)
-            return s
-          }
-          # Notify args in order: string app_name, uint32 id, string app_icon,
-          # string summary, string body, ... -> summary is string #3, body #4.
+    stdbuf -oL dbus-monitor "interface='org.freedesktop.Notifications',member='Notify'" 2>/dev/null \
+      | awk '
+          function clean(s) { gsub(/\n/, " ", s); gsub(/\t/, " ", s); return s }
+          # Notify strings in order: app_name, app_icon, summary(#3), body(#4)
           /member=Notify/ { n = 0; summary = ""; body = ""; cap = 1; next }
           cap && /^[[:space:]]*string/ {
             n++
@@ -34,21 +35,91 @@ let
             if (n == 3) summary = line
             else if (n == 4) {
               body = line
-              text = summary
-              if (body != "") text = summary "  " body
-              if (length(text) > 64) text = substr(text, 1, 61) "..."
-              tip = summary
-              if (body != "") tip = summary ": " body
-              printf "{\"text\":\"%s\",\"tooltip\":\"%s\",\"class\":\"active\"}\n", jesc(text), jesc(tip)
+              msg = summary
+              if (body != "") msg = summary "  —  " body
+              print clean(msg)
               fflush()
               cap = 0
             }
           }
-        '
+        ' \
+      | while IFS= read -r line; do
+          printf '%s' "$line" > "$statefile.tmp" && mv "$statefile.tmp" "$statefile"
+        done
+  '';
+
+  # Scrolls the current message inside a fixed-width window for waybar.
+  # Flushes every frame (bash buffers stdout on a pipe) and pauses after each
+  # full scroll cycle so the start of the message is readable.
+  notificationTicker = pkgs.writeScript "notification-feed-ticker" ''
+    #!${pkgs.python3}/bin/python3
+    import json
+    import os
+    import sys
+    import time
+
+    runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
+    statefile = os.path.join(runtime, "waybar-notification")
+    width = 42
+    gap = "          "
+    step = 0.25
+    pause = 3.0
+    cur = ""
+    offset = 0
+
+    sys.stdout.write('{"text":""}\n')
+    sys.stdout.flush()
+
+    while True:
+        try:
+            with open(statefile) as f:
+                msg = f.read().strip()
+        except OSError:
+            msg = ""
+
+        if msg != cur:
+            cur = msg
+            offset = 0
+
+        if not cur:
+            payload = {"text": ""}
+            delay = 0.5
+        elif len(cur) <= width:
+            payload = {"text": cur.ljust(width), "tooltip": cur, "class": "active"}
+            delay = 1.0
+        else:
+            loop = cur + gap
+            doubled = loop + loop
+            start = offset % len(loop)
+            payload = {
+                "text": doubled[start:start + width],
+                "tooltip": cur,
+                "class": "active",
+            }
+            # Pause when a full cycle brings us back to the start.
+            delay = pause if start == 0 else step
+            offset += 1
+
+        sys.stdout.write(json.dumps(payload) + "\n")
+        sys.stdout.flush()
+        time.sleep(delay)
   '';
 
 in
 {
+  systemd.user.services.notification-feed = {
+    Unit = {
+      Description = "Feed the latest desktop notification to waybar";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      ExecStart = "${notificationWriter}";
+      Restart = "on-failure";
+    };
+  };
+
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
 
   programs.waybar = {
@@ -144,12 +215,11 @@ in
         };
 
         "custom/notification" = {
-          "exec" = "${notificationFeed}";
+          "exec" = "${notificationTicker}";
           "return-type" = "json";
           "on-click" = "swaync-client -t -sw";
           "on-click-right" = "swaync-client -d -sw";
           "escape" = true;
-          "max-length" = 70;
           "tooltip" = true;
         };
 
