@@ -14,8 +14,6 @@ window#waybar {
 
 #clock,
 #tray,
-#cpu,
-#memory,
 #network,
 #pulseaudio,
 #battery,
@@ -49,8 +47,6 @@ window#waybar {
     padding: 2px 8px;
 }
 
-#cpu,
-#memory,
 #network,
 #pulseaudio,
 #battery,
@@ -71,23 +67,6 @@ window#waybar {
     padding: 2px 8px;
     background-color: #1d2021;
     color: #c4c0c1;
-}
-
-#cpu.critical,
-#memory.critical {
-    border-top: 1px solid white;
-    border-left: 1px solid white;
-
-    background-color: #c4c0c1;
-    color: #1d2021;
-}
-
-#cpu,
-#memory,
-#battery,
-#pulseaudio,
-#network {
-    min-width: 54px;
 }
 
 #tray {

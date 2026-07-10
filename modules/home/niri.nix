@@ -123,15 +123,15 @@ in
       # audio
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
-        action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0";
+        action.spawn-sh = "volume-notify up";
       };
       "XF86AudioLowerVolume" = {
         allow-when-locked = true;
-        action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-";
+        action.spawn-sh = "volume-notify down";
       };
       "XF86AudioMute" = {
         allow-when-locked = true;
-        action.spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        action.spawn-sh = "volume-notify mute";
       };
       "XF86AudioMicMute" = {
         allow-when-locked = true;

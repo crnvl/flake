@@ -109,6 +109,65 @@ let
         time.sleep(delay)
   '';
 
+  # Adjusts the default sink and fires a notification (shown in the ticker).
+  # Exposed on PATH as `volume-notify` so niri media keys can use it too.
+  volumeControl = pkgs.writeShellScriptBin "volume-notify" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.wireplumber
+        pkgs.libnotify
+        pkgs.gawk
+        pkgs.gnugrep
+        pkgs.coreutils
+      ]
+    }
+    sink="@DEFAULT_AUDIO_SINK@"
+    case "$1" in
+      up)   wpctl set-volume -l 1.5 "$sink" 5%+ ;;
+      down) wpctl set-volume "$sink" 5%- ;;
+      mute) wpctl set-mute "$sink" toggle ;;
+    esac
+
+    out=$(wpctl get-volume "$sink")
+    pct=$(printf '%s' "$out" | awk '{printf "%d", $2 * 100}')
+    if printf '%s' "$out" | grep -q MUTED; then
+      body="muted"
+    else
+      body="$pct%"
+    fi
+    notify-send -a Volume -t 2000 \
+      -h string:x-canonical-private-synchronous:volume \
+      "Volume" "$body"
+  '';
+
+  # Notifies (into the ticker) when the battery crosses low thresholds.
+  batteryMonitor = pkgs.writeShellScript "battery-monitor" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.libnotify
+        pkgs.coreutils
+      ]
+    }
+    bat=/sys/class/power_supply/BAT0
+    last=100
+    while true; do
+      cap=$(cat "$bat/capacity" 2>/dev/null || echo 100)
+      status=$(cat "$bat/status" 2>/dev/null || echo Unknown)
+      if [ "$status" = "Discharging" ]; then
+        for t in 25 10 5; do
+          if [ "$cap" -le "$t" ] && [ "$last" -gt "$t" ]; then
+            notify-send -u critical -a Battery \
+              -h string:x-canonical-private-synchronous:battery \
+              "Battery low" "$cap% remaining"
+            break
+          fi
+        done
+      fi
+      last=$cap
+      sleep 60
+    done
+  '';
+
 in
 {
   systemd.user.services.notification-feed = {
@@ -124,7 +183,22 @@ in
     };
   };
 
+  systemd.user.services.battery-monitor = {
+    Unit = {
+      Description = "Notify on low battery thresholds";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      ExecStart = "${batteryMonitor}";
+      Restart = "on-failure";
+    };
+  };
+
   home.file.".config/waybar/style.css".source = ./waybar/style.css;
+
+  home.packages = [ volumeControl ];
 
   programs.waybar = {
     enable = true;
@@ -152,8 +226,6 @@ in
           "custom/recording"
           "custom/check"
           "custom/backup"
-          "cpu"
-          "memory"
           "network"
           "pulseaudio"
           "battery"
@@ -177,45 +249,57 @@ in
           "tooltip" = false;
         };
 
-        cpu = {
-          "format" = "  {usage}%";
-          "interval" = 1;
-
-          states = {
-            "critical" = 90;
-          };
-        };
-
-        memory = {
-          "format" = "  {percentage}%";
-          "interval" = 2;
-
-          states = {
-            "critical" = 80;
-          };
-        };
-
         network = {
-          "format-wifi" = "  {signalStrength}%";
-          "format-ethernet" = "  wired";
-          "format-disconnected" = "󱚼  off";
+          "format-wifi" = "{icon}";
+          "format-ethernet" = "󰈁";
+          "format-disconnected" = "󰤮";
+          "format-icons" = [
+            "󰤯"
+            "󰤟"
+            "󰤢"
+            "󰤥"
+            "󰤨"
+          ];
           "interval" = 5;
           "tooltip" = false;
         };
 
         pulseaudio = {
-          "scroll-step" = 5;
-          "max-volume" = 150;
-          "format" = "  {volume}%";
-          "format-bluetooth" = "  {volume}%";
-          "nospacing" = 1;
-          "on-click" = "pavucontrol";
+          "format" = "{icon}";
+          "format-muted" = "󰝟";
+          "format-icons" = {
+            "default" = [
+              "󰕿"
+              "󰖀"
+              "󰕾"
+            ];
+          };
+          "on-scroll-up" = "${volumeControl}/bin/volume-notify up";
+          "on-scroll-down" = "${volumeControl}/bin/volume-notify down";
+          "on-click" = "${volumeControl}/bin/volume-notify mute";
+          "on-click-right" = "pavucontrol";
           "tooltip" = false;
         };
 
         battery = {
           "bat" = "BAT0";
-          "format" = "  {capacity}%";
+          "format" = "{icon}";
+          "format-charging" = "󰂄";
+          "format-full" = "󰁹";
+          "format-icons" = [
+            "󰂎"
+            "󰁺"
+            "󰁻"
+            "󰁼"
+            "󰁽"
+            "󰁾"
+            "󰁿"
+            "󰂀"
+            "󰂁"
+            "󰂂"
+            "󰁹"
+          ];
+          "tooltip" = false;
         };
 
         "custom/notification" = {
