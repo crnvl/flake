@@ -157,15 +157,12 @@ window#waybar {
 
 @keyframes rec-blink {
     to {
-        opacity: 0.35;
+        opacity: 0.2;
     }
-}
-
-#custom-recording {
-    animation: rec-blink 1s steps(1) infinite alternate;
 }
 
 #custom-recording.recording {
     color: #cc241d;
     margin: 0 6px;
+    animation: rec-blink 1s linear infinite alternate;
 }
