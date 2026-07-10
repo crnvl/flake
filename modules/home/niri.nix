@@ -1,6 +1,48 @@
-{ ... }:
+{ pkgs, lib, ... }:
 
+let
+  screen-record = pkgs.writeShellApplication {
+    name = "niri-record";
+    runtimeInputs = with pkgs; [
+      wl-screenrec
+      slurp
+      libnotify
+      coreutils
+    ];
+    text = ''
+      outdir="$HOME/Videos/recordings"
+      pidfile="$XDG_RUNTIME_DIR/niri-record.pid"
+      mkdir -p "$outdir"
+
+      # Second press: stop and finalize the current recording.
+      if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+        kill -INT "$(cat "$pidfile")"
+        rm -f "$pidfile"
+        notify-send "Screen recording" "Stopped — saved to $outdir"
+        exit 0
+      fi
+      rm -f "$pidfile"
+
+      file="$outdir/$(date +%Y-%m-%d_%H-%M-%S).mp4"
+
+      if [ "''${1:-}" = "area" ]; then
+        geometry="$(slurp)" || exit 0
+        wl-screenrec --geometry "$geometry" --filename "$file" &
+      else
+        wl-screenrec --filename "$file" &
+      fi
+
+      echo $! > "$pidfile"
+      notify-send "Screen recording" "Started — $file"
+    '';
+  };
+in
 {
+  home.packages = with pkgs; [
+    wl-screenrec
+    slurp
+  ];
+
   programs.niri.settings = {
     layout = {
       gaps = 8;
@@ -278,6 +320,13 @@
       "Print".action.screenshot = [ ];
       "Ctrl+Print".action.screenshot-screen = [ ];
       "Alt+Print".action.screenshot-window = [ ];
+
+      # screen recording (toggle: press again to stop)
+      "Mod+Print".action.spawn = [ (lib.getExe screen-record) ];
+      "Mod+Shift+Print".action.spawn = [
+        (lib.getExe screen-record)
+        "area"
+      ];
 
       # system
       "Mod+Escape" = {
