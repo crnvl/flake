@@ -154,3 +154,13 @@ window#waybar {
     margin: 6px 6px 6px 0px;
     padding-right: 10px;
 }
+
+@keyframes rec-blink {
+    to {
+        opacity: 0.35;
+    }
+}
+
+#custom-recording {
+    animation: rec-blink 1s steps(1) infinite alternate;
+}

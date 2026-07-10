@@ -38,10 +38,13 @@ let
   };
 in
 {
-  home.packages = with pkgs; [
-    wl-screenrec
-    slurp
-  ];
+  home.packages =
+    with pkgs;
+    [
+      wl-screenrec
+      slurp
+    ]
+    ++ [ screen-record ];
 
   programs.niri.settings = {
     layout = {

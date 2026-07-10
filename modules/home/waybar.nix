@@ -25,6 +25,7 @@
         ];
 
         modules-right = [
+          "custom/recording"
           "custom/check"
           "custom/backup"
           "cpu"
@@ -139,6 +140,14 @@
           "exec-if" = "systemctl is-failed --quiet borgbackup-check-home.service";
           "exec" = "echo '󰀦 backup check failed'";
           "interval" = 30;
+          "tooltip" = false;
+        };
+
+        "custom/recording" = {
+          "exec-if" = "kill -0 \"$(cat \"$XDG_RUNTIME_DIR/niri-record.pid\" 2>/dev/null)\" 2>/dev/null";
+          "exec" = "echo '<span foreground=\"#cc241d\"></span> REC'";
+          "interval" = 1;
+          "on-click" = "niri-record";
           "tooltip" = false;
         };
       }
