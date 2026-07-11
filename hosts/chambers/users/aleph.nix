@@ -22,6 +22,7 @@
       kdePackages.dolphin
       inetutils
       vesktop
+      telegram-desktop
     ];
   };
 
