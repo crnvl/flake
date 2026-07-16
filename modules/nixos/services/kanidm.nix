@@ -138,9 +138,9 @@
           ];
         };
 
-        kiri = {
-          displayName = "kiri";
-          mailAddresses = [ "kiri@shimme.rs" ];
+        hurensohn = {
+          displayName = "hurensohn";
+          mailAddresses = [ "hurensohn@shimme.rs" ];
           groups = [
             "jellyfin_users"
           ];
