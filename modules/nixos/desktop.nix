@@ -112,7 +112,10 @@
       xdg-desktop-portal-gtk
       xdg-desktop-portal-gnome
     ];
-    config.common.default = [ "gtk" ];
+    config.common.default = [
+      "gnome"
+      "gtk"
+    ];
   };
 
   security.pam.services.greetd.enableGnomeKeyring = true;
