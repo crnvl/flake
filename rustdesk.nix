@@ -7,7 +7,7 @@
   #
   # Populate this after the first deploy of shimmers by running:
   #   ssh shimmers cat /var/lib/rustdesk/id_ed25519.pub
-  key = "";
+  key = "yy3hehllpbfeYYrnmZSOGmBDdJ7cE65JdGuLhKZsPes=";
 
   # A `rustdesk --config <string>` export string that pins every client to
   # the `server`/`key` above (ID server, relay server, key all in one).
