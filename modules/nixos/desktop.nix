@@ -118,12 +118,15 @@
     ];
   };
 
+  hardware.uinput.enable = true;
+
   security.pam.services.greetd.enableGnomeKeyring = true;
 
   users.users.aleph = {
     extraGroups = [
       "video"
       "audio"
+      "uinput"
     ];
   };
 

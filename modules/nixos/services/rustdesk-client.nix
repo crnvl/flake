@@ -37,7 +37,7 @@ in
         ${pkgs.rustdesk}/bin/rustdesk --config ${lib.escapeShellArg rustdesk.configString}
       ''}
       ${pkgs.rustdesk}/bin/rustdesk --password "$(cat ${config.age.secrets.${secretName}.path})"
-      exec ${pkgs.rustdesk}/bin/rustdesk
+      exec ${pkgs.rustdesk}/bin/rustdesk --server
     '';
   };
 }
