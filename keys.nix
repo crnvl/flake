@@ -7,6 +7,6 @@
   hosts = {
     shimmers = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOs1x+98r+MXYAitek6+yrO96TnyOWoZ9IO6MPONqcmY";
     chambers = "age1dj80cg9er0hw459wmgqs7yd9tkrkezfjysr50csx3zm3gsuc5susdk7r59";
-    corridors = "age1REPLACEME_CORRIDORS";
+    corridors = "age1r7mvxtp79dmrlgukrgjmpdt4ft0d0fex9xz2aqx3h47ajwe77avsz2ft4e";
   };
 }
