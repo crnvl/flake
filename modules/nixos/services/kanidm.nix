@@ -137,6 +137,14 @@
             "vaultwarden_users"
           ];
         };
+
+        kiri = {
+          displayName = "kiri";
+          mailAddresses = [ "kiri@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
