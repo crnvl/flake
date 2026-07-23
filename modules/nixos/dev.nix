@@ -36,5 +36,6 @@
     zlib
     nixd
     nil
+    usbmuxd
   ];
 }
