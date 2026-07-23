@@ -37,5 +37,6 @@
     nixd
     nil
     usbmuxd
+    iloader
   ];
 }
