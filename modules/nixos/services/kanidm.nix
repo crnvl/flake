@@ -72,7 +72,6 @@
           mailAddresses = [ "jil@shimme.rs" ];
           groups = [
             "jellyfin_users"
-            "catshift_users"
           ];
         };
 
