@@ -25,6 +25,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    beat = {
+      url = "git+https://git.gay/67/beat";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 

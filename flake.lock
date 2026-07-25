@@ -23,6 +23,26 @@
         "type": "github"
       }
     },
+    "beat": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784993775,
+        "narHash": "sha256-yGuuT81pYog/EQ1jQqMK8e3H28yZub91Hv/ZxqXKXWg=",
+        "ref": "refs/heads/main",
+        "rev": "407b68eecd526846f9c16d85c07fa58e9985df8f",
+        "revCount": 2,
+        "type": "git",
+        "url": "https://git.gay/67/beat"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://git.gay/67/beat"
+      }
+    },
     "catshift": {
       "inputs": {
         "crane": "crane",
@@ -344,6 +364,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "beat": "beat",
         "catshift": "catshift",
         "disko": "disko",
         "firefox-addons": "firefox-addons",

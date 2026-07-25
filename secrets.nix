@@ -9,11 +9,13 @@ let
       "kanidm-oauth2-jellyfin-secret"
       "kanidm-oauth2-catshift-secret"
       "kanidm-oauth2-vaultwarden-secret"
+      "kanidm-oauth2-beat-secret"
       "mullvad-wg.conf"
       "caelo-env"
       "chroma-smb"
       "radarr-api-key"
       "vaultwarden-env"
+      "beat-env"
       "vaultwarden-borg-passphrase"
     ];
 
