@@ -59,7 +59,6 @@
             ./modules/nixos/desktop.nix
             ./modules/nixos/dev.nix
             ./modules/nixos/zsh.nix
-            ./modules/nixos/services/rustdesk-client.nix
 
             inputs.niri.nixosModules.niri
             inputs.disko.nixosModules.disko

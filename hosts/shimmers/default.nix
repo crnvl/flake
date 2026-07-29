@@ -14,7 +14,7 @@
     ../../modules/nixos/services/monero.nix
     ../../modules/nixos/services/vaultwarden.nix
     ../../modules/nixos/services/beat.nix
-    ../../modules/nixos/services/rustdesk-server.nix
+
 
     ../../modules/nixos/services/media/sabnzbd.nix
     ../../modules/nixos/services/media/prowlarr.nix

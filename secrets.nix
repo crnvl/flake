@@ -19,8 +19,6 @@ let
       "vaultwarden-borg-passphrase"
     ];
 
-    chambers = [ "rustdesk-password" ];
-    corridors = [ "rustdesk-password" ];
   };
 in
 builtins.listToAttrs (
