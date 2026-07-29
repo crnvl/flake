@@ -32,5 +32,6 @@
     jellyfin.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
     radarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
     sonarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+    podman-tunarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
   };
 }
