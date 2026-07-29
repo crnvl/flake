@@ -3,6 +3,7 @@
 {
   services.sabnzbd = {
     enable = true;
+    allowConfigWrite = true;
   };
 
   systemd.services.sabnzbd.serviceConfig.ExecStart =
