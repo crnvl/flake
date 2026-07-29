@@ -87,8 +87,8 @@
 
     mullvad-vpn = {
       enable = true;
-      package = pkgs.mullvad-vpn;
       enableEarlyBootBlocking = true;
+      gui.enable = true;
     };
 
     gnome = {
