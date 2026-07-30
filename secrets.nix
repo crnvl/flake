@@ -14,6 +14,7 @@ let
       "caelo-env"
       "chroma-smb"
       "radarr-api-key"
+      "decluttarr-env"
       "vaultwarden-env"
       "beat-env"
       "vaultwarden-borg-passphrase"

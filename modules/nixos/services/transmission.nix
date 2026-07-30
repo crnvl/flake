@@ -19,6 +19,7 @@ in
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
       incomplete-dir-enabled = true;
+      preallocation = 0; # "none" - avoid reserving full file size for undownloaded data
       umask = 2;
     };
   };
