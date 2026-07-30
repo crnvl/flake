@@ -39,7 +39,10 @@ in
       TZ = config.time.timeZone;
     };
     environmentFiles = [ config.age.secrets.decluttarr-env.path ];
-    volumes = [ "${configFile}:/app/config/config.yaml:ro" ];
+    volumes = [
+      "${configFile}:/app/config/config.yaml:ro"
+      "/mnt/chroma:/mnt/chroma:ro"
+    ];
   };
 
   virtualisation.podman.enable = true;
@@ -54,4 +57,6 @@ in
   # Join the wg netns so it can reach sonarr/radarr (and transmission,
   # for stalled-download data) over localhost, same as recyclarr does.
   my.vpn.confinedServices = [ "podman-decluttarr" ];
+
+  systemd.services.podman-decluttarr.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
 }
