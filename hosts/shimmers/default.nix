@@ -9,7 +9,10 @@
     ../../modules/nixos/services/nginx.nix
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/jellyfin.nix
+
     ../../modules/nixos/services/transmission.nix
+    ../../modules/nixos/services/qbittorrent.nix
+
     ../../modules/nixos/services/vpn.nix
     ../../modules/nixos/services/monero.nix
     ../../modules/nixos/services/vaultwarden.nix
