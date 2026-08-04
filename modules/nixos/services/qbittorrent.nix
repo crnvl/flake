@@ -1,12 +1,13 @@
-{ ... }:
+{ config, ... }:
 
+let
+  wgNamespace = config.vpnNamespaces."wg";
+in
 {
   services.qbittorrent = {
     enable = true;
     group = "media";
-    # 8080 ist von sabnzbd belegt
     webuiPort = 8081;
-    # transmission belegt den Default 51413 im selben netns
     torrentingPort = 51414;
     extraArgs = [ "--confirm-legal-notice" ];
 
@@ -14,21 +15,49 @@
       LegalNotice.Accepted = true;
 
       Preferences.WebUI = {
-        Address = "*";
+        Address = wgNamespace.namespaceAddress;
         Username = "aleph";
-        # via codeberg.org/feathecutie/qbittorrent_password erzeugen
-        Password_PBKDF2 = "@ByteArray(GedoRPUgb3IprDh9zDEW6Q==:Q+JzoEqbaTqEkEIznXVjgQFBfaCM7ERD7T2qMpcOclV+dY4FLwWNkUd+ShBG4F2gnEHy8recMdTRg5eWuwsNpw==)";
+        Password_PBKDF2 = ''"@ByteArray(GedoRPUgb3IprDh9zDEW6Q==:Q+JzoEqbaTqEkEIznXVjgQFBfaCM7ERD7T2qMpcOclV+dY4FLwWNkUd+ShBG4F2gnEHy8recMdTRg5eWuwsNpw==)"'';
       };
 
       BitTorrent.Session = {
         DefaultSavePath = "/var/lib/qBittorrent/downloads";
         TempPath = "/var/lib/qBittorrent/incomplete";
         TempPathEnabled = true;
-        # kein GlobalMaxRatio -> unbegrenzt seeden
         Preallocation = false;
+
+        GlobalMaxRatio = -1;
+        GlobalMaxSeedingMinutes = -1;
+        QueueingSystemEnabled = false;
+
+        ConnectionSpeed = 100;
+        MaxConnections = 2000;
+        MaxConnectionsPerTorrent = 300;
+        MaxUploads = 50;
+        MaxUploadsPerTorrent = 8;
+
+        PeerTurnover = 10;
+        PeerTurnoverCutoff = 90;
+        PeerTurnoverInterval = 300;
+
+        SendBufferWatermark = 10240;
+        SendBufferLowWatermark = 1024;
+        SendBufferWatermarkFactor = 200;
+        SocketBacklogSize = 100;
+
+        BTProtocol = "Both";
+        Encryption = 0;
+
+        DHTEnabled = false;
+        PeXEnabled = false;
+        LSDEnabled = false;
+
+        AnonymousModeEnabled = false;
       };
     };
   };
+
+  systemd.services.qbittorrent.serviceConfig.LimitNOFILE = 65536;
 
   my.vpn = {
     confinedServices = [ "qbittorrent" ];
@@ -40,6 +69,5 @@
     "d /var/lib/qBittorrent/incomplete 0755 qbittorrent media -"
   ];
 
-  # transmission.nix legt die Gruppe ebenfalls an; das Merge ist konfliktfrei
   users.groups.media = { };
 }
