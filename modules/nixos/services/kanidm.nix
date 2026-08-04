@@ -147,6 +147,15 @@
             "jellyfin_users"
           ];
         };
+
+        conny = {
+          displayName = "conny";
+          mailAddresses = [ "conny@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "vaultwarden_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
