@@ -220,4 +220,6 @@ in
   };
 
   my.vpn.confinedServices = [ "recyclarr" ];
+
+  environment.systemPackages = [ config.services.recyclarr.package ];
 }
