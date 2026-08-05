@@ -12,7 +12,7 @@ in
       rpc-whitelist-enabled = true;
       rpc-host-whitelist-enabled = false;
       rpc-whitelist = "127.0.0.1,${wgNamespace.bridgeAddress}";
-     
+
       ratio-limit = 2.0;
       ratio-limit-enabled = true;
       idle-seeding-limit = 20160;
@@ -25,7 +25,7 @@ in
 
       port-forwarding-enabled = false;
 
-      downloa90888888888888888889d-queue-size = 10;
+      download-queue-size = 10;
       download-queue-enabled = true;
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
