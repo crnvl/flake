@@ -48,8 +48,8 @@ in
         BTProtocol = "Both";
         Encryption = 0;
 
-        DHTEnabled = false;
-        PeXEnabled = false;
+        DHTEnabled = true;
+        PeXEnabled = true;
         LSDEnabled = false;
 
         AnonymousModeEnabled = false;
