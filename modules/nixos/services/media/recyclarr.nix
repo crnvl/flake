@@ -212,6 +212,10 @@ in
                 name = "Original Language";
                 score = 100;
               }
+              {
+                name = "Anime";
+                score = 10;
+              }
             ];
           }
           {
