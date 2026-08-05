@@ -121,11 +121,6 @@ in
         base_url = "http://localhost:8989";
         api_key._secret = config.age.secrets.sonarr-api-key.path;
 
-        include = [
-          { template = "sonarr-v4-quality-profile-anime"; }
-          { template = "sonarr-v4-custom-formats-anime"; }
-        ];
-
         quality_profiles = [
           {
             name = "German";
