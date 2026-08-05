@@ -12,9 +12,20 @@ in
       rpc-whitelist-enabled = true;
       rpc-host-whitelist-enabled = false;
       rpc-whitelist = "127.0.0.1,${wgNamespace.bridgeAddress}";
-      ratio-limit = 0;
+     
+      ratio-limit = 2.0;
       ratio-limit-enabled = true;
-      download-queue-size = 10;
+      idle-seeding-limit = 20160;
+      idle-seeding-limit-enabled = true;
+
+      seed-queue-enabled = false;
+
+      peer-limit-global = 1000;
+      peer-limit-per-torrent = 100;
+
+      port-forwarding-enabled = false;
+
+      downloa90888888888888888889d-queue-size = 10;
       download-queue-enabled = true;
       download-dir = "/var/lib/transmission/downloads";
       incomplete-dir = "/var/lib/transmission/incomplete";
