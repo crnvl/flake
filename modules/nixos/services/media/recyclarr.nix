@@ -156,7 +156,7 @@ in
               until_quality = "Bluray-1080p";
               until_score = 10000;
             };
-            qualities = hd1080; # überschreibt die Remux-Stufen des Guides
+            qualities = hd1080;
           }
         ];
 
