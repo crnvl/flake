@@ -28,7 +28,7 @@ in
 
         GlobalMaxRatio = 2.0;
         GlobalMaxRatioAction = 0;
-        GlobalMaxInactiveSeedingMinutes = 10080;
+        GlobalMaxInactiveSeedingMinutes = 20160;
         QueueingSystemEnabled = false;
 
         ConnectionSpeed = 100;
