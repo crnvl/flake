@@ -146,6 +146,18 @@ in
             };
             qualities = hd1080;
           }
+          {
+            trash_id = "20e0fc959f1f1704bed501f23bdae76f"; # [Anime] Remux-1080p
+            name = "Anime";
+            reset_unmatched_scores.enabled = true;
+            quality_sort = "top";
+            upgrade = {
+              allowed = true;
+              until_quality = "Bluray-1080p";
+              until_score = 10000;
+            };
+            qualities = hd1080;
+          }
         ];
 
         custom_formats = [
