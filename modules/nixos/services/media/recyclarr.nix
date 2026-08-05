@@ -36,33 +36,6 @@ in
 
         quality_profiles = [
           {
-            name = "German";
-            reset_unmatched_scores.enabled = true;
-            quality_sort = "top";
-            min_format_score = 0;
-            upgrade = {
-              allowed = true;
-              until_quality = "Bluray-1080p";
-              until_score = 11000;
-            };
-            qualities = hd1080;
-          }
-          {
-            name = "Original Language";
-            reset_unmatched_scores.enabled = true;
-            quality_sort = "top";
-            min_format_score = -1000;
-            upgrade = {
-              allowed = true;
-              until_quality = "Bluray-1080p";
-              until_score = 0;
-            };
-            qualities = hd1080;
-          }
-        ];
-
-        custom_formats = [
-          {
             trash_ids = [ "86bc3115eb4e9873ac96904a4a68e19e" ]; # German
             assign_scores_to = [
               {
@@ -71,7 +44,7 @@ in
               }
               {
                 name = "Original Language";
-                score = 0;
+                score = -200;
               }
             ];
           }
@@ -84,7 +57,7 @@ in
               }
               {
                 name = "Original Language";
-                score = 0;
+                score = -100;
               }
             ];
           }
@@ -97,7 +70,7 @@ in
               }
               {
                 name = "Original Language";
-                score = 0;
+                score = -100;
               }
             ];
           }
@@ -159,7 +132,6 @@ in
             qualities = hd1080;
           }
         ];
-
 
         custom_formats = [
           {
