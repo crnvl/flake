@@ -30,7 +30,7 @@ in
     enable = true;
     schedule = "daily";
     configuration = {
-      radarr.main = {
+      radarr.movies = {
         base_url = "http://localhost:7878";
         api_key._secret = config.age.secrets.radarr-api-key.path;
 
@@ -117,7 +117,7 @@ in
         ];
       };
 
-      sonarr.main = {
+      sonarr.tv = {
         base_url = "http://localhost:8989";
         api_key._secret = config.age.secrets.sonarr-api-key.path;
 
