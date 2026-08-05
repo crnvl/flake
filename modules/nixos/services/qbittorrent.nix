@@ -26,8 +26,9 @@ in
         TempPathEnabled = true;
         Preallocation = false;
 
-        GlobalMaxRatio = -1;
-        GlobalMaxSeedingMinutes = -1;
+        GlobalMaxRatio = 2.0;
+        GlobalMaxRatioAction = 0;
+        GlobalMaxInactiveSeedingMinutes = 10080;
         QueueingSystemEnabled = false;
 
         ConnectionSpeed = 100;
@@ -57,7 +58,10 @@ in
     };
   };
 
-  systemd.services.qbittorrent.serviceConfig.LimitNOFILE = 65536;
+  systemd.services.qbittorrent.serviceConfig = {
+    LimitNOFILE = 65536;
+    UMask = "0002";
+  };
 
   my.vpn = {
     confinedServices = [ "qbittorrent" ];
