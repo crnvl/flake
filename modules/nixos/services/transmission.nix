@@ -15,7 +15,7 @@ in
 
       ratio-limit = 2.0;
       ratio-limit-enabled = true;
-      idle-seeding-limit = 20160;
+      idle-seeding-limit = 10080;
       idle-seeding-limit-enabled = true;
 
       seed-queue-enabled = false;
