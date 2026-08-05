@@ -29,7 +29,10 @@ in
         GlobalMaxRatio = 2.0;
         GlobalMaxRatioAction = 0;
         GlobalMaxInactiveSeedingMinutes = 20160;
-        QueueingSystemEnabled = false;
+        QueueingSystemEnabled = true;
+        MaxActiveDownloads = 10;
+        MaxActiveUploads = -1;
+        MaxActiveTorrents = -1;
 
         ConnectionSpeed = 100;
         MaxConnections = 2000;
