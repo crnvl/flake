@@ -156,6 +156,14 @@
             "vaultwarden_users"
           ];
         };
+
+        blu = {
+          displayName = "blu";
+          mailAddresses = [ "blu@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
