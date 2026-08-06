@@ -1,17 +1,21 @@
-{ lib, pkgs, mkProxyHost, ... }:
+{ pkgs, mkProxyHost, ... }:
 
 let
   ssoConfig = "/var/lib/jellyfin/plugins/configurations/SSO-Auth.xml";
 
+  liveTvGroup = "jellyfin_users@id.shimme.rs";
+
+  cfg = "//*[Roles/string='${liveTvGroup}']";
+
   ssoLiveTvRbac = pkgs.writeShellScript "jellyfin-sso-livetv-rbac" ''
     set -eu
     [ -e ${ssoConfig} ] || exit 0
-    ${lib.getExe pkgs.xmlstarlet} ed -L \
-      -d '//LiveTvRoles' \
-      -u '//EnableLiveTvRoles' -v true \
-      -u '//EnableLiveTv' -v false \
-      -s '//EnableLiveTvRoles/..' -t elem -n LiveTvRoles -v "" \
-      -s '//LiveTvRoles' -t elem -n string -v livetv \
+    ${pkgs.xmlstarlet}/bin/xmlstarlet ed -L \
+      -d "${cfg}/LiveTvRoles" \
+      -u "${cfg}/EnableLiveTvRoles" -v true \
+      -u "${cfg}/EnableLiveTv" -v false \
+      -s "${cfg}" -t elem -n LiveTvRoles -v "" \
+      -s "${cfg}/LiveTvRoles" -t elem -n string -v '${liveTvGroup}' \
       ${ssoConfig}
   '';
 in

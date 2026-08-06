@@ -189,10 +189,7 @@
 
           claimMaps.jellyfin_role = {
             joinType = "array";
-            valuesByGroup = {
-              jellyfin_admins = [ "admin" ];
-              jellyfin_users = [ "livetv" ];
-            };
+            valuesByGroup.jellyfin_admins = [ "admin" ];
           };
         };
 
