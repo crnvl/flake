@@ -57,7 +57,7 @@ in
               until_quality = "Bluray-2160p";
               until_score = 11000;
             };
-            qualities = uhd2160;
+            qualities = hd1080;
           }
           {
             name = "Original Language";
@@ -69,7 +69,7 @@ in
               until_quality = "Bluray-2160p";
               until_score = 0;
             };
-            qualities = uhd2160;
+            qualities = hd1080;
           }
         ];
 
