@@ -26,10 +26,10 @@ in
         TempPathEnabled = true;
         Preallocation = false;
 
-        GlobalMaxRatio = 1.0;
-        GlobalMaxSeedingMinutes = 4320; # 3 Tage aktives Seeding
-        GlobalMaxInactiveSeedingMinutes = 1440; # 1 Tag ohne Aktivität
-        GlobalMaxRatioAction = 3; # Torrent + Dateien entfernen
+        GlobalMaxRatio = 2.0;
+        GlobalMaxSeedingMinutes = 20160;
+        GlobalMaxInactiveSeedingMinutes = 4320;
+        GlobalMaxRatioAction = 3;
 
         QueueingSystemEnabled = true;
         MaxActiveDownloads = 5;
