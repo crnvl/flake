@@ -156,15 +156,6 @@
             "vaultwarden_users"
           ];
         };
-
-        sample = {
-          displayName = "sample";
-          mailAddresses = [ "sample@shimme.rs" ];
-          groups = [
-            "jellyfin_users"
-            "vaultwarden_users"
-          ];
-        };
       };
 
       systems.oauth2 = {
