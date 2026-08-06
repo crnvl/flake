@@ -54,7 +54,7 @@ in
             min_format_score = 0;
             upgrade = {
               allowed = true;
-              until_quality = "Bluray-2160p";
+              until_quality = "Bluray-1080p";
               until_score = 11000;
             };
             qualities = hd1080;
@@ -66,7 +66,7 @@ in
             min_format_score = -1000;
             upgrade = {
               allowed = true;
-              until_quality = "Bluray-2160p";
+              until_quality = "Bluray-1080p";
               until_score = 0;
             };
             qualities = hd1080;
