@@ -13,9 +13,9 @@ in
       rpc-host-whitelist-enabled = false;
       rpc-whitelist = "127.0.0.1,${wgNamespace.bridgeAddress}";
 
-      ratio-limit = 2.0;
+      ratio-limit = 1.0;
       ratio-limit-enabled = true;
-      idle-seeding-limit = 10080;
+      idle-seeding-limit = 1440;
       idle-seeding-limit-enabled = true;
 
       seed-queue-enabled = false;

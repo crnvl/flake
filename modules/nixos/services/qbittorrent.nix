@@ -21,16 +21,18 @@ in
       };
 
       BitTorrent.Session = {
-        DefaultSavePath = "/var/lib/qBittorrent/downloads";
+        DefaultSavePath = "/mnt/chroma/downloads";
         TempPath = "/var/lib/qBittorrent/incomplete";
         TempPathEnabled = true;
         Preallocation = false;
 
-        GlobalMaxRatio = 2.0;
-        GlobalMaxRatioAction = 0;
-        GlobalMaxInactiveSeedingMinutes = 20160;
+        GlobalMaxRatio = 1.0;
+        GlobalMaxSeedingMinutes = 4320; # 3 Tage aktives Seeding
+        GlobalMaxInactiveSeedingMinutes = 1440; # 1 Tag ohne Aktivität
+        GlobalMaxRatioAction = 3; # Torrent + Dateien entfernen
+
         QueueingSystemEnabled = true;
-        MaxActiveDownloads = 10;
+        MaxActiveDownloads = 5;
         MaxActiveUploads = -1;
         MaxActiveTorrents = -1;
 
@@ -61,9 +63,12 @@ in
     };
   };
 
-  systemd.services.qbittorrent.serviceConfig = {
-    LimitNOFILE = 65536;
-    UMask = "0002";
+  systemd.services.qbittorrent = {
+    serviceConfig = {
+      LimitNOFILE = 65536;
+      UMask = "0002";
+    };
+    unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
   };
 
   my.vpn = {
@@ -72,9 +77,6 @@ in
   };
 
   systemd.tmpfiles.rules = [
-    "d /var/lib/qBittorrent/downloads 0775 qbittorrent media -"
     "d /var/lib/qBittorrent/incomplete 0755 qbittorrent media -"
   ];
-
-  users.groups.media = { };
 }
