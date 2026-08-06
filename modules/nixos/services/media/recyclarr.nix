@@ -19,6 +19,18 @@ let
       ];
     }
   ];
+
+  uhd2160 = [
+     { name = "Bluray-2160p"; }
+     {
+       name = "WEB 2160p";
+       qualities = [
+         "WEBDL-2160p"
+         "WEBRip-2160p"
+       ];
+     }
+   ]
+   ++ hd1080;
 in
 {
   age.secrets = {
@@ -42,10 +54,10 @@ in
             min_format_score = 0;
             upgrade = {
               allowed = true;
-              until_quality = "Bluray-1080p";
+              until_quality = "Bluray-2160p";
               until_score = 11000;
             };
-            qualities = hd1080;
+            qualities = uhd2160;
           }
           {
             name = "Original Language";
@@ -54,10 +66,10 @@ in
             min_format_score = -1000;
             upgrade = {
               allowed = true;
-              until_quality = "Bluray-1080p";
+              until_quality = "Bluray-2160p";
               until_score = 0;
             };
-            qualities = hd1080;
+            qualities = uhd2160;
           }
         ];
 
