@@ -118,7 +118,8 @@ let
       chmod 0644 "$target" 2>/dev/null || true
 
       # Exactly one video in here, ever.
-      find "$dir" -mindepth 1 -maxdepth 1 -type f ! -name "${cfg.filename}" -delete
+      find "$dir" -mindepth 1 -maxdepth 1 -type f \
+        ! -name "${cfg.filename}" ! -name '*.nfo' -delete
 
       jq -n \
         --arg id "$id" \
