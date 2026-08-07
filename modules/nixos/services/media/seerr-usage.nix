@@ -180,12 +180,14 @@ let
     runtimeInputs = with pkgs; [
       coreutils
       curl
+      iproute2
       jq
     ];
     text = ''
       seerr_url=${lib.escapeShellArg cfg.seerrUrl}
       radarr_url=${lib.escapeShellArg cfg.radarrUrl}
       sonarr_url=${lib.escapeShellArg cfg.sonarrUrl}
+      arr_ns=${lib.escapeShellArg (if cfg.arrNamespace == null then "" else cfg.arrNamespace)}
       settings=${lib.escapeShellArg (toString cfg.settingsFile)}
       radarr_key_file=${lib.escapeShellArg (toString cfg.radarrKeyFile)}
       sonarr_key_file=${lib.escapeShellArg (toString cfg.sonarrKeyFile)}
@@ -242,14 +244,34 @@ let
       radarr_key="$(read_key "$radarr_key_file" radarr)"
       sonarr_key="$(read_key "$sonarr_key_file" sonarr)"
 
-      tmp="$(mktemp -d)"
-      trap 'rm -rf "$tmp"' EXIT
+      # radarr and sonarr are confined to the vpn namespace. Its port mappings
+      # are PREROUTING DNAT rules, which locally generated packets never
+      # traverse, so those ports answer the LAN but not this host's loopback.
+      # Ask from inside the namespace instead, like recyclarr and decluttarr do.
+      if [ -n "$arr_ns" ] && [ ! -e "/run/netns/$arr_ns" ]; then
+        echo "seerr-usage: no $arr_ns namespace, trying the host network instead" >&2
+        arr_ns=""
+      fi
+
+      curl_opts=(
+        --fail --silent --show-error --location --max-time 120
+        --retry 2 --retry-delay 2 --retry-all-errors
+      )
 
       get() {
-        curl --fail --silent --show-error --location --max-time 120 \
-          --retry 2 --retry-delay 2 --retry-all-errors \
-          --header "X-Api-Key: $2" "$1"
+        curl "''${curl_opts[@]}" --header "X-Api-Key: $2" "$1"
       }
+
+      arr_get() {
+        if [ -n "$arr_ns" ]; then
+          ip netns exec "$arr_ns" curl "''${curl_opts[@]}" --header "X-Api-Key: $2" "$1"
+        else
+          curl "''${curl_opts[@]}" --header "X-Api-Key: $2" "$1"
+        fi
+      }
+
+      tmp="$(mktemp -d)"
+      trap 'rm -rf "$tmp"' EXIT
 
       # The request list is paginated and there is no "give me everything"
       # switch, so walk it until a short page comes back.
@@ -270,43 +292,48 @@ let
       done
       jq -s '.' "$tmp/requests.jsonl" > "$tmp/requests.json"
 
-      if movies="$(get "$radarr_url/api/v3/movie" "$radarr_key")"; then
+      if movies="$(arr_get "$radarr_url/api/v3/movie" "$radarr_key")"; then
         printf '%s' "$movies" > "$tmp/movies.json"
       else
         echo "seerr-usage: radarr unreachable at $radarr_url, movies will show as 0 bytes" >&2
         echo '[]' > "$tmp/movies.json"
       fi
 
-      if series="$(get "$sonarr_url/api/v3/series" "$sonarr_key")"; then
+      sonarr_ok=true
+      if series="$(arr_get "$sonarr_url/api/v3/series" "$sonarr_key")"; then
         printf '%s' "$series" > "$tmp/series.json"
       else
+        sonarr_ok=false
         echo "seerr-usage: sonarr unreachable at $sonarr_url, series will show as 0 bytes" >&2
         echo '[]' > "$tmp/series.json"
       fi
 
       # Per-season sizes need the episode file list, and sonarr only hands that
-      # out one series at a time, so ask for the ones that were requested.
-      jq -r '
-        [ .[]
-          | select(((.type // .media.mediaType) // "") == "tv")
-          | (if (.is4k // false) then .media.externalServiceId4k else .media.externalServiceId end)
-          | select(. != null)
-        ] | unique | .[]
-      ' "$tmp/requests.json" > "$tmp/series-ids"
-
+      # out one series at a time, so ask for the ones that were requested. The
+      # whole loop is skipped when sonarr is down, rather than failing per id.
       : > "$tmp/files.jsonl"
-      while read -r sid; do
-        if [ -z "$sid" ]; then
-          continue
-        fi
-        if files="$(get "$sonarr_url/api/v3/episodefile?seriesId=$sid" "$sonarr_key")"; then
-          jq -c --arg id "$sid" \
-            '{ key: $id, value: [ .[] | { seasonNumber: (.seasonNumber // 0), size: (.size // 0) } ] }' \
-            <<< "$files" >> "$tmp/files.jsonl"
-        else
-          echo "seerr-usage: sonarr has no episode files for series $sid" >&2
-        fi
-      done < "$tmp/series-ids"
+      if [ "$sonarr_ok" = true ]; then
+        jq -r '
+          [ .[]
+            | select(((.type // .media.mediaType) // "") == "tv")
+            | (if (.is4k // false) then .media.externalServiceId4k else .media.externalServiceId end)
+            | select(. != null)
+          ] | unique | .[]
+        ' "$tmp/requests.json" > "$tmp/series-ids"
+
+        while read -r sid; do
+          if [ -z "$sid" ]; then
+            continue
+          fi
+          if files="$(arr_get "$sonarr_url/api/v3/episodefile?seriesId=$sid" "$sonarr_key")"; then
+            jq -c --arg id "$sid" \
+              '{ key: $id, value: [ .[] | { seasonNumber: (.seasonNumber // 0), size: (.size // 0) } ] }' \
+              <<< "$files" >> "$tmp/files.jsonl"
+          else
+            echo "seerr-usage: sonarr has no episode files for series $sid" >&2
+          fi
+        done < "$tmp/series-ids"
+      fi
       jq -s 'from_entries' "$tmp/files.jsonl" > "$tmp/files.json"
 
       report="$(jq -n \
@@ -349,6 +376,18 @@ in
       type = lib.types.str;
       default = "http://localhost:8989";
       description = "Base URL of sonarr, used for per-season sizes on disk.";
+    };
+
+    arrNamespace = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = "wg";
+      description = ''
+        Network namespace to run the radarr and sonarr queries in. Their port
+        mappings out of the VPN namespace are PREROUTING DNAT rules, which
+        host-local traffic never traverses, so the APIs have to be reached from
+        inside. Set to null to query them over the host network instead, in
+        which case the URLs above should point somewhere actually reachable.
+      '';
     };
 
     settingsFile = lib.mkOption {
