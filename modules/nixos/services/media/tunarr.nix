@@ -12,6 +12,7 @@
     };
     volumes = [
       "/var/lib/tunarr:/config/tunarr"
+      "/etc/localtime:/etc/localtime:ro"
       "/mnt/chroma:/mnt/chroma:ro"
     ];
   };
