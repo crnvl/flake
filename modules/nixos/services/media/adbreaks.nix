@@ -295,7 +295,7 @@ in
       };
 
       loudness = lib.mkOption {
-        type = lib.types.int;
+        type = lib.types.numbers.between (-70) (-5);
         default = -18;
         description = ''
           Integrated loudness target in LUFS. Broadcast is -23, streaming
@@ -305,7 +305,7 @@ in
       };
 
       truePeak = lib.mkOption {
-        type = lib.types.numbers.nonpositive;
+        type = lib.types.numbers.between (-9) 0;
         default = -1.5;
         description = "True peak ceiling in dBTP.";
       };
