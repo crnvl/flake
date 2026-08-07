@@ -8,6 +8,7 @@
 let
   cfg = config.my.adbreaks;
   norm = cfg.normalize;
+  sleepFor = cfg.sleepInterval;
 
   # dir<TAB>archive<TAB>url per line, fed to the loop below on fd 3 so that
   # yt-dlp and ffmpeg cannot eat the iteration list off stdin. The archive
@@ -24,6 +25,10 @@ let
     "--match-filter " + lib.escapeShellArg "duration < ${toString cfg.maxDurationSeconds}"
   );
 
+  extractorFlags = lib.concatMapStringsSep "\n          " (
+    a: "--extractor-args ${lib.escapeShellArg a}"
+  ) cfg.extractorArgs;
+
   fetchScript = pkgs.writeShellApplication {
     name = "adbreaks-fetch";
     runtimeInputs = with pkgs; [
@@ -31,6 +36,7 @@ let
       yt-dlp
       ffmpeg-headless
       findutils
+      gnugrep
       gnused
       jq
     ];
@@ -38,9 +44,23 @@ let
       dir="${cfg.directory}"
       state="''${STATE_DIRECTORY:-/var/lib/adbreaks}"
       normalize_enabled=${lib.boolToString norm.enable}
+      budget=${toString cfg.budgetPerRun}
       failures=0
+      blocked=0
 
       loudnorm_base="I=${toString norm.loudness}:TP=${toString norm.truePeak}:LRA=${toString norm.loudnessRange}"
+
+      ${lib.optionalString (cfg.cookieFile != null) ''
+        # yt-dlp rewrites the jar as the session refreshes, so it needs a
+        # writable copy. Only re-seed when the source is newer, otherwise a
+        # refreshed session would be discarded on every single run.
+        src_cookies=${lib.escapeShellArg (toString cfg.cookieFile)}
+        live_cookies="$state/cookies.txt"
+        if [ ! -f "$live_cookies" ] || [ "$src_cookies" -nt "$live_cookies" ]; then
+          install -m 0600 "$src_cookies" "$live_cookies"
+          echo "seeded cookie jar from $src_cookies"
+        fi
+      ''}
 
       # Re-encode to one fixed video and loudness profile, so that clips
       # pulled from thirty different uploads do not change resolution,
@@ -92,17 +112,25 @@ let
       while IFS=$'\t' read -r name archive_name url <&3; do
         [ -n "$name" ] || continue
 
+        if [ "$budget" -le 0 ]; then
+          echo "download budget for this run is spent, the rest waits for the next timer"
+          break
+        fi
+
         out="$dir/$name"
         work="$dir/.staging/$name"
         archive="$state/$archive_name.archive"
+        log="$work/yt-dlp.log"
+        rc_file="$work/rc"
 
         rm -rf "$work"
         mkdir -p "$out" "$work"
 
-        echo "== $name"
+        echo "== $name (budget: $budget)"
 
-        # The archive is what makes this incremental: anything already
-        # fetched is skipped, so a rerun only pulls newly added clips.
+        # The archive is what makes this incremental and resumable: entries
+        # already fetched are skipped straight from the playlist listing,
+        # without touching the video page, so a rerun is cheap.
         args=(
           --ignore-config
           --download-archive "$archive"
@@ -116,25 +144,42 @@ let
           --no-progress
           --no-overwrites
           --ignore-errors
+          --max-downloads "$budget"
           --retries 5
+          --extractor-retries 3
+          --retry-sleep 'extractor:exp=5:120'
+          --retry-sleep 'http:exp=5:120'
           --sleep-requests ${toString cfg.sleepRequests}
+          --sleep-interval ${toString sleepFor.min}
+          --max-sleep-interval ${toString sleepFor.max}
           ${matchFilter}
+          ${extractorFlags}
         )
         ${lib.optionalString (cfg.cookieFile != null) ''
-          args+=( --cookies ${lib.escapeShellArg (toString cfg.cookieFile)} )
+          args+=( --cookies "$live_cookies" )
         ''}
 
-        rc=0
-        yt-dlp "''${args[@]}" -- "$url" || rc=$?
-        if [ "$rc" -ne 0 ]; then
-          echo "warning: yt-dlp exited $rc for $name" >&2
-          failures=$(( failures + 1 ))
-        fi
+        # errexit off in the subshell, otherwise a yt-dlp failure would kill
+        # it before the exit code is recorded.
+        ( set +e; yt-dlp "''${args[@]}" -- "$url"; echo "$?" > "$rc_file" ) 2>&1 | tee "$log"
+        rc="$(cat "$rc_file")"
+
+        case "$rc" in
+          0) ;;
+          101) echo "$name: reached the per-run download limit" ;;
+          *)
+            echo "warning: yt-dlp exited $rc for $name" >&2
+            failures=$(( failures + 1 ))
+            ;;
+        esac
 
         added=0
         shopt -s nullglob
         for src in "$work"/*; do
           [ -f "$src" ] || continue
+          case "$src" in
+            "$log" | "$rc_file") continue ;;
+          esac
           base="$(basename "$src")"
 
           if [ "$normalize_enabled" = true ]; then
@@ -155,8 +200,17 @@ let
         done
         shopt -u nullglob
 
-        total="$(find "$out" -type f -name '*.mp4' | wc -l)"
-        echo "$name: $added new, $total total"
+        budget=$(( budget - added ))
+        echo "$name: $added new, $(find "$out" -type f -name '*.mp4' | wc -l) total"
+
+        # Once YouTube starts refusing, every further request deepens the
+        # block. Back off immediately and let the next timer try again.
+        refusals="$(grep -c -e 'Sign in to confirm' -e 'HTTP Error 429' "$log" || true)"
+        if [ "''${refusals:-0}" -ge ${toString cfg.blockThreshold} ]; then
+          echo "youtube refused $refusals times, backing off for this run" >&2
+          blocked=1
+          break
+        fi
       done 3<<'PLAYLISTS'
       ${playlistTable}
       PLAYLISTS
@@ -164,6 +218,11 @@ let
       rm -rf "$dir/.staging"
 
       echo "library: $(find "$dir" -type f -name '*.mp4' | wc -l) clips, $(du -sh "$dir" | cut -f1)"
+
+      if [ "$blocked" -eq 1 ]; then
+        echo "stopped early on rate limiting; the archive resumes from here next run"
+        exit 0
+      fi
 
       if [ "$failures" -gt 0 ]; then
         echo "$failures playlist(s) reported errors" >&2
@@ -211,6 +270,26 @@ in
       };
     };
 
+    budgetPerRun = lib.mkOption {
+      type = lib.types.ints.positive;
+      default = 50;
+      description = ''
+        Maximum clips to download across all playlists in one run. This is
+        the setting that keeps YouTube from blocking the host: the library
+        fills as a trickle over days rather than one long scrape. The
+        download archive makes every run resume where the last one stopped.
+      '';
+    };
+
+    blockThreshold = lib.mkOption {
+      type = lib.types.ints.positive;
+      default = 3;
+      description = ''
+        Abandon the run after this many bot checks or 429s in one playlist.
+        Continuing past a refusal only extends the block.
+      '';
+    };
+
     format = lib.mkOption {
       type = lib.types.str;
       default = "bv*[height<=1080][vcodec^=avc1]+ba[acodec^=mp4a]/bv*[height<=1080][vcodec^=avc1]+ba/bv*[height<=1080]+ba/b";
@@ -228,11 +307,35 @@ in
 
     sleepRequests = lib.mkOption {
       type = lib.types.numbers.nonnegative;
-      default = 1;
+      default = 1.5;
+      description = "Seconds to wait between metadata requests.";
+    };
+
+    sleepInterval = {
+      min = lib.mkOption {
+        type = lib.types.numbers.nonnegative;
+        default = 5;
+        description = "Lower bound of the randomised pause between downloads.";
+      };
+      max = lib.mkOption {
+        type = lib.types.numbers.nonnegative;
+        default = 20;
+        description = ''
+          Upper bound of the randomised pause between downloads. A varying
+          gap draws less attention than a metronomic one.
+        '';
+      };
+    };
+
+    extractorArgs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "youtube:player_client=default,tv_simply" ];
       description = ''
-        Seconds to wait between metadata requests. The first sync walks
-        several thousand videos, which is exactly the traffic pattern that
-        earns a temporary block.
+        Passed through as --extractor-args. Useful for steering yt-dlp at
+        player clients that are currently less aggressively challenged.
+        Deliberately empty by default, because which clients work changes
+        often enough that a baked-in value would rot.
       '';
     };
 
@@ -241,14 +344,18 @@ in
       default = null;
       description = ''
         Netscape cookie jar, for when YouTube demands sign-in. Point this at
-        an agenix secret rather than a plain file.
+        an agenix secret; it is copied to a writable location, since yt-dlp
+        rewrites the jar as the session refreshes.
       '';
     };
 
     schedule = lib.mkOption {
       type = lib.types.str;
-      default = "Sun *-*-* 04:00:00";
-      description = "OnCalendar expression, in local time.";
+      default = "*-*-* 00/3:17:00";
+      description = ''
+        OnCalendar expression, in local time. Runs often and takes a little
+        each time, rather than rarely and everything at once.
+      '';
     };
 
     normalize = {
@@ -295,7 +402,7 @@ in
       };
 
       loudness = lib.mkOption {
-        type = lib.types.numbers.between (-70) (-5);
+        type = lib.types.int;
         default = -18;
         description = ''
           Integrated loudness target in LUFS. Broadcast is -23, streaming
@@ -347,9 +454,7 @@ in
         ];
         ReadWritePaths = [ cfg.directory ];
         UMask = "0022";
-        # The first sync walks fifteen playlists and re-encodes everything
-        # it finds, which is an afternoon of work, not a minute.
-        TimeoutStartSec = "12h";
+        TimeoutStartSec = "2h";
         Nice = 15;
         CPUSchedulingPolicy = "batch";
         IOSchedulingClass = "idle";
@@ -380,7 +485,7 @@ in
       timerConfig = {
         OnCalendar = cfg.schedule;
         Persistent = true;
-        RandomizedDelaySec = "30m";
+        RandomizedDelaySec = "20m";
         AccuracySec = "5m";
       };
     };
