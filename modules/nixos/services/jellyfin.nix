@@ -27,7 +27,10 @@ in
 
   users.users.jellyfin.extraGroups = [ "media" ];
 
-  systemd.services.jellyfin.serviceConfig.ExecStartPre = [ "${ssoLiveTvRbac}" ];
+  systemd.services.jellyfin = {
+    serviceConfig.ExecStartPre = [ "${ssoLiveTvRbac}" ];
+    environment.TZ = "Europe/Berlin";
+  };
 
   services.nginx.virtualHosts."jellyfin.shimme.rs" = mkProxyHost {
     port = 8096;
