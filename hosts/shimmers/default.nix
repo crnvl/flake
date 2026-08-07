@@ -23,6 +23,7 @@
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
     ../../modules/nixos/services/media/seerr.nix
+    ../../modules/nixos/services/media/seerr-usage.nix
     ../../modules/nixos/services/media/byparr.nix
     ../../modules/nixos/services/media/recyclarr.nix
     ../../modules/nixos/services/media/tunarr.nix
