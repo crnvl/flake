@@ -2,9 +2,10 @@
 
 {
   imports = [
+    ./battery.nix
     ./firefox.nix
     ./niri.nix
-    ./waybar.nix
+    ./quickshell.nix
   ];
 
   xdg.enable = true;

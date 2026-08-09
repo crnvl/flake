@@ -47,7 +47,9 @@ in
 
   programs.niri.settings = {
     layout = {
-      gaps = 8;
+      # Tight gaps: TUIs are dense, and windows should read as adjacent
+      # panes rather than floating cards.
+      gaps = 4;
       center-focused-column = "never";
 
       preset-column-widths = [
@@ -60,31 +62,42 @@ in
         proportion = 0.5;
       };
 
-      focus-ring = {
-        width = 4;
-        active.color = "#7fc8ff";
-        inactive.color = "#505050";
+      # Every window gets a frame, like panes in tmux or Midnight Commander,
+      # and the focused one brightens. This uses `border` rather than
+      # `focus-ring` on purpose: focus-ring only draws around the *active*
+      # window, so unfocused windows would have no frame at all -- which is
+      # not how a pane-based TUI looks.
+      focus-ring.enable = false;
+
+      border = {
+        enable = true;
+        width = 2;
+        active.color = "#c9c9c9"; # Theme.fg
+        inactive.color = "#3a3a3a"; # below Theme.dim so it recedes
+        urgent.color = "#f4f4f4"; # Theme.bright
       };
 
-      border.enable = false;
+      # Soft blurred drop shadows are the least terminal-like thing there is.
+      shadow.enable = false;
 
-      shadow = {
-        enable = true;
-        softness = 30;
-        spread = 5;
-        offset = {
-          x = 0;
-          y = 5;
-        };
-        color = "#0007";
+      insert-hint.display.color = "#c9c9c9";
+
+      tab-indicator = {
+        gap = 2;
+        width = 4;
+        position = "left";
+        active.color = "#c9c9c9";
+        inactive.color = "#3a3a3a";
       };
     };
+
+    overview.backdrop-color = "#0b0b0b";
 
     prefer-no-csd = true;
 
     spawn-at-startup = [
       { argv = [ "xwayland-satellite" ]; }
-      { argv = [ "waybar" ]; }
+      { argv = [ "quickshell" "-c" "tui" ]; }
       { argv = [ "awww-daemon" ]; }
       {
         argv = [
@@ -120,18 +133,19 @@ in
         action.spawn = [ "fuzzel" ];
       };
 
-      # audio
+      # audio -- the wrapper scripts are gone; Quickshell's OSD provides the
+      # visual feedback that waybar's notification ticker used to.
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
-        action.spawn-sh = "volume-notify up";
+        action.spawn-sh = "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
       };
       "XF86AudioLowerVolume" = {
         allow-when-locked = true;
-        action.spawn-sh = "volume-notify down";
+        action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
       };
       "XF86AudioMute" = {
         allow-when-locked = true;
-        action.spawn-sh = "volume-notify mute";
+        action.spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
       };
       "XF86AudioMicMute" = {
         allow-when-locked = true;
@@ -159,11 +173,11 @@ in
       # brightness
       "XF86MonBrightnessUp" = {
         allow-when-locked = true;
-        action.spawn-sh = "brightness-notify up";
+        action.spawn-sh = "brightnessctl --class=backlight set 10%+";
       };
       "XF86MonBrightnessDown" = {
         allow-when-locked = true;
-        action.spawn-sh = "brightness-notify down";
+        action.spawn-sh = "brightnessctl --class=backlight set 10%-";
       };
 
       # general
