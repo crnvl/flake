@@ -164,6 +164,14 @@
             "jellyfin_users"
           ];
         };
+
+        nobelboje = {
+          displayName = "nobelboje";
+          mailAddresses = [ "nobelboje@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
