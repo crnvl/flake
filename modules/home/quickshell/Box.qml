@@ -18,6 +18,9 @@ Item {
     property int rowCount: 3
     property bool doubled: false   // ╔═╗ instead of ┌─┐
     property color frameColor: Theme.dim
+    // Box drawing only paints the border glyphs, so without an explicit fill
+    // the panel is transparent and whatever is underneath shows through.
+    property color backgroundColor: Theme.bg
 
     default property alias content: inner.data
 
@@ -57,6 +60,11 @@ Item {
 
     implicitWidth: Theme.cell * root.cols
     implicitHeight: Theme.row * (root.rowCount + 2)
+
+    Rectangle {
+        anchors.fill: parent
+        color: root.backgroundColor
+    }
 
     Txt {
         anchors.fill: parent

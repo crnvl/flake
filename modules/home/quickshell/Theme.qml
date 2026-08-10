@@ -41,6 +41,10 @@ Singleton {
     // Vertical padding above/below the content row, in pixels.
     readonly property int padY: 4
 
+    // Single source of truth for the bar's height, so popups can position
+    // themselves directly beneath it.
+    readonly property int barHeight: root.row + root.padY * 2 + 1
+
     function cols(n) {
         return Math.round(n * root.cell);
     }
@@ -70,5 +74,45 @@ Singleton {
         if (s.length >= n)
             return root.clamp(s, n);
         return " ".repeat(n - s.length) + s;
+    }
+
+    // Greedy word wrap to a fixed column count, hard-breaking any word too
+    // long to ever fit. Returns an array of lines, none exceeding `cols`.
+    // Text on a character grid has to be wrapped by us -- letting Text do it
+    // would break cell alignment.
+    function wrap(text, cols) {
+        if (!text || cols <= 0)
+            return [];
+
+        const words = text.split(/\s+/).filter(function (w) {
+            return w.length > 0;
+        });
+
+        let lines = [];
+        let cur = "";
+        for (let i = 0; i < words.length; i++) {
+            const w = words[i];
+            if (cur.length === 0)
+                cur = w;
+            else if (cur.length + 1 + w.length <= cols)
+                cur += " " + w;
+            else {
+                lines.push(cur);
+                cur = w;
+            }
+        }
+        if (cur.length > 0)
+            lines.push(cur);
+
+        let out = [];
+        for (let j = 0; j < lines.length; j++) {
+            const l = lines[j];
+            if (l.length <= cols)
+                out.push(l);
+            else
+                for (let k = 0; k < l.length; k += cols)
+                    out.push(l.slice(k, k + cols));
+        }
+        return out;
     }
 }

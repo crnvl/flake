@@ -9,6 +9,15 @@ ShellRoot {
         Bar {}
     }
 
-    // Single OSD, on the default screen.
-    Osd {}
+    Variants {
+        model: Quickshell.screens
+
+        Desktop {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        NotifPopups {}
+    }
 }

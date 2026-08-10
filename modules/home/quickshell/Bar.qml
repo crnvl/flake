@@ -17,7 +17,7 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: Theme.row + Theme.padY * 2 + 1
+    implicitHeight: Theme.barHeight
 
     // Pipewire nodes are unbound by default; binding the sink is what makes
     // volume/mute readable.
@@ -35,7 +35,7 @@ PanelWindow {
     readonly property real volume: bar.sink && bar.sink.audio ? bar.sink.audio.volume : 0
     readonly property bool muted: bar.sink && bar.sink.audio ? bar.sink.audio.muted : false
 
-    readonly property bool anyFlag: Status.recording || Status.flakeDirty || Status.backupRunning || Status.checkFailed
+    readonly property bool anyFlag: Status.recording || Status.backupRunning || Status.checkFailed
 
     // ── Left: workspaces, then the focused window ────────────────────────
     Row {
@@ -102,11 +102,6 @@ PanelWindow {
         }
 
         Seg {
-            text: "GIT"
-            visible: Status.flakeDirty
-        }
-
-        Seg {
             text: "BAK"
             visible: Status.backupRunning
         }
@@ -137,13 +132,19 @@ PanelWindow {
             muted: !Network.connected
         }
 
-        Meter {
-            value: Network.strength / 100
-            cells: 4
-            visible: Network.wifi
+        Sep {}
+
+        Seg {
+            // Pending notification count. Reverse video so it reads as an
+            // alert without needing colour; hidden entirely when zero.
+            visible: Notifications.count > 0
+            text: "[" + Notifications.count + "]"
+            reverse: true
         }
 
-        Sep {}
+        Sep {
+            visible: Notifications.count > 0
+        }
 
         Seg {
             text: "CPU"
