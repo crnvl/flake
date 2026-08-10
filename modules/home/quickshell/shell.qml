@@ -20,4 +20,8 @@ ShellRoot {
 
         NotifPopups {}
     }
+
+    // Single instance rather than one per screen: Osd has no screen binding,
+    // and a volume popup mirrored onto every monitor would be noise.
+    Osd {}
 }

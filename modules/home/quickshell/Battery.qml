@@ -8,9 +8,8 @@ import QtQuick
 //
 // Quickshell ships a proper UPower service (Quickshell.Services.UPower) with
 // richer data -- charge rate, time-to-empty, health -- but it needs the
-// UPower daemon, which this system doesn't run. Your current waybar setup
-// reads sysfs directly too, so this keeps the config working with no
-// system-level changes.
+// UPower daemon, which this system doesn't run. The old waybar setup read
+// sysfs directly too, so this keeps working with no system-level changes.
 //
 // If you'd rather have the richer data, set `services.upower.enable = true;`
 // in modules/nixos/desktop.nix and swap this singleton for UPower.

@@ -6,8 +6,13 @@
 # notification it fires used to be rendered by waybar's notification ticker.
 # It has nothing to do with the bar, so it stands on its own now.
 #
-# Note this still uses notify-send, so the warning lands in swaync. Once
-# Quickshell owns the notification daemon this can become a plain OSD.
+# The notify-send call lands in Quickshell's notification daemon
+# (modules/home/quickshell/Notifications.qml). `-u critical` is what makes it
+# render with the double-line frame and skip the expiry timeout -- in a
+# monochrome palette that framing is the only way urgency can show itself.
+#
+# The x-canonical-private-synchronous hint collapses repeat warnings into one
+# notification rather than stacking 25/10/5 on top of each other.
 let
   batteryMonitor = pkgs.writeShellScript "battery-monitor" ''
     export PATH=${

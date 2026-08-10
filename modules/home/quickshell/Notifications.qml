@@ -6,13 +6,17 @@ import QtQuick
 
 // The notification daemon.
 //
-// This single object replaces the entire dbus-monitor -> awk -> statefile ->
-// python-scroller pipeline in modules/home/waybar.nix, plus the
-// notification-feed systemd unit, plus swaync itself. Notifications arrive as
-// structured objects with summary, body, urgency, and actions already parsed.
+// This single object replaced the entire dbus-monitor -> awk -> statefile ->
+// python-scroller pipeline in the old waybar.nix, plus the notification-feed
+// systemd unit, plus swaync itself -- all of which are now deleted.
+// Notifications arrive as structured objects with summary, body, urgency and
+// actions already parsed.
 //
-// IMPORTANT: only one process can own org.freedesktop.Notifications. swaync
-// must be disabled before this will bind (see modules/home/quickshell.nix).
+// IMPORTANT: only one process can own org.freedesktop.Notifications. Nothing
+// else on the system claims it now, but running a second Quickshell instance
+// against the source tree while the niri-spawned one is alive will make the
+// second fail to bind -- and notifications silently vanish, since the loser
+// just doesn't get them. Kill the first one when iterating.
 Singleton {
     id: root
 

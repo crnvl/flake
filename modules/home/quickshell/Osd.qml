@@ -4,11 +4,10 @@ import QtQuick
 
 // Volume / brightness OSD.
 //
-// This replaces the feedback path that waybar's notification ticker used to
-// provide. Your swaync config mutes all popups, so notify-send output only
-// ever landed in the control centre -- the ticker was the only thing that
-// actually showed you a volume change. Removing waybar without this would
-// have been a real regression.
+// The media keys in modules/home/niri.nix shell out to wpctl/brightnessctl
+// directly and produce no output of their own, so without this the volume and
+// brightness keys would change state with zero feedback. This is the only
+// thing that shows you what happened.
 //
 // It's also the first real job for Box.qml.
 PanelWindow {

@@ -2,41 +2,33 @@
 
 # Monochrome TUI shell built on Quickshell.
 #
-# NOTE: this module is intentionally NOT imported by desktop.nix yet, so it has
-# zero effect on your system until you opt in. To try it:
+# This is the whole desktop shell: top bar, fullscreen background dashboard
+# (in place of a wallpaper), volume/brightness OSD, and the notification
+# daemon. It replaced waybar and swaync outright -- neither is installed.
 #
-#   1. Add `./quickshell.nix` to the imports list in modules/home/desktop.nix
-#   2. Rebuild, then run:  quickshell -p ~/.config/quickshell/tui
+# niri launches it from spawn-at-startup in modules/home/niri.nix:
 #
-# The bar anchors to the TOP of the screen, so it can run alongside the
-# existing waybar (which sits at the bottom) while you compare them.
+#   { argv = [ "quickshell" "-c" "tui" ]; }
 #
-# Quickshell is in nixpkgs (0.3.0), so no new flake input is required.
+# `-c tui` resolves to ~/.config/quickshell/tui, which is the symlink created
+# below. Quickshell is in nixpkgs (0.3.0), so no new flake input is required.
 #
-# ── Notifications ────────────────────────────────────────────────────────────
-# The config includes a notification daemon (Notifications.qml). Only one
-# process may own the org.freedesktop.Notifications DBus name, so swaync MUST
-# be stopped before it will bind:
+# ── Working on the QML ───────────────────────────────────────────────────────
+# Quickshell hot-reloads on file save, but the symlink points at the *store*
+# copy, so editing the checkout doesn't reach the running shell. To iterate
+# without rebuilding, run a second instance straight off the source tree:
 #
-#   systemctl --user stop swaync     # ephemeral; returns on next login
+#   quickshell -p ~/flake/modules/home/quickshell
 #
-# To adopt it permanently, delete the `services.swaync` block from
-# modules/home/desktop.nix. At that point the following also become dead code
-# and can be removed from modules/home/waybar.nix:
+# Kill the niri-spawned one first, or the two will fight over the
+# org.freedesktop.Notifications DBus name (only one process may own it).
 #
-#   - notificationWriter        (dbus-monitor | awk pipeline)
-#   - notificationTicker        (the python scroller)
-#   - systemd.user.services.notification-feed
-#
-# volume-notify / brightness-notify keep working unchanged -- they just
-# notify into this daemon instead of swaync.
+# ── Layout ───────────────────────────────────────────────────────────────────
+# All QML lives in a single flat directory on purpose. Quickshell resolves
+# implicit component imports per-directory, so splitting into subdirs means
+# every file needs explicit import paths for very little gain.
 {
   home.packages = [ pkgs.quickshell ];
 
   xdg.configFile."quickshell/tui".source = ./quickshell;
-
-  # When you're ready to make it permanent, drop this into the
-  # spawn-at-startup list in modules/home/niri.nix instead of waybar:
-  #
-  #   { argv = [ "quickshell" "-p" "/home/aleph/.config/quickshell/tui" ]; }
 }

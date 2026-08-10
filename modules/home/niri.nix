@@ -98,14 +98,6 @@ in
     spawn-at-startup = [
       { argv = [ "xwayland-satellite" ]; }
       { argv = [ "quickshell" "-c" "tui" ]; }
-      { argv = [ "awww-daemon" ]; }
-      {
-        argv = [
-          "sh"
-          "-c"
-          "awww wait && awww img \"$HOME/.config/wallpaper\" --transition-type grow --transition-fps 60 --transition-duration 1"
-        ];
-      }
     ];
 
     window-rules = [
