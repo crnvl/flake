@@ -45,6 +45,8 @@ in
     ]
     ++ [ screen-record ];
 
+  xdg.configFile.niri-config.force = true;
+
   programs.niri.settings = {
     layout = {
       # Tight gaps: TUIs are dense, and windows should read as adjacent
