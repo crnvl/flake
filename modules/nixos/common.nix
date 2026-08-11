@@ -24,9 +24,11 @@ in
     };
   };
 
-  system.activationScripts.cleanupGenerations = ''
-    ${pkgs.nix}/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations +5
-  '';
+  boot.loader.systemd-boot = {
+    enable = true;
+    configurationLimit = 5;
+  };
+
 
   nixpkgs.config.allowUnfree = true;
   nix.settings.use-xdg-base-directories = true;
