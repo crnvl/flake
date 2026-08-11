@@ -10,8 +10,16 @@
 
   networking = {
     hostName = "chambers";
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      wifi.powersave = false;
+    };
   };
+
+  boot.extraModprobeConfig = ''
+    options iwlmvm power_scheme=1
+    options iwlwifi uapsd_disable=1
+  '';
 
   hardware.graphics = {
     enable = true;
