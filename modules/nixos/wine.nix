@@ -42,9 +42,14 @@ let
     runtimeInputs = [
       wine
       winetricks
+      pkgs.coreutils
     ];
     text = ''
       ${wineEnv}
+
+      wait_wine() {
+        timeout 120 wineserver -w || true
+      }
 
       if [ ! -x "${wine}/bin/.wine" ]; then
         echo "expected unwrapped wine binary at ${wine}/bin/.wine" >&2
@@ -56,21 +61,21 @@ let
 
       echo ">> initialising prefix at $WINEPREFIX"
       wineboot --init
-      wineserver -w
+      wait_wine
 
       echo ">> installing core components"
       winetricks -q win10 corefonts vcrun2022 gdiplus powershell dxvk
-      wineserver -w
+      wait_wine
 
       echo ">> installing extra fonts"
       if ! winetricks -q allfonts; then
         echo "warning: allfonts failed, continuing" >&2
       fi
-      wineserver -w
+      wait_wine
 
       echo ">> applying window management settings"
       wine reg add 'HKCU\Software\Wine\X11 Driver' /v Managed /d Y /f
-      wineserver -w
+      wait_wine
 
       echo
       echo "prefix ready."
