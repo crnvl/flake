@@ -1,4 +1,17 @@
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  pluginPath = subdir: [
+    "$HOME/.${subdir}"
+    "${config.home-manager.users.aleph.home.profileDirectory}/lib/${subdir}"
+    "/run/current-system/sw/lib/${subdir}"
+  ];
+in
 
 {
   services = {
@@ -65,6 +78,14 @@
   };
 
   hardware.graphics.enable32Bit = lib.mkDefault true;
+
+  environment.sessionVariables = {
+    LV2_PATH = pluginPath "lv2";
+    VST3_PATH = pluginPath "vst3";
+    CLAP_PATH = pluginPath "clap";
+    VST_PATH = pluginPath "vst";
+    LADSPA_PATH = pluginPath "ladspa";
+  };
 
   environment.etc."udisks2/mount_options.conf".text = ''
     [defaults]
