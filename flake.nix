@@ -59,6 +59,7 @@
             ./modules/nixos/desktop.nix
             ./modules/nixos/dev.nix
             ./modules/nixos/audio.nix
+            ./modules/nixos/wine.nix
             ./modules/nixos/zsh.nix
 
             inputs.niri.nixosModules.niri
