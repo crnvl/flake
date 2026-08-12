@@ -88,17 +88,42 @@ let
     runtimeInputs = [
       wine
       pkgs.findutils
+      pkgs.coreutils
+      pkgs.gnused
     ];
     text = ''
       ${wineEnv}
-      ${findInPrefix}
 
-      fl="$(find_in_prefix 'FL64.exe')"
+      mapfile -t candidates < <(find "$WINEPREFIX/drive_c" -maxdepth 8 -iname 'FL64.exe' 2>/dev/null | sort)
 
-      if [ -z "$fl" ]; then
+      if [ "''${#candidates[@]}" -eq 0 ]; then
         echo "FL Studio not found under $WINEPREFIX" >&2
         echo "install it first:  wine-audio /path/to/flstudio_installer.exe" >&2
         exit 1
+      fi
+
+      fl="''${candidates[-1]}"
+
+      if [ "''${#candidates[@]}" -gt 1 ]; then
+        echo "multiple FL Studio installs found, using:" >&2
+        echo "  $fl" >&2
+      fi
+
+      desktop="''${FL_DESKTOP:-auto}"
+
+      if [ "$desktop" = "auto" ]; then
+        desktop=""
+        if command -v niri >/dev/null 2>&1; then
+          desktop="$(niri msg focused-output 2>/dev/null | sed -n 's/.*Logical size: \([0-9]\+x[0-9]\+\).*/\1/p' | head -1)"
+        fi
+        if [ -z "$desktop" ]; then
+          echo "could not detect output size, starting without a virtual desktop" >&2
+          desktop="off"
+        fi
+      fi
+
+      if [ "$desktop" != "off" ]; then
+        exec wine explorer "/desktop=fl-studio,$desktop" "$fl" "$@"
       fi
 
       exec wine "$fl" "$@"
@@ -361,7 +386,3 @@ in
     authenticode-check
   ];
 }
-
-authenticode-check
-];
-}2212

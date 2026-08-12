@@ -113,6 +113,10 @@ in
         ];
         open-floating = true;
       }
+      {
+        matches = [ { app-id = "^fl64\\.exe$"; } ];
+        open-fullscreen = true;
+      }
     ];
 
     binds = {
