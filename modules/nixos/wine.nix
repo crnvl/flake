@@ -3,11 +3,22 @@
 let
   wine = pkgs.wineWow64Packages.stagingFull;
 
+  winetricks = pkgs.symlinkJoin {
+    name = "winetricks-wrapped";
+    paths = [ pkgs.winetricks ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/winetricks \
+        --set-default WINE_BIN ${wine}/bin/.wine \
+        --set-default WINESERVER_BIN ${wine}/bin/wineserver \
+        --prefix PATH : ${wine}/bin
+    '';
+  };
+
   wineEnv = ''
     export WINEPREFIX="$HOME/.local/share/wineprefixes/audio"
     export WINEARCH=win64
     export WINEFSYNC=1
-    export WINEDLLOVERRIDES="mscoree,mshtml="
     export WINEDEBUG="''${WINEDEBUG:--all}"
   '';
 
@@ -30,10 +41,16 @@ let
     name = "fl-prefix-bootstrap";
     runtimeInputs = [
       wine
-      pkgs.winetricks
+      winetricks
     ];
     text = ''
       ${wineEnv}
+
+      if [ ! -x "${wine}/bin/.wine" ]; then
+        echo "expected unwrapped wine binary at ${wine}/bin/.wine" >&2
+        echo "nixpkgs wrapper layout changed; winetricks arch detection will fail" >&2
+        exit 1
+      fi
 
       mkdir -p "$WINEPREFIX"
 
@@ -41,14 +58,23 @@ let
       wineboot --init
       wineserver -w
 
-      echo ">> installing runtime components (this takes a while)"
-      winetricks -q win10 corefonts allfonts vcrun2022 gdiplus powershell dxvk
+      echo ">> installing core components"
+      winetricks -q win10 corefonts vcrun2022 gdiplus powershell dxvk
+      wineserver -w
+
+      echo ">> installing extra fonts"
+      if ! winetricks -q allfonts; then
+        echo "warning: allfonts failed, continuing" >&2
+      fi
+      wineserver -w
+
+      echo ">> applying window management settings"
+      wine reg add 'HKCU\Software\Wine\X11 Driver' /v Managed /d Y /f
       wineserver -w
 
       echo
       echo "prefix ready."
-      echo "next: wine-audio winecfg  ->  Graphics tab"
-      echo "      tick 'Allow the window manager to control the windows'"
+      echo "install FL Studio with:  wine-audio /path/to/installer.exe"
     '';
   };
 
@@ -226,7 +252,7 @@ in
 {
   environment.systemPackages = [
     wine
-    pkgs.winetricks
+    winetricks
 
     wine-audio
     fl-prefix-bootstrap
