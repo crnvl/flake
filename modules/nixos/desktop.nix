@@ -98,10 +98,13 @@
       xdg-desktop-portal-gtk
       xdg-desktop-portal-gnome
     ];
-    config.common.default = [
-      "gnome"
-      "gtk"
-    ];
+    config.common = {
+      default = [
+        "gnome"
+        "gtk"
+      ];
+      "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    };
   };
 
   hardware.uinput.enable = true;
