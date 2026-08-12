@@ -8,6 +8,7 @@
     ./niri.nix
     ./quickshell.nix
     ./theme.nix
+    ./zsh.nix
   ];
 
   xdg.enable = true;
@@ -59,7 +60,6 @@
       EDITOR = "zeditor";
       LANG = "en_US.UTF-8";
       CARGO_HOME = "$HOME/.local/share/cargo";
-      HISTFILE = "$HOME/.local/state/zsh/history";
     };
 
     packages = with pkgs; [
