@@ -98,7 +98,6 @@ in
     prefer-no-csd = true;
 
     spawn-at-startup = [
-      { argv = [ "xwayland-satellite" ]; }
       { argv = [ "quickshell" "-c" "tui" ]; }
     ];
 
