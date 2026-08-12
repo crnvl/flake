@@ -102,6 +102,8 @@ in
       { argv = [ "quickshell" "-c" "tui" ]; }
     ];
 
+    environment.DISPLAY = ":0";
+
     window-rules = [
       {
         matches = [
