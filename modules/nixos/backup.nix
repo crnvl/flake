@@ -66,6 +66,14 @@
       "pp:/home/aleph/.BitwigStudio/cache"
       "pp:/home/aleph/.vscode/extensions"
 
+      "sh:/home/aleph/.local/share/wineprefixes/*/drive_c/windows"
+      "sh:/home/aleph/.local/share/wineprefixes/*/drive_c/Program Files*"
+      "sh:/home/aleph/.local/share/wineprefixes/*/drive_c/ProgramData"
+      "sh:/home/aleph/.local/share/wineprefixes/*/drive_c/users/*/AppData/Local/Temp"
+
+      "pp:/home/aleph/music/ni-content"
+      "pp:/home/aleph/music/ni-isos"
+
       "sh:**/.direnv"
 
       "sh:**/node_modules"
