@@ -54,6 +54,7 @@
         catshift_users = { };
         vaultwarden_users = { };
         beat_users = { };
+        nextcloud_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -67,6 +68,7 @@
             "catshift_users"
             "vaultwarden_users"
             "beat_users"
+            "nextcloud_users"
           ];
         };
 
@@ -236,6 +238,20 @@
           preferShortUsername = true;
 
           scopeMaps.beat_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
+
+        nextcloud = {
+          displayName = "nextcloud";
+          originUrl = "https://cloud.shimme.rs/apps/user_oidc/code";
+          originLanding = "https://cloud.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-nextcloud-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.nextcloud_users = [
             "openid"
             "profile"
             "email"

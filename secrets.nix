@@ -10,6 +10,7 @@ let
       "kanidm-oauth2-catshift-secret"
       "kanidm-oauth2-vaultwarden-secret"
       "kanidm-oauth2-beat-secret"
+      "kanidm-oauth2-nextcloud-secret"
       "mullvad-wg.conf"
       "caelo-env"
       "chroma-smb"
@@ -19,6 +20,7 @@ let
       "vaultwarden-env"
       "beat-env"
       "vaultwarden-borg-passphrase"
+      "nextcloud-admin-password"
     ];
 
   };
