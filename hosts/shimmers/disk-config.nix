@@ -5,13 +5,6 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  boot.loader.grub = {
-    enable = true;
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-    devices = [ "nodev" ];
-  };
-
   disko.devices.disk.main = {
     device = "/dev/sda";
     type = "disk";
