@@ -36,7 +36,7 @@ in
     configureRedis = true;
     database.createLocally = true;
 
-    appstoreEnable = true;
+    appstoreEnable = false;
 
     config = {
       dbtype = "pgsql";
