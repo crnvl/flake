@@ -102,7 +102,10 @@ in
         --check-bearer=0 \
         --mapping-uid="preferred_username" \
         --mapping-display-name="name" \
-        --mapping-email="email"
+        --mapping-email="email" \
+        --group-provisioning=1 \
+        --mapping-groups="nextcloud_groups" \
+        --group-whitelist-regex='^admin$'
 
       ${occ} config:app:set user_oidc allow_multiple_user_backends --value=1
     '';

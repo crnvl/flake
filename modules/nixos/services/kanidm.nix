@@ -55,6 +55,7 @@
         vaultwarden_users = { };
         beat_users = { };
         nextcloud_users = { };
+        nextcloud_admins = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -69,6 +70,7 @@
             "vaultwarden_users"
             "beat_users"
             "nextcloud_users"
+            "nextcloud_admins"
           ];
         };
 
@@ -256,6 +258,11 @@
             "profile"
             "email"
           ];
+
+          claimMaps.nextcloud_groups = {
+            joinType = "array";
+            valuesByGroup.nextcloud_admins = [ "admin" ];
+          };
         };
       };
     };
