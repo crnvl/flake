@@ -36,7 +36,7 @@ in
     };
 
     serviceConfig = {
-      ExecStart = "${inputs.beat.packages.${pkgs.system}.default}/bin/beat";
+      ExecStart = "${inputs.beat.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/beat";
       EnvironmentFile = [ config.age.secrets.beat-env.path ];
 
       User = "beat";
