@@ -176,6 +176,14 @@
             "jellyfin_users"
           ];
         };
+
+        konkurs = {
+          displayName = "konkurs";
+          mailAddresses = [ "konkurs@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
