@@ -57,6 +57,7 @@ in
     settings = {
       default_phone_region = "DE";
       overwriteprotocol = "https";
+      "overwrite.cli.url" = "https://${domain}";
       log_type = "file";
       loglevel = 2;
       maintenance_window_start = 1;
