@@ -85,6 +85,24 @@ in
     '';
   };
 
+  systemd.services.nextcloud-settings = {
+    description = "Apply declarative Nextcloud settings";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "nextcloud-setup.service" ];
+    requires = [ "nextcloud-setup.service" ];
+
+    script = ''
+      ${occ} config:app:set activity notify_email_filesystem --value=0
+    '';
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      User = "nextcloud";
+      Group = "nextcloud";
+    };
+  };
+
   systemd.services.nextcloud-oidc-setup = {
     description = "Provision the kanidm OIDC provider in Nextcloud";
     wantedBy = [ "multi-user.target" ];

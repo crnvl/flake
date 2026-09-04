@@ -20,6 +20,13 @@ in
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
+
+    extraCommands = ''
+      iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400
+    '';
+    extraStopCommands = ''
+      iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400 || true
+    '';
   };
 
   users.users.aleph.openssh.authorizedKeys.keys = sshKeys;
