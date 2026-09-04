@@ -15,6 +15,8 @@ in
 
   security.sudo.wheelNeedsPassword = false;
 
+  boot.kernel.sysctl."net.ipv4.tcp_mtu_probing" = 1;
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];

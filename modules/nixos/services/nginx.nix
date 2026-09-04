@@ -24,6 +24,12 @@
     recommendedTlsSettings = true;
     recommendedOptimisation = true;
     recommendedGzipSettings = true;
+
+    commonHttpConfig = ''
+      log_format timed '$remote_addr $host "$request" $status '
+                       'sent=$body_bytes_sent rt=$request_time '
+                       'urt="$upstream_response_time" ua="$http_user_agent"';
+    '';
   };
 
   security.acme = {

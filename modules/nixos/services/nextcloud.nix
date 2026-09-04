@@ -79,6 +79,10 @@ in
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
+
+    extraConfig = ''
+      access_log syslog:server=unix:/dev/log,tag=nginx_nextcloud timed;
+    '';
   };
 
   systemd.services.nextcloud-oidc-setup = {
