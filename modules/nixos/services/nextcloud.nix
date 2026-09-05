@@ -114,6 +114,13 @@ in
 
     script = ''
       ${occ} config:app:set activity notify_email_filesystem --value=0
+
+      ${occ} config:app:set recognize imagenet.enabled --value=true
+      ${occ} config:app:set recognize faces.enabled --value=true
+      ${occ} config:app:set recognize landmarks.enabled --value=true
+
+      ${occ} config:app:set recognize movinet.enabled --value=false
+      ${occ} config:app:set recognize musicnn.enabled --value=false
     '';
 
     serviceConfig = {
