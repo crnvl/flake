@@ -10,6 +10,16 @@ let
   occ = lib.getExe config.services.nextcloud.occ;
 in
 {
+  nixpkgs.overlays = [
+    (final: prev: {
+      nextcloud34 = prev.nextcloud34.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ./nextcloud-preview-mapper-ambiguous-column.patch
+        ];
+      });
+    })
+  ];
+
   age.secrets = {
     nextcloud-admin-password = {
       file = ../../../hosts/shimmers/secrets/nextcloud-admin-password.age;
@@ -229,18 +239,26 @@ in
     requires = [ "nextcloud-setup.service" ];
 
     script = ''
+      echo ">>> [1/5] files:scan"
       # Pick up files written directly into the data directory.
       ${occ} --no-interaction files:scan --all
 
+      echo ">>> [2/5] memories:index"
       # Incremental: skips files whose mtime is unchanged.
       ${occ} --no-interaction memories:index
 
+      echo ">>> [3/5] recognize:classify"
       # Skips files already carrying the processed tag.
       ${occ} --no-interaction recognize:classify
+
+      echo ">>> [4/5] recognize:cluster-faces"
       ${occ} --no-interaction recognize:cluster-faces
 
+      echo ">>> [5/5] preview:generate-all"
       # Skips files that already have previews.
       ${occ} --no-interaction preview:generate-all
+
+      echo ">>> reindex complete"
     '';
 
     serviceConfig = {
