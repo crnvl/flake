@@ -219,4 +219,38 @@ in
       CPUSchedulingPolicy = "idle";
     };
   };
+
+  systemd.services.nextcloud-photo-reindex = {
+    description = "Re-scan and re-index the photo library";
+    after = [
+      "nextcloud-setup.service"
+      "phpfpm-nextcloud.service"
+    ];
+    requires = [ "nextcloud-setup.service" ];
+
+    script = ''
+      # Pick up files written directly into the data directory.
+      ${occ} --no-interaction files:scan --all
+
+      # Incremental: skips files whose mtime is unchanged.
+      ${occ} --no-interaction memories:index
+
+      # Skips files already carrying the processed tag.
+      ${occ} --no-interaction recognize:classify
+      ${occ} --no-interaction recognize:cluster-faces
+
+      # Skips files that already have previews.
+      ${occ} --no-interaction preview:generate-all
+    '';
+
+    serviceConfig = {
+      Type = "oneshot";
+      User = "nextcloud";
+      Group = "nextcloud";
+      TimeoutStartSec = "infinity";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      CPUSchedulingPolicy = "idle";
+    };
+  };
 }
