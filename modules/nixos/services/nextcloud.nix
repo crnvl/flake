@@ -51,8 +51,14 @@ in
         contacts
         notes
         tasks
+        memories
+        maps
+        previewgenerator
+        recognize
         ;
     };
+
+    imaginary.enable = true;
 
     settings = {
       default_phone_region = "DE";
@@ -61,6 +67,21 @@ in
       log_type = "file";
       loglevel = 2;
       maintenance_window_start = 1;
+
+      enabledPreviewProviders = lib.mkForce [
+        "OC\\Preview\\Imaginary"
+        "OC\\Preview\\ImaginaryPDF"
+        "OC\\Preview\\Movie"
+        "OC\\Preview\\Krita"
+        "OC\\Preview\\MarkDown"
+        "OC\\Preview\\TXT"
+        "OC\\Preview\\OpenDocument"
+      ];
+      preview_ffmpeg_path = lib.getExe pkgs.ffmpeg-headless;
+
+      preview_max_x = 2048;
+      preview_max_y = 2048;
+      jpeg_quality = 60;
     };
 
     phpOptions = {
@@ -149,6 +170,46 @@ in
     unitConfig = {
       StartLimitIntervalSec = 120;
       StartLimitBurst = 5;
+    };
+  };
+
+  systemd.services.nextcloud-photo-backfill = {
+    description = "One-time Memories/Recognize/preview backfill";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "nextcloud-setup.service"
+      "phpfpm-nextcloud.service"
+      "network-online.target"
+    ];
+    wants = [ "network-online.target" ];
+    requires = [ "nextcloud-setup.service" ];
+
+    script = ''
+      stamp="${config.services.nextcloud.home}/.photo-backfill-done"
+      if [ -e "$stamp" ]; then
+        echo "backfill already completed, nothing to do"
+        exit 0
+      fi
+
+      # Downloads ~1G of planet boundary data for reverse geocoding.
+      # Only needed for the Places view; the map view works without it.
+      ${occ} --no-interaction memories:places-setup
+      ${occ} --no-interaction memories:index
+      ${occ} --no-interaction recognize:recrawl
+      ${occ} --no-interaction preview:generate-all -vvv
+
+      touch "$stamp"
+    '';
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      User = "nextcloud";
+      Group = "nextcloud";
+      TimeoutStartSec = "infinity";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      CPUSchedulingPolicy = "idle";
     };
   };
 }
