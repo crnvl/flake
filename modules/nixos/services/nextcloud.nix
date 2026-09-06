@@ -59,8 +59,6 @@ in
         user_oidc
         calendar
         contacts
-        notes
-        tasks
         maps
         previewgenerator
         recognize
@@ -122,7 +120,7 @@ in
     requires = [ "nextcloud-setup.service" ];
 
     script = ''
-      ${occ} config:app:set activity notify_email_filesystem --value=0
+      ${occ} app:disable activity office notes tasks
 
       ${occ} config:app:set recognize imagenet.enabled --value=true
       ${occ} config:app:set recognize faces.enabled --value=true
