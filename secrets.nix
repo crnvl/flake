@@ -21,6 +21,7 @@ let
       "beat-env"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"
+      "maddy-rxby-password"
     ];
 
   };

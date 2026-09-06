@@ -18,6 +18,7 @@
     ../../modules/nixos/services/vaultwarden.nix
     ../../modules/nixos/services/nextcloud.nix
     ../../modules/nixos/services/beat.nix
+    ../../modules/nixos/services/mail.nix
 
     ../../modules/nixos/services/media/sabnzbd.nix
     ../../modules/nixos/services/media/prowlarr.nix
