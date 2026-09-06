@@ -140,6 +140,7 @@
           mailAddresses = [ "feinwaage@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "nextcloud_users"
             "vaultwarden_users"
           ];
         };
