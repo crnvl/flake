@@ -239,22 +239,25 @@ in
     requires = [ "nextcloud-setup.service" ];
 
     script = ''
-      echo ">>> [1/5] files:scan"
+      echo ">>> [1/6] files:scan"
       # Pick up files written directly into the data directory.
-      ${occ} --no-interaction files:scan --all
+      ${occ} --no-interaction files:scan --all --generate-metadata
 
-      echo ">>> [2/5] memories:index"
+      echo ">>> [2/6] photos:update-1000-cities"
+      ${occ} --no-interaction photos:update-1000-cities
+
+      echo ">>> [3/6] memories:index"
       # Incremental: skips files whose mtime is unchanged.
       ${occ} --no-interaction memories:index
 
-      echo ">>> [3/5] recognize:classify"
+      echo ">>> [4/6] recognize:classify"
       # Skips files already carrying the processed tag.
       ${occ} --no-interaction recognize:classify
 
-      echo ">>> [4/5] recognize:cluster-faces"
+      echo ">>> [5/6] recognize:cluster-faces"
       ${occ} --no-interaction recognize:cluster-faces
 
-      echo ">>> [5/5] preview:generate-all"
+      echo ">>> [6/6] preview:generate-all"
       # Skips files that already have previews.
       ${occ} --no-interaction preview:generate-all
 
