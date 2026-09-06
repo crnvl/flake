@@ -61,7 +61,6 @@ in
         contacts
         notes
         tasks
-        memories
         maps
         previewgenerator
         recognize
@@ -190,46 +189,6 @@ in
     };
   };
 
-  systemd.services.nextcloud-photo-backfill = {
-    description = "One-time Memories/Recognize/preview backfill";
-    wantedBy = [ "multi-user.target" ];
-    after = [
-      "nextcloud-setup.service"
-      "phpfpm-nextcloud.service"
-      "network-online.target"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [ "nextcloud-setup.service" ];
-
-    script = ''
-      stamp="${config.services.nextcloud.home}/.photo-backfill-done"
-      if [ -e "$stamp" ]; then
-        echo "backfill already completed, nothing to do"
-        exit 0
-      fi
-
-      # Downloads ~1G of planet boundary data for reverse geocoding.
-      # Only needed for the Places view; the map view works without it.
-      ${occ} --no-interaction memories:places-setup
-      ${occ} --no-interaction memories:index
-      ${occ} --no-interaction recognize:recrawl
-      ${occ} --no-interaction preview:generate-all -vvv
-
-      touch "$stamp"
-    '';
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      User = "nextcloud";
-      Group = "nextcloud";
-      TimeoutStartSec = "infinity";
-      Nice = 19;
-      IOSchedulingClass = "idle";
-      CPUSchedulingPolicy = "idle";
-    };
-  };
-
   systemd.services.nextcloud-photo-reindex = {
     description = "Re-scan and re-index the photo library";
     after = [
@@ -239,25 +198,20 @@ in
     requires = [ "nextcloud-setup.service" ];
 
     script = ''
-      echo ">>> [1/6] files:scan"
-      # Pick up files written directly into the data directory.
+      echo ">>> [1/5] files:scan"
       ${occ} --no-interaction files:scan --all --generate-metadata
 
-      echo ">>> [2/6] photos:update-1000-cities"
+      echo ">>> [2/5] photos:update-1000-cities"
       ${occ} --no-interaction photos:update-1000-cities
 
-      echo ">>> [3/6] memories:index"
-      # Incremental: skips files whose mtime is unchanged.
-      ${occ} --no-interaction memories:index
-
-      echo ">>> [4/6] recognize:classify"
+      echo ">>> [3/5] recognize:classify"
       # Skips files already carrying the processed tag.
       ${occ} --no-interaction recognize:classify
 
-      echo ">>> [5/6] recognize:cluster-faces"
+      echo ">>> [4/5] recognize:cluster-faces"
       ${occ} --no-interaction recognize:cluster-faces
 
-      echo ">>> [6/6] preview:generate-all"
+      echo ">>> [5/5] preview:generate-all"
       # Skips files that already have previews.
       ${occ} --no-interaction preview:generate-all
 
