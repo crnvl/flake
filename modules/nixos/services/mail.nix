@@ -87,13 +87,15 @@ in
           all rate 20 1s
           all concurrency 10
         }
-        # dmarc is deliberately off. All inbound mail reaches us via a
-        # forwarder (forwardemail.net), which rewrites the envelope sender to
-        # SRS0=...@forwardemail.net. SPF therefore authenticates the forwarder,
-        # never the From: domain, so DMARC's SPF leg cannot align and a pass
-        # depends entirely on DKIM surviving the hop. maddy's dmarc is a plain
-        # boolean with no fail_action, and a p=reject sender whose signature
-        # didn't survive would get a hard 550 -- silent mail loss.
+        # dmarc is deliberately off. Some inbound mail arrives via relays that
+        # apply Sender Rewriting Scheme (envelope rewritten to SRS0=...@relay),
+        # so SPF authenticates the relay rather than the From: domain and
+        # DMARC's SPF leg cannot align; a pass then depends entirely on DKIM
+        # surviving the hop. maddy's dmarc is a plain boolean with no
+        # fail_action, so a p=reject sender whose signature didn't survive gets
+        # a hard 550 -- silent mail loss. The old Postfix setup enforced no
+        # DMARC at all, so this keeps behaviour equivalent rather than adding a
+        # new way to lose mail.
         # The checks below still run and still annotate Authentication-Results;
         # spf's fail_action defaults to quarantine rather than reject.
         dmarc no
