@@ -4,6 +4,7 @@
   imports = [
     ./battery.nix
     ./firefox.nix
+    ./gpg.nix
     ./music.nix
     ./niri.nix
     ./quickshell.nix
