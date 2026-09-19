@@ -185,6 +185,15 @@
             "jellyfin_users"
           ];
         };
+
+        lyssenka = {
+          displayName = "lyssenka";
+          mailAddresses = [ "lyssenka@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "nextcloud_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
