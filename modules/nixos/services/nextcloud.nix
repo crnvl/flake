@@ -10,29 +10,6 @@ let
   occ = lib.getExe config.services.nextcloud.occ;
 in
 {
-  # Both patches are backports of upstream fixes for the oc_previews tables
-  # introduced in NC 34. Drop each one once nixpkgs ships a release that
-  # contains it -- the build will fail loudly when the patch stops applying.
-  nixpkgs.overlays = [
-    (final: prev: {
-      nextcloud34 = prev.nextcloud34.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [
-          ./nextcloud-preview-mapper-ambiguous-column.patch
-          # nextcloud/server#63376: savePreview() writes the preview file before
-          # inserting its row. Losing the unique-constraint race made it delete
-          # that file again -- but LocalPreviewStorage derives the path from the
-          # file id and the size spec, never from the preview id, so both racers
-          # write the same path and the loser deleted the winner's file. The row
-          # survives, so nothing ever regenerates it and the thumbnail is gone
-          # for good. previewgenerator hits this on every non-square image,
-          # because its "fillWidthHeight" and "width"/"height" specs collapse to
-          # identical dimensions.
-          ./nextcloud-preview-keep-file-on-insert-race.patch
-        ];
-      });
-    })
-  ];
-
   age.secrets = {
     nextcloud-admin-password = {
       file = ../../../hosts/shimmers/secrets/nextcloud-admin-password.age;
