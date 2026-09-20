@@ -194,6 +194,16 @@
             "nextcloud_users"
           ];
         };
+
+        masha = {
+          displayName = "masha";
+          mailAddresses = [ "masha@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "nextcloud_users"
+            "vaultwarden_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
