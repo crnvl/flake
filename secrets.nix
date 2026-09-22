@@ -11,6 +11,8 @@ let
       "kanidm-oauth2-vaultwarden-secret"
       "kanidm-oauth2-beat-secret"
       "kanidm-oauth2-nextcloud-secret"
+      "kanidm-oauth2-grafana-secret"
+      "grafana-secret-key"
       "mullvad-wg.conf"
       "caelo-env"
       "chroma-smb"
