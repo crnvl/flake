@@ -284,8 +284,11 @@ let
         --retry 2 --retry-delay 2 --retry-all-errors
       )
 
-      jf_get() { curl "''${curl_opts[@]}" --header "X-Emby-Token: $jellyfin_key" "$1"; }
-      jf_post() { curl "''${curl_opts[@]}" --request POST --header "X-Emby-Token: $jellyfin_key" "$1"; }
+      # Jellyfin 10.11 removed the legacy X-Emby-Token header; the
+      # MediaBrowser scheme works on both old and new versions.
+      jf_auth="Authorization: MediaBrowser Token=\"$jellyfin_key\", Client=\"media-janitor\""
+      jf_get() { curl "''${curl_opts[@]}" --header "$jf_auth" "$1"; }
+      jf_post() { curl "''${curl_opts[@]}" --request POST --header "$jf_auth" "$1"; }
       seerr_get() { curl "''${curl_opts[@]}" --header "X-Api-Key: $seerr_key" "$1"; }
       seerr_del() { curl "''${curl_opts[@]}" --request DELETE --header "X-Api-Key: $seerr_key" "$1"; }
 
