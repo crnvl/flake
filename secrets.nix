@@ -16,6 +16,8 @@ let
       "chroma-smb"
       "radarr-api-key"
       "sonarr-api-key"
+      "jellyfin-api-key"
+      "media-janitor-webhook"
       "decluttarr-env"
       "vaultwarden-env"
       "beat-env"
