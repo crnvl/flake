@@ -37,6 +37,8 @@
   ];
 
   system.stateVersion = "26.05";
+
+  my.mediaJanitor.dryRun = false;
   networking = {
     hostName = "shimmers";
     hosts = {
