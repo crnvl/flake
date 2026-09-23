@@ -13,7 +13,7 @@ let
   # After creating a shared (public) dashboard in Grafana, paste its token here
   # (the part after /public-dashboards/ in the share URL) so that
   # https://status.shimme.rs/ redirects straight to it.
-  publicDashboardToken = null;
+  publicDashboardToken = "3d7dabda6fbb466290e14b1a59568743";
 
   # Friendly names end up as the "service" label, so panels can use
   # {{service}} in their legend instead of the raw instance URL.
