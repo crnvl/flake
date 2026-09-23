@@ -15,7 +15,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "min(probe_success)",
+          "expr": "min(probe_success{service!=\"\"})",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -67,7 +67,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "probe_success",
+          "expr": "probe_success{service!=\"\"}",
           "instant": false,
           "range": true,
           "legendFormat": "{{service}}"
@@ -123,7 +123,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg_over_time(probe_success[24h]) * 100",
+          "expr": "avg_over_time(probe_success{service!=\"\"}[24h]) * 100",
           "instant": true,
           "range": false,
           "legendFormat": "{{service}}"
@@ -171,7 +171,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg_over_time(probe_success[30d]) * 100",
+          "expr": "avg_over_time(probe_success{service!=\"\"}[30d]) * 100",
           "instant": true,
           "range": false,
           "legendFormat": "{{service}}"
@@ -219,7 +219,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "probe_duration_seconds",
+          "expr": "probe_duration_seconds{service!=\"\"}",
           "instant": false,
           "range": true,
           "legendFormat": "{{service}}"
