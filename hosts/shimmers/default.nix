@@ -51,6 +51,13 @@
   # Read-only deploy key so `nixos-rebuild` can fetch the private proxyagain
   # flake input over SSH. Only usable for that one repo.
   #
+  # This is scoped to a dedicated "git-gay-proxyagain" host alias (matching
+  # the flake input's URL in flake.nix), rather than "git.gay" itself, so it
+  # only ever applies to that one fetch. A blanket "Host git.gay" override
+  # would hijack every other SSH connection to git.gay too - including this
+  # flake repo's own `git pull` - and this deploy key isn't authorized for
+  # any of those.
+  #
   # Bootstrapping note: agenix only decrypts secrets to /run/agenix during
   # system activation, which happens *after* the flake has already been
   # evaluated (and its inputs fetched). So the very first switch that
@@ -71,7 +78,8 @@
   };
 
   programs.ssh.extraConfig = ''
-    Host git.gay
+    Host git-gay-proxyagain
+      HostName git.gay
       User git
       IdentityFile ${config.age.secrets.proxyagain-deploy-key.path}
       IdentitiesOnly yes

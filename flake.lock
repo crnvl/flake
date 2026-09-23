@@ -374,11 +374,11 @@
         "rev": "9f72b2d23abf5d33c60897541b1c0cb3447f7d33",
         "revCount": 1,
         "type": "git",
-        "url": "ssh://git@git.gay/67/proxyagain"
+        "url": "ssh://git@git-gay-proxyagain/67/proxyagain"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@git.gay/67/proxyagain"
+        "url": "ssh://git@git-gay-proxyagain/67/proxyagain"
       }
     },
     "root": {

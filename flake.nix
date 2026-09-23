@@ -31,7 +31,7 @@
     };
 
     proxyagain = {
-      url = "git+ssh://git@git.gay/67/proxyagain";
+      url = "git+ssh://git@git-gay-proxyagain/67/proxyagain";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
