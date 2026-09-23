@@ -57,11 +57,17 @@
   # introduces this secret needs it pre-placed manually - see the flake repo
   # notes for the one-time bootstrap command. Every switch after that (and
   # every reboot) is handled automatically by agenix.
+  #
+  # Group is "wheel", not "root": `nixos-rebuild switch` invoked via plain
+  # `sudo` builds/evaluates as the original calling user (only the final
+  # activation runs as root), so the key must be readable by aleph too. This
+  # adds no real exposure since wheel members already have unrestricted root
+  # via sudo anyway.
   age.secrets.proxyagain-deploy-key = {
     file = ./secrets/proxyagain-deploy-key.age;
     owner = "root";
-    group = "root";
-    mode = "0400";
+    group = "wheel";
+    mode = "0440";
   };
 
   programs.ssh.extraConfig = ''
