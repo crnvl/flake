@@ -13,6 +13,7 @@ let
       "kanidm-oauth2-nextcloud-secret"
       "kanidm-oauth2-grafana-secret"
       "grafana-secret-key"
+      "alertmanager-env"
       "mullvad-wg.conf"
       "caelo-env"
       "chroma-smb"

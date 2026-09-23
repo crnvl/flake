@@ -8,7 +8,7 @@
 
     ../../modules/nixos/services/nginx.nix
     ../../modules/nixos/services/kanidm.nix
-    ../../modules/nixos/services/monitoring.nix
+    ../../modules/nixos/services/monitoring
     ../../modules/nixos/services/jellyfin.nix
 
     ../../modules/nixos/services/transmission.nix

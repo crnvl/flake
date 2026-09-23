@@ -80,17 +80,23 @@ in
 {
   # Shared with kanidm (owner) and grafana (group) for the OIDC client.
   age.secrets.kanidm-oauth2-grafana-secret = {
-    file = ../../../hosts/shimmers/secrets/kanidm-oauth2-grafana-secret.age;
+    file = ../../../../hosts/shimmers/secrets/kanidm-oauth2-grafana-secret.age;
     owner = "kanidm";
     group = "grafana";
     mode = "0440";
   };
 
   age.secrets.grafana-secret-key = {
-    file = ../../../hosts/shimmers/secrets/grafana-secret-key.age;
+    file = ../../../../hosts/shimmers/secrets/grafana-secret-key.age;
     owner = "grafana";
     group = "grafana";
   };
+
+  # Contains DISCORD_WEBHOOK=<id>/<token>; substituted into the alertmanager
+  # config at runtime so the webhook never lands in the nix store. Only the
+  # secret part is a variable: the build-time config check (amtool) requires
+  # webhook_url to parse as a URL, which a bare $VAR placeholder doesn't.
+  age.secrets.alertmanager-env.file = ../../../../hosts/shimmers/secrets/alertmanager-env.age;
 
   services.prometheus = {
     enable = true;
@@ -98,6 +104,83 @@ in
     port = 9090;
     retentionTime = "90d";
     globalConfig.scrape_interval = "30s";
+
+    alertmanagers = [
+      { static_configs = [ { targets = [ "127.0.0.1:9093" ]; } ]; }
+    ];
+
+    rules = [
+      (builtins.toJSON {
+        groups = [
+          {
+            name = "status";
+            rules = [
+              {
+                alert = "ServiceDown";
+                expr = "probe_success == 0";
+                for = "3m";
+                labels.severity = "critical";
+                annotations = {
+                  summary = "{{ $labels.service }} is down";
+                  description = "Probe of {{ $labels.instance }} has been failing for 3 minutes.";
+                };
+              }
+              {
+                alert = "SystemdUnitFailed";
+                expr = ''systemd_unit_state{state="failed"} == 1'';
+                for = "5m";
+                labels.severity = "warning";
+                annotations.summary = "systemd unit {{ $labels.name }} is in failed state";
+              }
+              {
+                alert = "DiskSpaceLow";
+                expr = ''node_filesystem_avail_bytes{mountpoint=~"/|/mnt/chroma"} / node_filesystem_size_bytes < 0.10'';
+                for = "15m";
+                labels.severity = "warning";
+                annotations.summary = "Less than 10% disk space left on {{ $labels.mountpoint }}";
+              }
+              {
+                alert = "TlsCertExpiringSoon";
+                expr = "(probe_ssl_earliest_cert_expiry - time()) / 86400 < 10";
+                for = "1h";
+                labels.severity = "warning";
+                annotations.summary = "TLS certificate for {{ $labels.service }} expires in under 10 days";
+              }
+            ];
+          }
+        ];
+      })
+    ];
+
+    alertmanager = {
+      enable = true;
+      listenAddress = "127.0.0.1";
+      port = 9093;
+      environmentFile = config.age.secrets.alertmanager-env.path;
+
+      configuration = {
+        route = {
+          receiver = "discord";
+          group_by = [ "alertname" ];
+          group_wait = "30s";
+          group_interval = "5m";
+          repeat_interval = "24h";
+        };
+
+        receivers = [
+          {
+            name = "discord";
+            discord_configs = [
+              {
+                webhook_url = "https://discord.com/api/webhooks/$DISCORD_WEBHOOK";
+                username = "status.shimme.rs";
+                send_resolved = true;
+              }
+            ];
+          }
+        ];
+      };
+    };
 
     exporters = {
       node = {
@@ -215,12 +298,23 @@ in
 
     provision = {
       enable = true;
+
       datasources.settings.datasources = [
         {
           name = "Prometheus";
           type = "prometheus";
+          uid = "prometheus";
           url = "http://127.0.0.1:9090";
           isDefault = true;
+        }
+      ];
+
+      dashboards.settings.providers = [
+        {
+          name = "declarative";
+          type = "file";
+          disableDeletion = true;
+          options.path = ./dashboards;
         }
       ];
     };
