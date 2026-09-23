@@ -15,17 +15,26 @@ let
   # https://status.shimme.rs/ redirects straight to it.
   publicDashboardToken = null;
 
-  httpsProbes = [
-    "https://id.shimme.rs"
-    "https://jellyfin.shimme.rs"
-    "https://vault.shimme.rs"
-    "https://cloud.shimme.rs"
-    "https://seerr.shimme.rs"
-    "https://shift.shimme.rs"
-    "https://vitals.shimme.rs"
-    "https://mail.shimme.rs"
-    "https://${domain}"
-  ];
+  # Friendly names end up as the "service" label, so panels can use
+  # {{service}} in their legend instead of the raw instance URL.
+  httpsProbes = {
+    "Identity" = "https://id.shimme.rs";
+    "Jellyfin" = "https://jellyfin.shimme.rs";
+    "Vault" = "https://vault.shimme.rs";
+    "Cloud" = "https://cloud.shimme.rs";
+    "Seerr" = "https://seerr.shimme.rs";
+    "Shift" = "https://shift.shimme.rs";
+    "Vitals" = "https://vitals.shimme.rs";
+    "Webmail" = "https://mail.shimme.rs";
+    "Grafana" = "https://${domain}";
+  };
+
+  mkProbeTargets =
+    probes:
+    lib.mapAttrsToList (name: url: {
+      targets = [ url ];
+      labels.service = name;
+    }) probes;
 
   blackboxConfig = pkgs.writeText "blackbox.yml" (
     builtins.toJSON {
@@ -142,21 +151,21 @@ in
         job_name = "blackbox-https";
         metrics_path = "/probe";
         params.module = [ "http_2xx" ];
-        static_configs = [ { targets = httpsProbes; } ];
+        static_configs = mkProbeTargets httpsProbes;
         relabel_configs = blackboxRelabel;
       }
       {
         job_name = "blackbox-imaps";
         metrics_path = "/probe";
         params.module = [ "tcp_tls" ];
-        static_configs = [ { targets = [ "mail.shimme.rs:993" ]; } ];
+        static_configs = mkProbeTargets { "Mail (IMAP)" = "mail.shimme.rs:993"; };
         relabel_configs = blackboxRelabel;
       }
       {
         job_name = "blackbox-smtp";
         metrics_path = "/probe";
         params.module = [ "smtp_banner" ];
-        static_configs = [ { targets = [ "mail.shimme.rs:25" ]; } ];
+        static_configs = mkProbeTargets { "Mail (SMTP)" = "mail.shimme.rs:25"; };
         relabel_configs = blackboxRelabel;
       }
     ];
