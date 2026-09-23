@@ -35,7 +35,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 

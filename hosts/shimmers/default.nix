@@ -48,8 +48,15 @@
     };
   };
 
-  # Read-only deploy key so `nix flake update`/`nixos-rebuild` can fetch the
-  # private proxyagain flake input over SSH. Only usable for that one repo.
+  # Read-only deploy key so `nixos-rebuild` can fetch the private proxyagain
+  # flake input over SSH. Only usable for that one repo.
+  #
+  # Bootstrapping note: agenix only decrypts secrets to /run/agenix during
+  # system activation, which happens *after* the flake has already been
+  # evaluated (and its inputs fetched). So the very first switch that
+  # introduces this secret needs it pre-placed manually - see the flake repo
+  # notes for the one-time bootstrap command. Every switch after that (and
+  # every reboot) is handled automatically by agenix.
   age.secrets.proxyagain-deploy-key = {
     file = ./secrets/proxyagain-deploy-key.age;
     owner = "root";
