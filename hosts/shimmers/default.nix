@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   imports = [
@@ -47,4 +47,21 @@
       "127.0.0.1" = [ "id.shimme.rs" ];
     };
   };
+
+  # Read-only deploy key so `nix flake update`/`nixos-rebuild` can fetch the
+  # private proxyagain flake input over SSH. Only usable for that one repo.
+  age.secrets.proxyagain-deploy-key = {
+    file = ./secrets/proxyagain-deploy-key.age;
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
+
+  programs.ssh.extraConfig = ''
+    Host git.gay
+      User git
+      IdentityFile ${config.age.secrets.proxyagain-deploy-key.path}
+      IdentitiesOnly yes
+      StrictHostKeyChecking accept-new
+  '';
 }

@@ -24,6 +24,7 @@ let
       "decluttarr-env"
       "vaultwarden-env"
       "beat-env"
+      "proxyagain-deploy-key"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"
       "maddy-rxby-password"
