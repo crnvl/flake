@@ -299,15 +299,28 @@ in
     provision = {
       enable = true;
 
-      datasources.settings.datasources = [
-        {
-          name = "Prometheus";
-          type = "prometheus";
-          uid = "prometheus";
-          url = "http://127.0.0.1:9090";
-          isDefault = true;
-        }
-      ];
+      # The datasource originally got an auto-generated uid before we pinned
+      # uid = "prometheus"; grafana's provisioner updates by uid, so it can't
+      # reconcile the rename on its own ("data source not found" at startup).
+      # Deleting by name first makes the insert idempotent.
+      datasources.settings = {
+        deleteDatasources = [
+          {
+            name = "Prometheus";
+            orgId = 1;
+          }
+        ];
+
+        datasources = [
+          {
+            name = "Prometheus";
+            type = "prometheus";
+            uid = "prometheus";
+            url = "http://127.0.0.1:9090";
+            isDefault = true;
+          }
+        ];
+      };
 
       dashboards.settings.providers = [
         {
