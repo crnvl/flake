@@ -121,8 +121,8 @@ in
                 for = "3m";
                 labels.severity = "critical";
                 annotations = {
-                  summary = "{{ $labels.service }} is down";
-                  description = "Probe of {{ $labels.instance }} has been failing for 3 minutes.";
+                  summary = "{{ $labels.service }} is currently unavailable.";
+                  resolved = "{{ $labels.service }} is back online.";
                 };
               }
               {
@@ -130,21 +130,30 @@ in
                 expr = ''systemd_unit_state{state="failed"} == 1'';
                 for = "5m";
                 labels.severity = "warning";
-                annotations.summary = "systemd unit {{ $labels.name }} is in failed state";
+                annotations = {
+                  summary = "A background service ({{ $labels.name }}) has failed.";
+                  resolved = "Background service {{ $labels.name }} has recovered.";
+                };
               }
               {
                 alert = "DiskSpaceLow";
                 expr = ''node_filesystem_avail_bytes{mountpoint=~"/|/mnt/chroma"} / node_filesystem_size_bytes < 0.10'';
                 for = "15m";
                 labels.severity = "warning";
-                annotations.summary = "Less than 10% disk space left on {{ $labels.mountpoint }}";
+                annotations = {
+                  summary = "The server is running low on storage.";
+                  resolved = "Server storage is back at a safe level.";
+                };
               }
               {
                 alert = "TlsCertExpiringSoon";
                 expr = "(probe_ssl_earliest_cert_expiry - time()) / 86400 < 10";
                 for = "1h";
                 labels.severity = "warning";
-                annotations.summary = "TLS certificate for {{ $labels.service }} expires in under 10 days";
+                annotations = {
+                  summary = "The certificate for {{ $labels.service }} expires in less than 10 days.";
+                  resolved = "The certificate for {{ $labels.service }} was renewed.";
+                };
               }
             ];
           }
@@ -175,6 +184,14 @@ in
                 webhook_url = "https://discord.com/api/webhooks/$DISCORD_WEBHOOK";
                 username = "status.shimme.rs";
                 send_resolved = true;
+
+                # Keep the channel human-readable: one line per alert, no
+                # label/annotation dumps or Prometheus source links.
+                title = ''{{ if .Alerts.Firing }}🔴 Service disruption{{ else }}🟢 Resolved{{ end }}'';
+                message = ''
+                  {{ range .Alerts.Firing }}{{ .Annotations.summary }}
+                  {{ end }}{{ range .Alerts.Resolved }}{{ .Annotations.resolved }}
+                  {{ end }}'';
               }
             ];
           }
