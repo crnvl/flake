@@ -30,6 +30,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    proxyagain = {
+      url = "git+ssh://git@git.gay/67/proxyagain";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
 
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
@@ -88,6 +93,7 @@
             inputs.agenix.nixosModules.default
             inputs.vpn-confinement.nixosModules.default
             inputs.catshift.nixosModules.default
+            inputs.proxyagain.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix

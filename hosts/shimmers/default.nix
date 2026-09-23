@@ -35,6 +35,7 @@
     ../../modules/nixos/services/media/decluttarr.nix
 
     ../../modules/nixos/services/catshift.nix
+    ../../modules/nixos/services/proxyagain.nix
   ];
 
   system.stateVersion = "26.05";

@@ -361,6 +361,26 @@
         "type": "github"
       }
     },
+    "proxyagain": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790162252,
+        "narHash": "sha256-0xdwsqP7+Y7rHlOt37jwR8bApWpJCmois+AwppwoRrQ=",
+        "ref": "refs/heads/main",
+        "rev": "9f72b2d23abf5d33c60897541b1c0cb3447f7d33",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@git.gay/67/proxyagain"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@git.gay/67/proxyagain"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -373,6 +393,7 @@
         "niri": "niri",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-2311": "nixpkgs-2311",
+        "proxyagain": "proxyagain",
         "vpn-confinement": "vpn-confinement"
       }
     },
