@@ -92,34 +92,46 @@ let
 
       # fetch_all <collection> <outfile> [curl query args...]
       # Follows Oura's next_token pagination and merges every page's .data
-      # into one array. A failed endpoint leaves an empty array behind so the
-      # other metrics still make it out; oura_fetch_success records the miss.
+      # into one array. Pages move through files rather than shell variables:
+      # 48 hours of heart rate samples is far more than fits into a single
+      # process argument. A failed endpoint leaves an empty array behind so
+      # the other metrics still make it out; oura_fetch_success records the
+      # miss.
       fetch_all() {
         path="$1"
         outfile="$2"
         shift 2
 
-        merged="[]"
+        pages="$tmp/pages.jsonl"
+        : > "$pages"
+
+        ok=1
         next=""
         while : ; do
           extra=()
           if [ -n "$next" ]; then
             extra=(--data-urlencode "next_token=$next")
           fi
-          if ! page="$(curl --get --fail --silent --show-error --max-time 60 \
+          if ! curl --get --fail --silent --show-error --max-time 60 \
               --retry 2 --retry-delay 5 \
               --header "Authorization: Bearer $OURA_TOKEN" \
-              "$@" "''${extra[@]}" "$api/$path")"; then
+              --output "$tmp/page.json" \
+              "$@" "''${extra[@]}" "$api/$path"; then
             echo "oura-metrics: could not fetch $path" >&2
             fail=1
-            merged="[]"
+            ok=0
             break
           fi
-          merged="$(jq -c --argjson acc "$merged" '$acc + (.data // [])' <<< "$page")"
-          next="$(jq -r '.next_token // empty' <<< "$page")"
+          jq -c '.data // []' "$tmp/page.json" >> "$pages"
+          next="$(jq -r '.next_token // empty' "$tmp/page.json")"
           [ -n "$next" ] || break
         done
-        printf '%s' "$merged" > "$outfile"
+
+        if [ "$ok" -eq 1 ]; then
+          jq -c -s 'add // []' "$pages" > "$outfile"
+        else
+          echo '[]' > "$outfile"
+        fi
       }
 
       # The ring only syncs when the phone app feels like it, so the windows
