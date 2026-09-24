@@ -25,11 +25,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    beat = {
-      url = "git+https://git.gay/67/beat";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     proxyagain = {
       url = "git+ssh://git@git-gay-proxyagain/67/proxyagain";
       inputs.nixpkgs.follows = "nixpkgs";

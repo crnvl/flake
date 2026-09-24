@@ -24,7 +24,6 @@ let
     "Cloud" = "https://cloud.shimme.rs";
     "Seerr" = "https://seerr.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
-    "Vitals" = "https://vitals.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";
   };
@@ -78,6 +77,9 @@ let
   };
 in
 {
+  # Oura ring metrics, surfaced on the "vitals" dashboard.
+  imports = [ ./oura.nix ];
+
   # Shared with kanidm (owner) and grafana (group) for the OIDC client.
   age.secrets.kanidm-oauth2-grafana-secret = {
     file = ../../../../hosts/shimmers/secrets/kanidm-oauth2-grafana-secret.age;

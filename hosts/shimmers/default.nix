@@ -18,7 +18,6 @@
     ../../modules/nixos/services/monero.nix
     ../../modules/nixos/services/vaultwarden.nix
     ../../modules/nixos/services/nextcloud.nix
-    ../../modules/nixos/services/beat.nix
     ../../modules/nixos/services/mail.nix
 
     ../../modules/nixos/services/media/sabnzbd.nix

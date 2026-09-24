@@ -14,7 +14,6 @@
         "kanidm-admin-password"
         "kanidm-oauth2-jellyfin-secret"
         "kanidm-oauth2-vaultwarden-secret"
-        "kanidm-oauth2-beat-secret"
       ]
       (name: {
         file = ../../../hosts/shimmers/secrets/${name}.age;
@@ -53,7 +52,6 @@
         seerr_users = { };
         catshift_users = { };
         vaultwarden_users = { };
-        beat_users = { };
         nextcloud_users = { };
         nextcloud_admins = { };
       };
@@ -68,7 +66,6 @@
             "jellyfin_admins"
             "catshift_users"
             "vaultwarden_users"
-            "beat_users"
             "nextcloud_users"
             "nextcloud_admins"
           ];
@@ -254,20 +251,6 @@
           basicSecretFile = config.age.secrets.kanidm-oauth2-vaultwarden-secret.path;
           preferShortUsername = true;
           scopeMaps.vaultwarden_users = [
-            "openid"
-            "profile"
-            "email"
-          ];
-        };
-
-        beat = {
-          displayName = "beat";
-          originUrl = "https://vitals.shimme.rs/auth/callback";
-          originLanding = "https://vitals.shimme.rs";
-          basicSecretFile = config.age.secrets.kanidm-oauth2-beat-secret.path;
-          preferShortUsername = true;
-
-          scopeMaps.beat_users = [
             "openid"
             "profile"
             "email"
