@@ -385,7 +385,7 @@
             "hideFrom": { "tooltip": false, "viz": false, "legend": false },
             "axisPlacement": "auto"
           },
-          "color": { "mode": "thresholds" },
+          "color": { "mode": "fixed", "fixedColor": "text" },
           "mappings": [
             {
               "type": "value",
