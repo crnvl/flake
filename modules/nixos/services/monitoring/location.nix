@@ -35,7 +35,7 @@ let
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
     VM_URL = "http://127.0.0.1:8428/api/v1/import/prometheus"
-    LISTEN = ("127.0.0.1", 3082)
+    LISTEN = ("127.0.0.1", 3083)
 
     USER = os.environ.get("LOCATION_USER", "phone")
     PASSWORD = os.environ["LOCATION_PASSWORD"]
@@ -188,7 +188,7 @@ in
   };
 
   services.nginx.virtualHosts.${domain} = mkProxyHost {
-    port = 3082;
+    port = 3083;
     websockets = false;
   };
 }
