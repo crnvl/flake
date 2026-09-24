@@ -64,16 +64,20 @@
   # notes for the one-time bootstrap command. Every switch after that (and
   # every reboot) is handled automatically by agenix.
   #
-  # Group is "wheel", not "root": `nixos-rebuild switch` invoked via plain
+  # Owner is "aleph", not "root": `nixos-rebuild switch` invoked via plain
   # `sudo` builds/evaluates as the original calling user (only the final
-  # activation runs as root), so the key must be readable by aleph too. This
-  # adds no real exposure since wheel members already have unrestricted root
-  # via sudo anyway.
+  # activation runs as root), so the key must be readable by aleph. It cannot
+  # simply be group-readable (root:wheel 0440), because OpenSSH refuses any
+  # private key with group/other permission bits ("UNPROTECTED PRIVATE KEY
+  # FILE") - the fetch then fails whenever the input isn't in the nix store
+  # yet. A 0400 key owned by aleph passes ssh's check for both aleph and root
+  # (root can read it regardless). This adds no real exposure since aleph
+  # already has unrestricted root via sudo anyway.
   age.secrets.proxyagain-deploy-key = {
     file = ./secrets/proxyagain-deploy-key.age;
-    owner = "root";
-    group = "wheel";
-    mode = "0440";
+    owner = "aleph";
+    group = "users";
+    mode = "0400";
   };
 
   programs.ssh.extraConfig = ''
