@@ -440,7 +440,7 @@
   "preload": false,
   "refresh": "1m",
   "schemaVersion": 39,
-  "tags": ["public"],
+  "tags": [],
   "templating": { "list": [] },
   "time": { "from": "now-24h", "to": "now" },
   "timepicker": {},

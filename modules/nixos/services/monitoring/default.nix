@@ -9,17 +9,11 @@
 let
   domain = "grafana.shimme.rs";
   statusDomain = "status.shimme.rs";
-  vitalsDomain = "vitals.shimme.rs";
 
   # After creating a shared (public) dashboard in Grafana, paste its token here
   # (the part after /public-dashboards/ in the share URL) so that
   # https://status.shimme.rs/ redirects straight to it.
   publicDashboardToken = "3d7dabda6fbb466290e14b1a59568743";
-
-  # Same, for the concise "vitals - now" wellbeing dashboard on
-  # https://vitals.shimme.rs/ (beat's old domain). Share > Share externally
-  # on the dashboard, then paste the token from the link.
-  vitalsPublicDashboardToken = null;
 
   # Friendly names end up as the "service" label, so panels can use
   # {{service}} in their legend instead of the raw instance URL.
@@ -422,7 +416,4 @@ in
 
   # Public status page.
   services.nginx.virtualHosts.${statusDomain} = mkPublicDashboardHost publicDashboardToken;
-
-  # Concise wellbeing dashboard ("vitals - now") for family & friends.
-  services.nginx.virtualHosts.${vitalsDomain} = mkPublicDashboardHost vitalsPublicDashboardToken;
 }
