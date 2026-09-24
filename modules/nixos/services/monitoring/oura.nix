@@ -21,6 +21,11 @@ let
     def line($name; $value; $ts):
       if $value == null then empty else "\($name) \($value) \($ts)" end;
 
+    def labeled($name; $labels; $value; $ts):
+      if $value == null then empty else "\($name){\($labels)} \($value) \($ts)" end;
+
+    def safe: tostring | gsub("[\\\\\"]"; "_");
+
     # RFC3339 with offset -> epoch milliseconds. jq's fromdateiso8601 only
     # accepts Z, so the offset is parsed by hand. Records with timestamps
     # that do not match are skipped (the "as" binds over an empty stream).
@@ -40,6 +45,16 @@ let
     def status_code:
       { "awake": 1, "rest": 2, "sleep": 3, "session": 4, "live": 5 }[.] // 0;
 
+    def resilience_code:
+      { "limited": 1, "adequate": 2, "solid": 3, "strong": 4, "exceptional": 5 }[.] // 0;
+
+    def stress_summary_code:
+      { "restored": 1, "normal": 2, "stressful": 3 }[.] // 0;
+
+    def contributors($name; $ts):
+      (.contributors // {}) | to_entries[]
+      | labeled($name; "contributor=\"\(.key | safe)\""; .value; $ts);
+
     ( ($rawHeartrate[0] // [])[]
       | ((.timestamp // "") | iso_ms?) as $t
       | line("oura_heart_rate_bpm"; .bpm; $t),
@@ -48,17 +63,32 @@ let
     ( ($rawReadiness[0] // [])[]
       | ((.day // "") | day_ms?) as $t
       | line("oura_readiness_score"; .score; $t),
-        line("oura_temperature_deviation_celsius"; .temperature_deviation; $t)
+        line("oura_temperature_deviation_celsius"; .temperature_deviation; $t),
+        line("oura_temperature_trend_deviation_celsius"; .temperature_trend_deviation; $t),
+        contributors("oura_readiness_contributor"; $t)
     ),
     ( ($rawDailySleep[0] // [])[]
       | ((.day // "") | day_ms?) as $t
-      | line("oura_sleep_score"; .score; $t)
+      | line("oura_sleep_score"; .score; $t),
+        contributors("oura_sleep_contributor"; $t)
     ),
     ( ($rawActivity[0] // [])[]
       | ((.day // "") | day_ms?) as $t
       | line("oura_activity_score"; .score; $t),
         line("oura_activity_steps"; .steps; $t),
-        line("oura_activity_active_calories"; .active_calories; $t)
+        line("oura_activity_active_calories"; .active_calories; $t),
+        line("oura_activity_total_calories"; .total_calories; $t),
+        line("oura_activity_target_calories"; .target_calories; $t),
+        line("oura_activity_met_minutes"; .average_met_minutes; $t),
+        line("oura_activity_walking_distance_meters"; .equivalent_walking_distance; $t),
+        line("oura_activity_high_time_seconds"; .high_activity_time; $t),
+        line("oura_activity_medium_time_seconds"; .medium_activity_time; $t),
+        line("oura_activity_low_time_seconds"; .low_activity_time; $t),
+        line("oura_activity_sedentary_time_seconds"; .sedentary_time; $t),
+        line("oura_activity_resting_time_seconds"; .resting_time; $t),
+        line("oura_activity_non_wear_time_seconds"; .non_wear_time; $t),
+        line("oura_activity_inactivity_alerts"; .inactivity_alerts; $t),
+        contributors("oura_activity_contributor"; $t)
     ),
     ( ($rawSessions[0] // [])[]
       | select(.type == "long_sleep")
@@ -68,10 +98,48 @@ let
         line("oura_sleep_rem_duration_seconds"; .rem_sleep_duration; $t),
         line("oura_sleep_light_duration_seconds"; .light_sleep_duration; $t),
         line("oura_sleep_awake_duration_seconds"; .awake_time; $t),
+        line("oura_sleep_time_in_bed_seconds"; .time_in_bed; $t),
+        line("oura_sleep_latency_seconds"; .latency; $t),
+        line("oura_sleep_restless_periods"; .restless_periods; $t),
         line("oura_sleep_efficiency_percent"; .efficiency; $t),
+        line("oura_sleep_breath_average_per_minute"; .average_breath; $t),
         line("oura_sleep_average_hrv_milliseconds"; .average_hrv; $t),
         line("oura_sleep_lowest_heart_rate_bpm"; .lowest_heart_rate; $t),
         line("oura_sleep_average_heart_rate_bpm"; .average_heart_rate; $t)
+    ),
+    ( ($rawSpo2[0] // [])[]
+      | ((.day // "") | day_ms?) as $t
+      | line("oura_spo2_average_percent"; (.spo2_percentage.average? // null); $t),
+        line("oura_breathing_disturbance_index"; .breathing_disturbance_index; $t)
+    ),
+    ( ($rawStress[0] // [])[]
+      | ((.day // "") | day_ms?) as $t
+      | line("oura_stress_high_seconds"; .stress_high; $t),
+        line("oura_recovery_high_seconds"; .recovery_high; $t),
+        (if .day_summary == null then empty
+         else line("oura_stress_day_summary"; (.day_summary | stress_summary_code); $t) end)
+    ),
+    ( ($rawResilience[0] // [])[]
+      | ((.day // "") | day_ms?) as $t
+      | (if .level == null then empty
+         else line("oura_resilience_level"; (.level | resilience_code); $t) end),
+        contributors("oura_resilience_contributor"; $t)
+    ),
+    ( ($rawCardio[0] // [])[]
+      | ((.day // "") | day_ms?) as $t
+      | line("oura_cardiovascular_age_years"; .vascular_age; $t)
+    ),
+    ( ($rawVo2[0] // [])[]
+      | ((.day // "") | day_ms?) as $t
+      | line("oura_vo2_max"; .vo2_max; $t)
+    ),
+    ( ($rawWorkouts[0] // [])[]
+      | ((.start_datetime // "") | iso_ms?) as $s
+      | ((.end_datetime // "") | iso_ms?) as $t
+      | "activity=\"\((.activity // "unknown") | safe)\"" as $l
+      | labeled("oura_workout_calories"; $l; .calories; $t),
+        labeled("oura_workout_distance_meters"; $l; .distance; $t),
+        labeled("oura_workout_duration_seconds"; $l; (($t - $s) / 1000); $t)
     )
   '';
 
@@ -104,6 +172,7 @@ let
       # Follows Oura's next_token pagination, appending every page's .data
       # array to the pages file. Pages move through files rather than shell
       # variables: heart rate data quickly outgrows a process argument.
+      # 404 counts as "this account has no such data", not as a failure.
       paginate() {
         pages="$1"
         path="$2"
@@ -115,11 +184,18 @@ let
           if [ -n "$next" ]; then
             extra=(--data-urlencode "next_token=$next")
           fi
-          if ! curl --get --fail --silent --show-error --max-time 120 \
+          if ! code="$(curl --get --silent --show-error --max-time 120 \
               --retry 2 --retry-delay 5 \
               --header "Authorization: Bearer $OURA_TOKEN" \
-              --output "$tmp/page.json" \
-              "$@" "''${extra[@]}" "$api/$path"; then
+              --output "$tmp/page.json" --write-out '%{http_code}' \
+              "$@" "''${extra[@]}" "$api/$path")"; then
+            return 1
+          fi
+          if [ "$code" = "404" ]; then
+            return 0
+          fi
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "oura-metrics: $path answered HTTP $code" >&2
             return 1
           fi
           jq -c '.data // []' "$tmp/page.json" >> "$pages"
@@ -176,6 +252,12 @@ let
       fetch_range daily_sleep "$tmp/daily-sleep.json" date
       fetch_range daily_activity "$tmp/activity.json" date
       fetch_range sleep "$tmp/sleep.json" date
+      fetch_range daily_spo2 "$tmp/spo2.json" date
+      fetch_range daily_stress "$tmp/stress.json" date
+      fetch_range daily_resilience "$tmp/resilience.json" date
+      fetch_range daily_cardiovascular_age "$tmp/cardio.json" date
+      fetch_range vO2_max "$tmp/vo2.json" date
+      fetch_range workout "$tmp/workouts.json" date
 
       jq -r -n \
         --slurpfile rawHeartrate "$tmp/heartrate.json" \
@@ -183,6 +265,12 @@ let
         --slurpfile rawDailySleep "$tmp/daily-sleep.json" \
         --slurpfile rawActivity "$tmp/activity.json" \
         --slurpfile rawSessions "$tmp/sleep.json" \
+        --slurpfile rawSpo2 "$tmp/spo2.json" \
+        --slurpfile rawStress "$tmp/stress.json" \
+        --slurpfile rawResilience "$tmp/resilience.json" \
+        --slurpfile rawCardio "$tmp/cardio.json" \
+        --slurpfile rawVo2 "$tmp/vo2.json" \
+        --slurpfile rawWorkouts "$tmp/workouts.json" \
         -f ${importScript} > "$tmp/import.txt"
 
       if [ -s "$tmp/import.txt" ]; then
