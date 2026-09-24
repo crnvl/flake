@@ -7,6 +7,7 @@
     ./gpg.nix
     ./music.nix
     ./niri.nix
+    ./opencode.nix
     ./quickshell.nix
     ./theme.nix
     ./zsh.nix
