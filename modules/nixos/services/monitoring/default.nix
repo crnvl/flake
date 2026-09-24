@@ -9,11 +9,17 @@
 let
   domain = "grafana.shimme.rs";
   statusDomain = "status.shimme.rs";
+  vitalsDomain = "vitals.shimme.rs";
 
   # After creating a shared (public) dashboard in Grafana, paste its token here
   # (the part after /public-dashboards/ in the share URL) so that
   # https://status.shimme.rs/ redirects straight to it.
   publicDashboardToken = "3d7dabda6fbb466290e14b1a59568743";
+
+  # Same, for the concise "vitals - now" wellbeing dashboard on
+  # https://vitals.shimme.rs/ (beat's old domain). Share > Share externally
+  # on the dashboard, then paste the token from the link.
+  vitalsPublicDashboardToken = null;
 
   # Friendly names end up as the "service" label, so panels can use
   # {{service}} in their legend instead of the raw instance URL.
@@ -74,6 +80,26 @@ let
   grafanaProxy = {
     proxyPass = "http://127.0.0.1:3000";
     proxyWebsockets = true;
+  };
+
+  # A public dashboard host: only the shared-dashboard routes and the static
+  # assets they need are proxied; everything else (login, API, admin) stays
+  # private behind grafana.shimme.rs. / redirects to one specific dashboard
+  # once its share token is known.
+  mkPublicDashboardHost = token: {
+    enableACME = true;
+    forceSSL = true;
+
+    locations =
+      {
+        "^~ /public-dashboards/" = grafanaProxy;
+        "^~ /api/public/" = grafanaProxy;
+        "^~ /public/" = grafanaProxy;
+        "= /favicon.ico" = grafanaProxy;
+      }
+      // lib.optionalAttrs (token != null) {
+        "= /".return = "302 /public-dashboards/${token}";
+      };
   };
 in
 {
@@ -394,22 +420,9 @@ in
 
   services.nginx.virtualHosts.${domain} = mkProxyHost { port = 3000; };
 
-  # Public status page: only the shared-dashboard routes and the static assets
-  # they need are proxied; everything else (login, API, admin) stays private
-  # behind grafana.shimme.rs.
-  services.nginx.virtualHosts.${statusDomain} = {
-    enableACME = true;
-    forceSSL = true;
+  # Public status page.
+  services.nginx.virtualHosts.${statusDomain} = mkPublicDashboardHost publicDashboardToken;
 
-    locations =
-      {
-        "^~ /public-dashboards/" = grafanaProxy;
-        "^~ /api/public/" = grafanaProxy;
-        "^~ /public/" = grafanaProxy;
-        "= /favicon.ico" = grafanaProxy;
-      }
-      // lib.optionalAttrs (publicDashboardToken != null) {
-        "= /".return = "302 /public-dashboards/${publicDashboardToken}";
-      };
-  };
+  # Concise wellbeing dashboard ("vitals - now") for family & friends.
+  services.nginx.virtualHosts.${vitalsDomain} = mkPublicDashboardHost vitalsPublicDashboardToken;
 }
