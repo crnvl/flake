@@ -179,6 +179,16 @@ in
   # Personal access token for the Oura v2 API: OURA_TOKEN=<token>
   age.secrets.oura-env.file = ../../../../hosts/shimmers/secrets/oura-env.age;
 
+  # A static user rather than DynamicUser: with DynamicUser the state
+  # directory really lives under /var/lib/private (0700 root), which the
+  # node exporter's own unprivileged user cannot traverse, so the textfile
+  # collector would never see oura.prom.
+  users.users.oura-metrics = {
+    isSystemUser = true;
+    group = "oura-metrics";
+  };
+  users.groups.oura-metrics = { };
+
   systemd.services.oura-metrics = {
     description = "oura ring metrics for prometheus";
     after = [ "network-online.target" ];
@@ -189,7 +199,8 @@ in
       ExecStart = "${metricsScript}/bin/oura-metrics";
       EnvironmentFile = [ config.age.secrets.oura-env.path ];
 
-      DynamicUser = true;
+      User = "oura-metrics";
+      Group = "oura-metrics";
       StateDirectory = "oura-metrics";
 
       NoNewPrivileges = true;
