@@ -23,6 +23,7 @@ let
       "decluttarr-env"
       "vaultwarden-env"
       "oura-env"
+      "location-env"
       "proxyagain-deploy-key"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"

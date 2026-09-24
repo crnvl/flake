@@ -98,7 +98,10 @@ let
 in
 {
   # Oura ring metrics, surfaced on the "vitals" dashboard.
-  imports = [ ./oura.nix ];
+  imports = [
+    ./oura.nix
+    ./location.nix
+  ];
 
   # Shared with kanidm (owner) and grafana (group) for the OIDC client.
   age.secrets.kanidm-oauth2-grafana-secret = {
