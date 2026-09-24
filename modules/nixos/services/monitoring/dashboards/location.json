@@ -71,8 +71,8 @@
           "showDebug": false
         },
         "basemap": {
-          "type": "osm-standard",
-          "name": "OpenStreetMap",
+          "type": "default",
+          "name": "Basemap",
           "config": {}
         },
         "layers": [
