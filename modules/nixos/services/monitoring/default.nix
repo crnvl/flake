@@ -338,6 +338,14 @@ in
             url = "http://127.0.0.1:9090";
             isDefault = true;
           }
+          # victoriametrics is PromQL-compatible; the oura dashboard reads
+          # the ring's history from here (see oura.nix).
+          {
+            name = "VictoriaMetrics";
+            type = "prometheus";
+            uid = "victoriametrics";
+            url = "http://127.0.0.1:8428";
+          }
         ];
       };
 

@@ -11,11 +11,11 @@
       "title": "Heart Rate",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
           "expr": "oura_heart_rate_bpm",
           "instant": false,
           "range": true,
@@ -52,20 +52,19 @@
       "title": "Status",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 4, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_heart_rate_source_info == 1",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_heart_rate_status[48h])",
           "instant": true,
           "range": false,
-          "format": "table",
           "legendFormat": "__auto"
         }
       ],
       "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "/^source$/" },
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
         "orientation": "auto",
         "textMode": "value",
         "colorMode": "value",
@@ -82,11 +81,12 @@
             {
               "type": "value",
               "options": {
-                "awake": { "text": "Awake", "color": "green", "index": 0 },
-                "rest": { "text": "Resting", "color": "blue", "index": 1 },
-                "sleep": { "text": "Asleep", "color": "purple", "index": 2 },
-                "session": { "text": "In a session", "color": "orange", "index": 3 },
-                "live": { "text": "Live", "color": "red", "index": 4 }
+                "0": { "text": "Unknown", "color": "text", "index": 0 },
+                "1": { "text": "Awake", "color": "green", "index": 1 },
+                "2": { "text": "Resting", "color": "blue", "index": 2 },
+                "3": { "text": "Asleep", "color": "purple", "index": 3 },
+                "4": { "text": "In a session", "color": "orange", "index": 4 },
+                "5": { "text": "Live", "color": "red", "index": 5 }
               }
             }
           ],
@@ -105,12 +105,12 @@
       "title": "Temperature Deviation",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 8, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_temperature_deviation_celsius",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_temperature_deviation_celsius[3d])",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -150,12 +150,12 @@
       "title": "Readiness",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_readiness_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_readiness_score[3d])",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -195,12 +195,12 @@
       "title": "Sleep",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 16, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_score[3d])",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -240,12 +240,12 @@
       "title": "Activity",
       "transparent": true,
       "gridPos": { "h": 5, "w": 4, "x": 20, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_activity_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_activity_score[2d])",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -285,11 +285,11 @@
       "title": "Heart Rate",
       "transparent": true,
       "gridPos": { "h": 9, "w": 16, "x": 0, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
           "expr": "oura_heart_rate_bpm",
           "instant": false,
           "range": true,
@@ -297,11 +297,11 @@
         },
         {
           "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_lowest_heart_rate_bpm",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_lowest_heart_rate_bpm[2d])",
           "instant": false,
           "range": true,
-          "legendFormat": "lowest (last night)"
+          "legendFormat": "lowest (night)"
         }
       ],
       "options": {
@@ -341,7 +341,7 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "lowest (last night)" },
+            "matcher": { "id": "byName", "options": "lowest (night)" },
             "properties": [
               { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
               { "id": "custom.fillOpacity", "value": 0 }
@@ -356,20 +356,20 @@
       "title": "Status",
       "transparent": true,
       "gridPos": { "h": 9, "w": 8, "x": 16, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by (source) (oura_heart_rate_source_info)",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_heart_rate_status[15m])",
           "instant": false,
           "range": true,
-          "legendFormat": "{{source}}"
+          "legendFormat": "status"
         }
       ],
       "options": {
         "mergeValues": true,
-        "showValue": "never",
+        "showValue": "auto",
         "alignValue": "center",
         "rowHeight": 0.9,
         "legend": { "showLegend": false, "displayMode": "list", "placement": "bottom" },
@@ -390,13 +390,18 @@
             {
               "type": "value",
               "options": {
-                "1": { "text": "", "color": "purple", "index": 0 }
+                "0": { "text": "Unknown", "color": "text", "index": 0 },
+                "1": { "text": "Awake", "color": "green", "index": 1 },
+                "2": { "text": "Resting", "color": "blue", "index": 2 },
+                "3": { "text": "Asleep", "color": "purple", "index": 3 },
+                "4": { "text": "Session", "color": "orange", "index": 4 },
+                "5": { "text": "Live", "color": "red", "index": 5 }
               }
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "value": null, "color": "purple" }]
+            "steps": [{ "value": null, "color": "text" }]
           }
         },
         "overrides": []
@@ -408,28 +413,28 @@
       "title": "Daily Scores",
       "transparent": true,
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_readiness_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_readiness_score[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "readiness"
         },
         {
           "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_score[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "sleep"
         },
         {
           "refId": "C",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_activity_score",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_activity_score[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "activity"
@@ -451,7 +456,7 @@
             "lineWidth": 1,
             "fillOpacity": 5,
             "gradientMode": "none",
-            "spanNulls": 3600000,
+            "spanNulls": false,
             "showPoints": "never",
             "pointSize": 5,
             "axisPlacement": "auto",
@@ -481,12 +486,12 @@
       "title": "Temperature Deviation",
       "transparent": true,
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_temperature_deviation_celsius",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_temperature_deviation_celsius[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "deviation from baseline"
@@ -507,7 +512,7 @@
             "lineWidth": 1,
             "fillOpacity": 10,
             "gradientMode": "none",
-            "spanNulls": 3600000,
+            "spanNulls": false,
             "showPoints": "never",
             "pointSize": 5,
             "axisPlacement": "auto",
@@ -534,39 +539,39 @@
     {
       "id": 11,
       "type": "timeseries",
-      "title": "Sleep Stages (last night)",
+      "title": "Sleep Stages",
       "transparent": true,
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_deep_duration_seconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_deep_duration_seconds[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "deep"
         },
         {
           "refId": "B",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_rem_duration_seconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_rem_duration_seconds[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "rem"
         },
         {
           "refId": "C",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_light_duration_seconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_light_duration_seconds[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "light"
         },
         {
           "refId": "D",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_awake_duration_seconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_awake_duration_seconds[1d])",
           "instant": false,
           "range": true,
           "legendFormat": "awake"
@@ -586,7 +591,7 @@
             "lineWidth": 1,
             "fillOpacity": 35,
             "gradientMode": "none",
-            "spanNulls": 3600000,
+            "spanNulls": false,
             "showPoints": "never",
             "pointSize": 5,
             "axisPlacement": "auto",
@@ -616,12 +621,12 @@
       "title": "Total Sleep",
       "transparent": true,
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_total_duration_seconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_total_duration_seconds[3d])",
           "instant": true,
           "range": false,
           "legendFormat": "__auto"
@@ -657,15 +662,15 @@
     {
       "id": 13,
       "type": "stat",
-      "title": "HRV (last night)",
+      "title": "HRV (night)",
       "transparent": true,
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 22 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_average_hrv_milliseconds",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_average_hrv_milliseconds[2d])",
           "instant": false,
           "range": true,
           "legendFormat": "__auto"
@@ -698,15 +703,15 @@
     {
       "id": 14,
       "type": "stat",
-      "title": "Resting HR (last night)",
+      "title": "Resting HR (night)",
       "transparent": true,
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 26 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_sleep_lowest_heart_rate_bpm",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_sleep_lowest_heart_rate_bpm[2d])",
           "instant": false,
           "range": true,
           "legendFormat": "__auto"
@@ -742,12 +747,12 @@
       "title": "Steps (today)",
       "transparent": true,
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 26 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "targets": [
         {
           "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "oura_activity_steps",
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "expr": "last_over_time(oura_activity_steps[2d])",
           "instant": false,
           "range": true,
           "legendFormat": "__auto"
@@ -783,7 +788,7 @@
   "schemaVersion": 39,
   "tags": [],
   "templating": { "list": [] },
-  "time": { "from": "now-24h", "to": "now" },
+  "time": { "from": "now-7d", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
   "title": "vitals",
