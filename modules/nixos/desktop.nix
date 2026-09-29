@@ -89,7 +89,13 @@
       pulse.enable = true;
     };
 
-    udev.packages = [ pkgs.brightnessctl ];
+    udev = {
+      packages = [ pkgs.brightnessctl ];
+      # Nintendo Switch in RCM mode (APX) - allow payload injection without root
+      extraRules = ''
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="0955", ATTRS{idProduct}=="7321", MODE="0660", TAG+="uaccess"
+      '';
+    };
   };
 
   xdg.portal = {
@@ -133,6 +139,7 @@
     libxrandr
     protontricks
     bluez
+    fusee-nano
     obsidian
     inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
