@@ -67,7 +67,14 @@
     packages = with pkgs; [
       zed-editor
       kdePackages.dolphin
-      feather
+      # Backport of nixpkgs master: abseil-cpp 20260817 defaults to C++20
+      # <compare> types, which breaks feather's bundled C++17 monero build.
+      # Drop the override once nixpkgs-unstable carries the fix.
+      (feather.override {
+        protobuf = protobuf.override {
+          abseil-cpp = abseil-cpp.override { cxxStandard = "17"; };
+        };
+      })
       fluffychat
       signal-desktop
       spotify
