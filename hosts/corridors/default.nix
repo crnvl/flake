@@ -36,6 +36,28 @@
   ];
 
   services = {
+    # The TV on the Radeon's HDMI is the only real speaker on this box. The
+    # DualShock 4 exposes a USB headset jack that outranks HDMI by default, so
+    # plugging the controller in silently steals the default sink.
+    pipewire.wireplumber.extraConfig."51-corridors-sinks" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [ { "node.name" = "~alsa_output.pci-0000_01_00.1.hdmi.*"; } ];
+          actions.update-props = {
+            "priority.session" = 2000;
+            "priority.driver" = 2000;
+          };
+        }
+        {
+          matches = [ { "node.name" = "~alsa_output.usb-Sony_Interactive_Entertainment_Wireless_Controller.*"; } ];
+          actions.update-props = {
+            "priority.session" = 100;
+            "priority.driver" = 100;
+          };
+        }
+      ];
+    };
+
     wivrn = {
       enable = true;
       openFirewall = true;
