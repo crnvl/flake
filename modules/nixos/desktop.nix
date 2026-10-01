@@ -82,7 +82,8 @@
     };
 
     mullvad-vpn = {
-      enable = true;
+      # mkDefault so individual hosts (e.g. corridors) can opt out.
+      enable = lib.mkDefault true;
       enableEarlyBootBlocking = true;
       gui.enable = true;
     };
@@ -154,7 +155,7 @@
     inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  systemd.services = {
+  systemd.services = lib.mkIf config.services.mullvad-vpn.enable {
     mullvad-autoconnect = {
       description = "Enforce Mullvad auto-connect";
       after = [ "mullvad-daemon.service" ];

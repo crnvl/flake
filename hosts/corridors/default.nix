@@ -36,6 +36,8 @@
   ];
 
   services = {
+    mullvad-vpn.enable = false;
+
     # Sink preference: UMC202HD interface when plugged in, otherwise the TV on
     # the Radeon's HDMI. The DualShock 4 exposes a USB headset jack that
     # outranks HDMI by default, so plugging the controller in silently steals
