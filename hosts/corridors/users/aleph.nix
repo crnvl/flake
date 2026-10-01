@@ -1,11 +1,30 @@
-{ ... }:
+{ pkgs, ... }:
 
+let
+  mkOdinCommand = name: arguments:
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [ pkgs.python3 pkgs.procps ];
+      text = ''
+        if pgrep -u "$(id -u)" -x 'Paladins.exe' >/dev/null; then
+          printf '%s\n' 'Exit Paladins before running ${name}.' >&2
+          exit 1
+        fi
+        exec python3 "$HOME/dev/odin-bridge/scripts/install-bridge.py" \
+          /mnt/storage1/SteamLibrary/steamapps/common/Paladins/Binaries/Win64 ${arguments}
+      '';
+    };
+in
 {
   imports = [
     ./../../../modules/home/desktop.nix
   ];
 
   home = {
+    packages = [
+      (mkOdinCommand "odin-load" "")
+      (mkOdinCommand "odin-unload" "--remove")
+    ];
     sessionVariables = {
       GTK_USE_PORTAL = "1";
     };
