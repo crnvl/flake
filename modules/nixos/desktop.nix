@@ -44,9 +44,19 @@
 
     ssh = {
       startAgent = false;
+      # The proxyagain flake input is fetched via the "git-gay-proxyagain" host
+      # alias (see flake.nix). shimmers binds it to a scoped deploy key; on
+      # desktops just resolve it to git.gay and use the user's own key, which
+      # is already authorized for the repo. Without this, `nix flake update`
+      # (or any fetch not already in the store) fails with an unresolvable
+      # hostname.
       extraConfig = ''
         Host *
           AddKeysToAgent yes
+
+        Host git-gay-proxyagain
+          HostName git.gay
+          User git
       '';
     };
 
