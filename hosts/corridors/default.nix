@@ -36,11 +36,19 @@
   ];
 
   services = {
-    # The TV on the Radeon's HDMI is the only real speaker on this box. The
-    # DualShock 4 exposes a USB headset jack that outranks HDMI by default, so
-    # plugging the controller in silently steals the default sink.
+    # Sink preference: UMC202HD interface when plugged in, otherwise the TV on
+    # the Radeon's HDMI. The DualShock 4 exposes a USB headset jack that
+    # outranks HDMI by default, so plugging the controller in silently steals
+    # the default sink; push it to the bottom.
     pipewire.wireplumber.extraConfig."51-corridors-sinks" = {
       "monitor.alsa.rules" = [
+        {
+          matches = [ { "node.name" = "~alsa_output.usb-BEHRINGER_UMC202HD_192k.*"; } ];
+          actions.update-props = {
+            "priority.session" = 3000;
+            "priority.driver" = 3000;
+          };
+        }
         {
           matches = [ { "node.name" = "~alsa_output.pci-0000_01_00.1.hdmi.*"; } ];
           actions.update-props = {
