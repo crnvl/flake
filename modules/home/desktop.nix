@@ -82,7 +82,7 @@
       vesktop
       ncdu
       xdg-ninja
-      google-chrome
+      vlc
 
       (tor-browser.override {
         extraPrefs = ''

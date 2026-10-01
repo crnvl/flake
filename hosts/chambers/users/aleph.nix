@@ -18,7 +18,6 @@
       httpx
       ghidra-bin
       spotify
-      vlc
       kdePackages.dolphin
       inetutils
       vesktop
