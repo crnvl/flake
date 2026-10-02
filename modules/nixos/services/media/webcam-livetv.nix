@@ -38,6 +38,6 @@
   environment.etc."jellyfin/webcam.m3u".text = ''
     #EXTM3U
     #EXTINF:-1 tvg-id="corridors-webcam" tvg-name="Corridors Webcam",Corridors Webcam
-    http://10.100.0.2:1984/api/stream.m3u8?src=webcam
+    rtsp://10.100.0.2:8554/webcam
   '';
 }

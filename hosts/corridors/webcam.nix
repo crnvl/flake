@@ -28,7 +28,12 @@
   networking = {
     # go2rtc listens on all interfaces, but only the wireguard link (and
     # localhost, which bypasses the filter) may actually reach it.
-    firewall.interfaces.wg-webcam.allowedTCPPorts = [ 1984 ];
+    # 1984 = HTTP API, 8554 = RTSP (what Jellyfin consumes; go2rtc's
+    # session-based HLS hangs ffprobe, RTSP is reliable and lower-latency).
+    firewall.interfaces.wg-webcam.allowedTCPPorts = [
+      1984
+      8554
+    ];
 
     wireguard.interfaces.wg-webcam = {
       ips = [ "10.100.0.2/24" ];
