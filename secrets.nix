@@ -28,6 +28,7 @@ let
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"
       "maddy-rxby-password"
+      "wireguard-webcam-key"
     ];
 
   };
