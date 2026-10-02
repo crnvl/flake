@@ -19,6 +19,9 @@
     wireguard.interfaces.wg-webcam = {
       ips = [ "10.100.0.1/24" ];
       listenPort = 51821;
+      # Match corridors: the path between the two has a reduced MTU and the
+      # default 1420 blackholes full-size packets (see hosts/corridors/webcam.nix).
+      mtu = 1380;
       privateKeyFile = config.age.secrets.wireguard-webcam-key.path;
 
       peers = [

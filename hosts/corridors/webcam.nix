@@ -37,6 +37,10 @@
 
     wireguard.interfaces.wg-webcam = {
       ips = [ "10.100.0.2/24" ];
+      # The path to shimmers has a reduced MTU (~1452 outer, measured
+      # 2026-10-02); wireguard's default 1420 gets full-size packets silently
+      # blackholed. 1380 leaves headroom.
+      mtu = 1380;
       privateKeyFile = "/var/lib/wireguard/webcam.key";
       generatePrivateKeyFile = true;
 
