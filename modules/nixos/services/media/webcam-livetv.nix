@@ -26,7 +26,7 @@
           name = "corridors";
           # Auto-generated on corridors' first activation; read it there with
           #   sudo wg show wg-webcam public-key
-          publicKey = "PLACEHOLDER-CORRIDORS-PUBKEY";
+          publicKey = "HRfdrfaf/uop4qdK/oiiX0WoA3eVEf0BS8L8+Z1LYCI=";
           allowedIPs = [ "10.100.0.2/32" ];
           # No endpoint: corridors is behind NAT and dials in with a
           # persistent keepalive.
