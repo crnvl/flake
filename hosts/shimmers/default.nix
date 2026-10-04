@@ -32,6 +32,7 @@
     ../../modules/nixos/services/media/tunarr.nix
     ../../modules/nixos/services/media/tagesschau.nix
     ../../modules/nixos/services/media/decluttarr.nix
+    ../../modules/nixos/services/media/webcam-livetv.nix
 
     ../../modules/nixos/services/catshift.nix
     ../../modules/nixos/services/proxyagain.nix

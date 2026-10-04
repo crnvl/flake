@@ -3,6 +3,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./webcam.nix
   ];
 
   system.stateVersion = "25.11";
