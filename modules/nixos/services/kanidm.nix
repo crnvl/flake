@@ -201,6 +201,15 @@
             "vaultwarden_users"
           ];
         };
+
+        lily = {
+          displayName = "lily";
+          mailAddresses = [ "lily@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "nextcloud_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
