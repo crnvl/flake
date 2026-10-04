@@ -153,6 +153,7 @@
     fusee-nano
     obsidian
     inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    rar
   ];
 
   systemd.services = lib.mkIf config.services.mullvad-vpn.enable {
