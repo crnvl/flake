@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ./webcam.nix
+    ../../modules/nixos/server.nix
   ];
 
   system.stateVersion = "25.11";
