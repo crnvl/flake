@@ -134,8 +134,11 @@ in
       { static_configs = [ { targets = [ "127.0.0.1:9093" ]; } ]; }
     ];
 
-    rules = [
-      (builtins.toJSON {
+    # Each module contributes its own file via ruleFiles: entries in `rules`
+    # get concatenated into a single file, and two concatenated JSON
+    # documents are not valid YAML - only the first group would load.
+    ruleFiles = [
+      (pkgs.writeText "status-rules.json" (builtins.toJSON {
         groups = [
           {
             name = "status";
@@ -183,7 +186,7 @@ in
             ];
           }
         ];
-      })
+      }))
     ];
 
     alertmanager = {

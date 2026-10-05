@@ -387,8 +387,10 @@ in
     "--collector.textfile.directory=${textfileDir}"
   ];
 
-  services.prometheus.rules = [
-    (builtins.toJSON {
+  # Own file via ruleFiles (see default.nix: concatenated `rules` entries
+  # don't merge across modules).
+  services.prometheus.ruleFiles = [
+    (pkgs.writeText "oura-rules.json" (builtins.toJSON {
       groups = [
         {
           name = "oura";
@@ -408,6 +410,6 @@ in
           ];
         }
       ];
-    })
+    }))
   ];
 }
