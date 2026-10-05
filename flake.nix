@@ -33,6 +33,11 @@
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.2.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     helium-nix = {
       url = "github:penal-colony/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";

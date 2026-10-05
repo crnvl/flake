@@ -1,11 +1,24 @@
-{ ... }:
+{ inputs, lib, pkgs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     ./webcam.nix
     ../../modules/nixos/server.nix
+
+    # Secure Boot (needed for Vanguard/League in the Windows dual-boot).
+    # Keys live in /var/lib/sbctl; Windows stays bootable via enrolled
+    # Microsoft keys (sbctl enroll-keys --microsoft).
+    inputs.lanzaboote.nixosModules.lanzaboote
   ];
+
+  # lanzaboote replaces systemd-boot (it embeds a signed systemd-boot).
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
+  environment.systemPackages = [ pkgs.sbctl ];
 
   system.stateVersion = "25.11";
 
