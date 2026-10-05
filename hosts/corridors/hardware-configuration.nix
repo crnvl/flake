@@ -45,11 +45,13 @@
     "/mnt/storage1" = {
       device = "/dev/disk/by-uuid/39dc6076-8b89-46f2-af13-89d6fcdb6740";
       fsType = "ext4";
+      options = [ "nofail" ];
     };
 
     "/mnt/storage2" = {
       device = "/dev/disk/by-uuid/a149898d-99d8-4d56-983a-abce9a48ce81";
       fsType = "ext4";
+      options = [ "nofail" ];
     };
   };
 
