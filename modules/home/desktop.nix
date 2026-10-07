@@ -83,6 +83,7 @@
       ncdu
       xdg-ninja
       vlc
+      figma-linux
 
       (tor-browser.override {
         extraPrefs = ''
