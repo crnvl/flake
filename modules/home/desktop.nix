@@ -84,6 +84,7 @@
       xdg-ninja
       vlc
       figma-linux
+      obs-studio
 
       (tor-browser.override {
         extraPrefs = ''
