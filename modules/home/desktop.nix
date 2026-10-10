@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./artcraft.nix
     ./battery.nix
     ./firefox.nix
     ./gpg.nix
