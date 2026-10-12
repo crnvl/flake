@@ -38,6 +38,6 @@
     nil
     usbmuxd
     iloader
-    chatgpt
+    codex
   ];
 }

@@ -84,6 +84,7 @@
       xdg-ninja
       vlc
       figma-linux
+      blender
 
       (tor-browser.override {
         extraPrefs = ''
