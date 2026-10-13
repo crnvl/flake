@@ -90,5 +90,11 @@ in
       hash = "sha256-/+x316LjSdn7AMjruQKvwsuO9UyKLVjdQEurFfW4Q4c=";
       description = "Motion graphics and visual effects compositor";
     })
+    (mkCraftApp {
+      pname = "lightcraft";
+      version = "0.7.1";
+      hash = "sha256-hCiB9a0WUC3xHu70wo5dzyxdZrfU2DivcXmj/S4MtsA=";
+      description = "Raw photo editor and library manager";
+    })
   ];
 }
