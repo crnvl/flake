@@ -3,7 +3,9 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./webcam.nix
+    # Webcam -> Jellyfin Live TV; disabled for now, re-enable together with
+    # webcam-livetv.nix on shimmers.
+    # ./webcam.nix
     ../../modules/nixos/server.nix
 
     # Secure Boot (needed for Vanguard/League in the Windows dual-boot).

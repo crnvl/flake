@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./artcraft.nix
     ./battery.nix
     ./firefox.nix
     ./gpg.nix
@@ -85,6 +86,7 @@
       vlc
       figma-linux
       blender
+      obs-studio
 
       (tor-browser.override {
         extraPrefs = ''
