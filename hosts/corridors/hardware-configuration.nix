@@ -49,7 +49,10 @@
     };
 
     "/mnt/storage2" = {
-      device = "/dev/disk/by-uuid/a149898d-99d8-4d56-983a-abce9a48ce81";
+      # by-partuuid, not by-uuid: the Windows MSR partition (sdc1) carries a
+      # stale ext4 superblock with the same fs UUID, so by-uuid can resolve
+      # to the 16M MSR and the mount fails.
+      device = "/dev/disk/by-partuuid/e9e319ec-9b47-4b32-826e-fb66b99b95f2";
       fsType = "ext4";
       options = [ "nofail" ];
     };
