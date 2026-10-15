@@ -3,6 +3,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./sqm.nix
     # Webcam -> Jellyfin Live TV; disabled for now, re-enable together with
     # webcam-livetv.nix on shimmers.
     # ./webcam.nix
