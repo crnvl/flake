@@ -8,6 +8,40 @@
 let
   domain = "cloud.shimme.rs";
   occ = lib.getExe config.services.nextcloud.occ;
+  apps = config.services.nextcloud.package.packages.apps;
+
+  # nixpkgs only packages recognize up to NC34. v13.1.0 supports NC35/36.
+  # Drop this once nixpkgs has a "35" entry in apps/recognize.nix.
+  recognize = apps.recognize.overrideAttrs (
+    finalAttrs: old: {
+      version = "13.1.0";
+
+      srcs = [
+        (pkgs.fetchurl {
+          url = "https://github.com/nextcloud/recognize/releases/download/v${finalAttrs.version}/recognize-${finalAttrs.version}.tar.gz";
+          hash = "sha256-bdeMFBomHKbEZC/lL7TBl5nFB5PGRtay5TaWwvwHo7E=";
+        })
+        (pkgs.fetchurl {
+          url = "https://github.com/nextcloud/recognize/archive/refs/tags/v${finalAttrs.version}.tar.gz";
+          hash = "sha256-WTiWOpEHD6+RfI2iGt+jBmoawaJOCDn2Ov49zX9yaJA=";
+        })
+      ]
+      # libtensorflow (unchanged, still 2.9.1)
+      ++ lib.drop 2 old.srcs;
+
+      unpackPhase = ''
+        tar -xzpf "${builtins.elemAt finalAttrs.srcs 0}" recognize
+        tar -xzpf "${builtins.elemAt finalAttrs.srcs 1}" -C recognize --strip-components=1 recognize-${finalAttrs.version}/models
+      ''
+      + lib.optionalString (lib.length finalAttrs.srcs > 2) ''
+        tar -xzpf "${builtins.elemAt finalAttrs.srcs 2}" -C recognize/node_modules/@tensorflow/tfjs-node/deps
+      '';
+
+      meta = old.meta // {
+        changelog = "https://github.com/nextcloud/recognize/blob/v${finalAttrs.version}/CHANGELOG.md";
+      };
+    }
+  );
 in
 {
   age.secrets = {
@@ -28,7 +62,7 @@ in
 
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud34;
+    package = pkgs.nextcloud35;
     hostName = domain;
     https = true;
 
@@ -45,14 +79,14 @@ in
     };
 
     extraApps = {
-      inherit (config.services.nextcloud.package.packages.apps)
+      inherit (apps)
         user_oidc
         calendar
         contacts
         maps
         previewgenerator
-        recognize
         ;
+      inherit recognize;
     };
 
     imaginary.enable = true;
