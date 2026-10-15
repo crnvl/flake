@@ -26,7 +26,23 @@
 
   networking = {
     hostName = "corridors";
-    networkmanager.enable = true;
+
+    networkmanager = {
+      enable = true;
+      # Ignore the DNS server handed out by DHCP (the Vodafone router). Its
+      # resolver caches a "kabelmodemaktivieren.vodafone.de" answer for an
+      # hour whenever the cable line blips.
+      dns = "none";
+    };
+
+    # Fastest resolvers from this line (benchmarked 2026-10-15: ~12 ms cached,
+    # ~17 ms uncached). Vodafone first, DNS4EU (unfiltered) as a fallback from
+    # a different operator. glibc only uses the first three.
+    nameservers = [
+      "80.69.96.12" # Vodafone
+      "86.54.11.100" # DNS4EU unfiltered
+      "81.210.129.4" # Vodafone
+    ];
 
     firewall = {
       allowedTCPPorts = [
