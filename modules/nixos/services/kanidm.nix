@@ -37,6 +37,20 @@
         bindaddress = "127.0.0.1:8443";
         tls_chain = "/var/lib/acme/id.shimme.rs/fullchain.pem";
         tls_key = "/var/lib/acme/id.shimme.rs/key.pem";
+
+        # The upstream module sets this to a derivation, which its
+        # filterAttrsRecursive then walks into, triggering the
+        # `stdenv.is*` deprecation warnings. Same path, but as a string.
+        migration_path = lib.mkForce (
+          toString (
+            pkgs.linkFarm "kanidm-entry-management" (
+              lib.mapAttrsToList (name: value: {
+                name = "${name}.json";
+                path = (pkgs.formats.json { }).generate "${name}.json" value;
+              }) config.services.kanidm.server.entryManagement.migrations
+            )
+          )
+        );
       };
     };
 

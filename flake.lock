@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779356589,
-        "narHash": "sha256-am4aDF9Zw4hiD4rL154Cigio2vhkNhDuuDca6fW+ChY=",
+        "lastModified": 1792061323,
+        "narHash": "sha256-E6zfHDA0G2djBjWf1ivipOm4w0d0BE5XGH+QgMQLJIo=",
         "ref": "refs/heads/main",
-        "rev": "51d9afcd7793ebcfcc854c641cb452bdf4a5571b",
-        "revCount": 10,
+        "rev": "c0597436e9a2364e5235040af937258634e66bc3",
+        "revCount": 11,
         "type": "git",
         "url": "https://git.gay/67/catshift"
       },
@@ -101,11 +101,11 @@
         "rust-analyzer-src": "rust-analyzer-src"
       },
       "locked": {
-        "lastModified": 1779007028,
-        "narHash": "sha256-AIbVmDAJFVRl+PUkgoOHVvzulVLQW0pcltKNrBVWxww=",
+        "lastModified": 1791977486,
+        "narHash": "sha256-yw4n7NA74PrQzGNQW304MRKVuZJ8+9WivzK2fy9qoMs=",
         "owner": "nix-community",
         "repo": "fenix",
-        "rev": "3c09e6c592c6ebfb9cde94bba990af23b2c06a87",
+        "rev": "aaa06ecaa7a23c42b85e3f786a9f1ee47f3a6e8c",
         "type": "github"
       },
       "original": {
@@ -411,11 +411,11 @@
     "rust-analyzer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1778958756,
-        "narHash": "sha256-bNCTsqjqpSVXDKsCKHTyNEaw6LpaiRUoUVKlVDSzjHk=",
+        "lastModified": 1791835614,
+        "narHash": "sha256-CMXY9x3W43sVW8G7IhXAi3vNqkbWwbsxtKldef8Jar0=",
         "owner": "rust-lang",
         "repo": "rust-analyzer",
-        "rev": "ace47025ddfc7fec399e11594318e64443c0e1c2",
+        "rev": "dd5ed69d4b5b26fe7f91013b1d02608cd37ae199",
         "type": "github"
       },
       "original": {
