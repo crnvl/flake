@@ -19,6 +19,14 @@
       "iocharset=utf8"
       "vers=3.0"
       "cache=loose"
+      # The Linux cifs client uses one lease key per inode, but the server
+      # binds a lease key to the filename it was first opened under. Sonarr/
+      # Radarr hardlink imports into media/, and qBittorrent keeps the
+      # downloads/ name open while seeding, so opening the media/ name with the
+      # same lease key fails with STATUS_INVALID_PARAMETER (EINVAL) and
+      # Jellyfin can't play the title. cache=loose already caches without
+      # leases.
+      "nolease"
       "nofail"
       "_netdev"
       "x-systemd.automount"
