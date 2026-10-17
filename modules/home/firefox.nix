@@ -51,7 +51,7 @@ in
         ];
 
         settings = {
-          "browser.startup.homepage" = "https://kagi.com";
+          "browser.startup.homepage" = "https://kagi.com?year=1996";
           "ui.systemUsesDarkTheme" = 1;
           "browser.startup.homepage_override.mstone" = "ignore";
 
