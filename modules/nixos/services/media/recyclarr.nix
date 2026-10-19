@@ -130,9 +130,10 @@ let
         arr_ns=""
       fi
 
+      # Retries only transient failures; a rejected request stays rejected.
       curl_opts=(
         --fail-with-body --silent --show-error --location --max-time 120
-        --retry 2 --retry-delay 2 --retry-all-errors
+        --retry 2 --retry-delay 2 --retry-connrefused
       )
 
       # call <netns or ""> <auth header> <method> <url> [json body]
@@ -216,7 +217,11 @@ let
           | if .activeAnimeProfileId | IN($old[]) then .activeAnimeProfileId = $p | .activeAnimeProfileName = $n else . end')"
         while read -r s; do
           [ -n "$s" ] || continue
-          seerr PUT "settings/$app/$(jq -r .id <<< "$s")" "$s" > /dev/null
+          # Seerr validates the body against its OpenAPI spec, where the id
+          # is read-only and several fields are not nullable, so send it the
+          # way its own settings page does: no id, unset fields left out.
+          seerr PUT "settings/$app/$(jq -r .id <<< "$s")" \
+            "$(jq -c 'del(.id) | with_entries(select(.value != null))' <<< "$s")" > /dev/null
           log "seerr: $(jq -r .name <<< "$s") now requests $main_profile"
         done <<< "$servers"
 
@@ -231,7 +236,8 @@ let
             seerr DELETE "overrideRule/$id" > /dev/null
             log "seerr: dropped override rule $id, it only picked a retired profile"
           else
-            seerr PUT "overrideRule/$id" "$(jq -c '.profileId = null' <<< "$r")" > /dev/null
+            seerr PUT "overrideRule/$id" "$(jq -c '{ users, genre, language, keywords, profileId: null,
+              rootFolder, tags, radarrServiceId, sonarrServiceId }' <<< "$r")" > /dev/null
             log "seerr: override rule $id no longer picks a profile"
           fi
         done <<< "$rules"
