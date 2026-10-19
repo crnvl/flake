@@ -14,6 +14,7 @@
         "kanidm-admin-password"
         "kanidm-oauth2-jellyfin-secret"
         "kanidm-oauth2-vaultwarden-secret"
+        "kanidm-oauth2-lily-git-secret"
       ]
       (name: {
         file = ../../../hosts/shimmers/secrets/${name}.age;
@@ -68,6 +69,7 @@
         vaultwarden_users = { };
         nextcloud_users = { };
         nextcloud_admins = { };
+        lily_git_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -82,6 +84,7 @@
             "vaultwarden_users"
             "nextcloud_users"
             "nextcloud_admins"
+            "lily_git_users"
           ];
         };
 
@@ -297,6 +300,23 @@
             joinType = "array";
             valuesByGroup.nextcloud_admins = [ "admin" ];
           };
+        };
+
+        # Forgejo on git.lily.pizza, auth source named "shimmers". Forgejo
+        # sends an S256 PKCE challenge for OpenID Connect sources, so PKCE
+        # stays enforced.
+        lily_git = {
+          displayName = "git.lily.pizza";
+          originUrl = "https://git.lily.pizza/user/oauth2/shimmers/callback";
+          originLanding = "https://git.lily.pizza";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-lily-git-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.lily_git_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
         };
       };
     };
