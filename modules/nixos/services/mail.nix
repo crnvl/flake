@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 
@@ -26,6 +27,15 @@ in
 
   services.maddy = {
     enable = true;
+
+    # When storing a message body fails (on 2026-10-18 a malformed multipart
+    # message from forwardemail), maddy drops the delivery without aborting
+    # it. imapsql then never rolls back its transaction, keeps the SQLite
+    # write lock, and every later delivery fails with "database is locked"
+    # until maddy restarts. Still the same upstream as of 0.9.6 / master.
+    package = pkgs.maddy.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./maddy-abort-failed-delivery.patch ];
+    });
 
     hostname = fqdn;
     primaryDomain = "5-htp.store";

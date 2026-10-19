@@ -1,0 +1,66 @@
+--- a/internal/endpoint/smtp/session.go
++++ b/internal/endpoint/smtp/session.go
+@@ -464,13 +464,22 @@
+ 	if err != nil {
+ 		return wrapErr(err)
+ 	}
++	committed := false
+ 	defer func() {
+ 		if err := buf.Remove(); err != nil {
+ 			s.log.Error("failed to remove buffered body", err)
+ 		}
+ 
+ 		// go-smtp will call Reset, but it will call Abort if delivery is non-nil.
+-		s.cleanSession()
++		// Dropping the delivery here means Reset never aborts it, so abort it
++		// ourselves unless it was committed: otherwise a failed Body leaves
++		// e.g. the imapsql transaction, and with it the SQLite write lock,
++		// open until maddy restarts.
++		if committed {
++			s.cleanSession()
++		} else {
++			s.abort(s.msgCtx)
++		}
+ 	}()
+ 
+ 	if err := s.checkRoutingLoops(header); err != nil {
+@@ -484,6 +493,7 @@
+ 	if err := s.delivery.Commit(bodyCtx); err != nil {
+ 		return wrapErr(err)
+ 	}
++	committed = true
+ 
+ 	s.log.Msg("accepted", "msg_id", s.msgMeta.ID)
+ 
+@@ -515,13 +525,22 @@
+ 	if err != nil {
+ 		return wrapErr(err)
+ 	}
++	committed := false
+ 	defer func() {
+ 		if err := buf.Remove(); err != nil {
+ 			s.log.Error("failed to remove buffered body", err)
+ 		}
+ 
+ 		// go-smtp will call Reset, but it will call Abort if delivery is non-nil.
+-		s.cleanSession()
++		// Dropping the delivery here means Reset never aborts it, so abort it
++		// ourselves unless it was committed: otherwise a failed Body leaves
++		// e.g. the imapsql transaction, and with it the SQLite write lock,
++		// open until maddy restarts.
++		if committed {
++			s.cleanSession()
++		} else {
++			s.abort(s.msgCtx)
++		}
+ 	}()
+ 
+ 	if err := s.checkRoutingLoops(header); err != nil {
+@@ -535,6 +554,7 @@
+ 	if err := s.delivery.Commit(bodyCtx); err != nil {
+ 		return wrapErr(err)
+ 	}
++	committed = true
+ 
+ 	s.log.Msg("accepted", "msg_id", s.msgMeta.ID)
+ 
