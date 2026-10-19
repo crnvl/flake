@@ -174,6 +174,16 @@ in
                 };
               }
               {
+                alert = "DiskSpaceAlmostFull";
+                expr = ''node_filesystem_avail_bytes{mountpoint=~"/|/mnt/chroma"} / node_filesystem_size_bytes < 0.03'';
+                for = "15m";
+                labels.severity = "critical";
+                annotations = {
+                  summary = "The server is almost out of storage.";
+                  resolved = "Server storage is no longer almost full.";
+                };
+              }
+              {
                 alert = "TlsCertExpiringSoon";
                 expr = "(probe_ssl_earliest_cert_expiry - time()) / 86400 < 10";
                 for = "1h";
@@ -195,6 +205,11 @@ in
       port = 9093;
       environmentFile = config.age.secrets.alertmanager-env.path;
 
+      # How long alertmanager remembers what it already sent. Once that is
+      # gone, a still firing alert counts as new and gets sent again, so this
+      # caps every repeat_interval below; the default is 120h.
+      extraFlags = [ "--data.retention=8760h" ];
+
       configuration = {
         route = {
           receiver = "discord";
@@ -202,6 +217,17 @@ in
           group_wait = "30s";
           group_interval = "5m";
           repeat_interval = "24h";
+
+          routes = [
+            {
+              # Storage fills up over weeks, so a daily reminder is just
+              # noise: one message when it gets low, one more when it is
+              # almost full (a separate alert, so a separate message), and
+              # the resolved ones. A year is as close to never as it gets.
+              matchers = [ ''alertname=~"DiskSpaceLow|DiskSpaceAlmostFull"'' ];
+              repeat_interval = "8760h";
+            }
+          ];
         };
 
         receivers = [
