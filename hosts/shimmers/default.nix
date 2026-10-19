@@ -10,6 +10,7 @@
     ../../modules/nixos/services/kanidm.nix
     ../../modules/nixos/services/monitoring
     ../../modules/nixos/services/jellyfin.nix
+    ../../modules/nixos/services/navidrome.nix
 
     ../../modules/nixos/services/transmission.nix
     ../../modules/nixos/services/qbittorrent.nix
@@ -24,6 +25,9 @@
     ../../modules/nixos/services/media/prowlarr.nix
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
+    ../../modules/nixos/services/media/lidarr.nix
+    ../../modules/nixos/services/media/slskd.nix
+    ../../modules/nixos/services/media/soularr.nix
     ../../modules/nixos/services/media/seerr.nix
     ../../modules/nixos/services/media/seerr-usage.nix
     ../../modules/nixos/services/media/janitor.nix

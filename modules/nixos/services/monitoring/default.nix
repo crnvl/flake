@@ -23,6 +23,7 @@ let
     "Vault" = "https://vault.shimme.rs";
     "Cloud" = "https://cloud.shimme.rs";
     "Seerr" = "https://seerr.shimme.rs";
+    "Music" = "https://music.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";

@@ -21,14 +21,16 @@ let
 
     Reads per-user watch data from jellyfin and ranks every movie and series
     by its most recent sign of life: the last time anyone played it, or the
-    last time something landed on disk for it (a fresh request, a new
-    season), whichever is newer. The bottom ${toString cfg.removePercent}% of that ranking gets
+    last time it became new (added to radarr/sonarr, requested in seerr, a
+    movie's release, a series' newest aired episode that is on disk),
+    whichever is newer. File dates are ignored, so quality upgrades do not
+    count. The bottom ${toString cfg.removePercent}% of that ranking gets
     evicted. Whole series are the unit of removal, so recent activity
     anywhere in a show lifts all of its seasons. Jellyfin favorites and
-    anything added in the last ${toString cfg.minAgeDays} days are left out of the ranking
-    entirely. Eviction deletes the files through radarr and sonarr (without
-    import exclusions) and drops the seerr media entry, so everything can be
-    re-requested later.
+    anything that became new in the last ${toString cfg.minAgeDays} days are left out of the
+    ranking entirely. Eviction deletes the files through radarr and sonarr
+    (without import exclusions) and drops the seerr media entry, so
+    everything can be re-requested later.
 
     Needs to run as root: the seerr api key lives in its state directory and
     the other keys are agenix secrets.
@@ -54,13 +56,32 @@ let
 
     def day: todate | .[0:10];
 
+    # The newest of a title's freshness marks ({at, why} pairs), each capped
+    # at now so a bogus future date cannot shield anything indefinitely.
+    def freshest($now):
+      map(select(.at != null) | .at |= ([ ., $now ] | min)) | max_by(.at);
+
+    # A movie can be grabbed from its digital or physical release, whichever
+    # came first. Without either, the cinema date is at least a lower bound.
+    def released($now):
+      ([ .digitalRelease, .physicalRelease ] | map(ts | select(. != null and . <= $now)) | min)
+      // (.inCinemas | ts | select(. != null and . <= $now))
+      // null;
+
+    # The newest non-declined seerr request per title.
+    def requestedBy($type; $key):
+      map(select(.type == $type and .status != 3 and .[$key] != null))
+      | group_by(.[$key])
+      | map({ key: (.[0][$key] | tostring), value: (map(.createdAt | ts) | max) })
+      | from_entries;
+
     # Titles that stay out of the ranking altogether, so they neither get
     # evicted nor count towards the share that does.
     def protection($now; $minAge):
       if .favorite then "favorite"
       elif .arr == null then "unmanaged"
-      elif .added == null then "undated"
-      elif ($now - .added) < ($minAge * 86400) then "added recently"
+      elif .fresh == null then "undated"
+      elif ($now - .fresh.at) < ($minAge * 86400) then "new recently"
       else null end;
 
     def entry($now):
@@ -71,25 +92,48 @@ let
         size: .arr.size,
         seerrIds: .seerrIds,
         idleDays: ((($now - .lastActivity) / 86400) | floor),
-        reason: (if .lastPlayed == null then "never watched, added \(.added | day)"
-                 elif .lastPlayed >= .added then "last watched \(.lastPlayed | day)"
-                 else "last watched \(.lastPlayed | day), \(if .type == "series" then "new episodes" else "added" end) \(.added | day)" end)
+        reason: (if .lastPlayed == null then "never watched, \(.fresh.why) \(.fresh.at | day)"
+                 elif .lastPlayed >= .fresh.at then "last watched \(.lastPlayed | day)"
+                 else "last watched \(.lastPlayed | day), \(.fresh.why) \(.fresh.at | day)" end)
       };
 
     ($jfItems[0] // []) as $items
     | ($jfEpisodes[0] // []) as $episodes
     | ($radarr[0] // []) as $radarrMovies
     | ($sonarr[0] // []) as $sonarrSeries
+    | ($aired[0] // {}) as $airedBySonarrId
     | ($seerr[0] // []) as $seerrMedia
+    | ($requests[0] // []) as $seerrRequests
     | now as $now
+    | ($seerrRequests | requestedBy("movie"; "tmdbId")) as $requestedByTmdb
+    | ($seerrRequests | requestedBy("tv"; "tvdbId")) as $requestedByTvdb
+    # Freshness only counts things that make a title new to us: it being
+    # added or requested, a movie's release, a series' newest aired episode
+    # that is on disk. File dates are out, quality upgrades rewrite those.
     | ($radarrMovies
         | map(select(.tmdbId != null)
-          | { key: (.tmdbId | tostring), value: { id: .id, size: (.sizeOnDisk // 0) } })
+          | (.tmdbId | tostring) as $k
+          | { key: $k,
+              value: {
+                id: .id,
+                size: (.sizeOnDisk // 0),
+                fresh: ([ { at: (.added | ts), why: "added" },
+                          { at: $requestedByTmdb[$k], why: "requested" },
+                          { at: released($now), why: "released" } ] | freshest($now))
+              } })
         | from_entries
       ) as $radarrByTmdb
     | ($sonarrSeries
         | map(select(.tvdbId != null)
-          | { key: (.tvdbId | tostring), value: { id: .id, size: (.statistics.sizeOnDisk // 0) } })
+          | (.tvdbId | tostring) as $k
+          | { key: $k,
+              value: {
+                id: .id,
+                size: (.statistics.sizeOnDisk // 0),
+                fresh: ([ { at: (.added | ts), why: "added" },
+                          { at: $requestedByTvdb[$k], why: "requested" },
+                          { at: ($airedBySonarrId[.id | tostring] | ts), why: "new episode aired" } ] | freshest($now))
+              } })
         | from_entries
       ) as $sonarrByTvdb
     | ($seerrMedia
@@ -112,40 +156,27 @@ let
         | map({
             title: .[0].name,
             key: (.[0].tmdb // null),
-            added: (map(.added | ts) | max),
             lastPlayed: (map(.lastPlayed | ts) | max),
             favorite: (map(.favorite) | any)
           })
       ) as $movies
-    # Series activity and freshness live on the episodes: the newest episode
-    # DateCreated lifts shows with a freshly added season, and the newest
-    # LastPlayedDate across all users and seasons is what "actively watching"
-    # means.
+    # Series activity lives on the episodes: the newest LastPlayedDate across
+    # all users and seasons is what "actively watching" means.
     | ($episodes
         | map(select(.series != null))
         | group_by(.series)
-        | map({
-            key: .[0].series,
-            value: {
-              lastPlayed: (map(.lastPlayed | ts) | max),
-              lastAdded: (map(.added | ts) | max)
-            }
-          })
+        | map({ key: .[0].series, value: (map(.lastPlayed | ts) | max) })
         | from_entries
-      ) as $epBySeries
+      ) as $playedBySeries
     | ($items
         | map(select(.type == "Series"))
         | group_by(.id)
-        | map(
-            ($epBySeries[.[0].id] // { lastPlayed: null, lastAdded: null }) as $ep
-            | {
-                title: .[0].name,
-                key: (.[0].tvdb // null),
-                added: ([ (map(.added | ts) | max), $ep.lastAdded ] | max),
-                lastPlayed: $ep.lastPlayed,
-                favorite: (map(.favorite) | any)
-              }
-          )
+        | map({
+            title: .[0].name,
+            key: (.[0].tvdb // null),
+            lastPlayed: ($playedBySeries[.[0].id] // null),
+            favorite: (map(.favorite) | any)
+          })
       ) as $series
     | ( [ $movies[]
           | . + { type: "movie",
@@ -157,9 +188,10 @@ let
                   seerrIds: (if .key == null then [] else ($seerrByTvdb[.key | tostring] // []) end) } ]
       )
     # A title's standing is its most recent sign of life: the last play by
-    # anyone, or the last time something landed on disk for it (the request
-    # being fulfilled, an upgrade, a new season), whichever is newer.
-    | map(. + { lastActivity: ([ .lastPlayed, .added ] | max) })
+    # anyone, or the last time it became new to us (added, requested,
+    # released, a new episode aired), whichever is newer.
+    | map(. + { fresh: .arr.fresh })
+    | map(. + { lastActivity: ([ .lastPlayed, .fresh.at ] | max) })
     | map(. + { protectedBy: protection($now; $minAgeDays) }) as $all
     # Most recently active first, so the tail of the list is what goes.
     | ($all
@@ -357,16 +389,22 @@ let
       mapfile -t user_ids < <(jq -r '.[].Id' <<< "$users")
       [ "''${#user_ids[@]}" -gt 0 ] || die "jellyfin returned no users, refusing to act on empty watch data"
 
+      # Jellyfin only supplies watch data and favorites. Its DateCreated is
+      # useless as a freshness signal: every quality upgrade imports a new
+      # file, which jellyfin treats as freshly added.
       item_proj='{type: .Type, id: .Id, name: .Name,
                   tmdb: .ProviderIds.Tmdb, tvdb: .ProviderIds.Tvdb,
-                  added: .DateCreated, lastPlayed: .UserData.LastPlayedDate,
+                  lastPlayed: .UserData.LastPlayedDate,
                   favorite: (.UserData.IsFavorite // false)}'
-      episode_proj='{series: .SeriesId, added: .DateCreated, lastPlayed: .UserData.LastPlayedDate}'
+      episode_proj='{series: .SeriesId, lastPlayed: .UserData.LastPlayedDate}'
 
       jf_page() { # user-id item-types fields outfile projection
-        local start=0 take=1000 page count
+        local start=0 take=1000 page count fields=""
+        if [ -n "$3" ]; then
+          fields="&Fields=$3"
+        fi
         while : ; do
-          page="$(jf_get "$jellyfin_url/Items?userId=$1&IncludeItemTypes=$2&Recursive=true&Fields=$3&EnableUserData=true&EnableImages=false&Limit=$take&StartIndex=$start")" \
+          page="$(jf_get "$jellyfin_url/Items?userId=$1&IncludeItemTypes=$2&Recursive=true$fields&EnableUserData=true&EnableImages=false&Limit=$take&StartIndex=$start")" \
             || die "jellyfin item listing failed for user $1"
           count="$(jq '.Items | length' <<< "$page")"
           jq -c ".Items[] | $5" <<< "$page" >> "$4"
@@ -380,8 +418,8 @@ let
       : > "$tmp/items.jsonl"
       : > "$tmp/episodes.jsonl"
       for uid in "''${user_ids[@]}"; do
-        jf_page "$uid" "Movie,Series" "ProviderIds,DateCreated" "$tmp/items.jsonl" "$item_proj"
-        jf_page "$uid" "Episode" "DateCreated" "$tmp/episodes.jsonl" "$episode_proj"
+        jf_page "$uid" "Movie,Series" "ProviderIds" "$tmp/items.jsonl" "$item_proj"
+        jf_page "$uid" "Episode" "" "$tmp/episodes.jsonl" "$episode_proj"
       done
       [ -s "$tmp/items.jsonl" ] || die "jellyfin returned no items, refusing to act on empty watch data"
       jq -s '.' "$tmp/items.jsonl" > "$tmp/items.json"
@@ -393,6 +431,37 @@ let
       printf '%s' "$radarr_movies" > "$tmp/radarr.json"
       sonarr_series="$(arr_get "$sonarr_url/api/v3/series" "$sonarr_key")" || die "sonarr unreachable at $sonarr_url"
       printf '%s' "$sonarr_series" > "$tmp/sonarr.json"
+
+      # A new season shows up as freshly aired episodes with a file, which
+      # upgrades never change. Sonarr only lists episodes one series at a
+      # time, so ask for every series that has anything on disk. A gap here
+      # would make a show look older than it is, hence the hard stop.
+      : > "$tmp/aired.jsonl"
+      while read -r sid; do
+        episodes="$(arr_get "$sonarr_url/api/v3/episode?seriesId=$sid" "$sonarr_key")" \
+          || die "sonarr episode listing failed for series $sid"
+        jq -c --arg id "$sid" \
+          '{ key: $id, value: ([ .[] | select(.hasFile and .airDateUtc != null) | .airDateUtc ] | max) }' \
+          <<< "$episodes" >> "$tmp/aired.jsonl"
+      done < <(jq -r '.[] | select((.statistics.episodeFileCount // 0) > 0) | .id' "$tmp/sonarr.json")
+      jq -s 'from_entries' "$tmp/aired.jsonl" > "$tmp/aired.json"
+
+      : > "$tmp/requests.jsonl"
+      skip=0
+      take=100
+      while : ; do
+        page="$(seerr_get "$seerr_url/api/v1/request?take=$take&skip=$skip&filter=all&sort=added")" \
+          || die "seerr unreachable at $seerr_url"
+        count="$(jq '.results | length' <<< "$page")"
+        jq -c '.results[]
+               | { type: (.type // .media.mediaType), status, createdAt,
+                   tmdbId: .media.tmdbId, tvdbId: .media.tvdbId }' <<< "$page" >> "$tmp/requests.jsonl"
+        if [ "$count" -lt "$take" ]; then
+          break
+        fi
+        skip=$(( skip + take ))
+      done
+      jq -s '.' "$tmp/requests.jsonl" > "$tmp/requests.json"
 
       : > "$tmp/seerr.jsonl"
       skip=0
@@ -416,7 +485,9 @@ let
         --slurpfile jfEpisodes "$tmp/episodes.json" \
         --slurpfile radarr "$tmp/radarr.json" \
         --slurpfile sonarr "$tmp/sonarr.json" \
+        --slurpfile aired "$tmp/aired.json" \
         --slurpfile seerr "$tmp/seerr.json" \
+        --slurpfile requests "$tmp/requests.json" \
         --argjson minAgeDays "$min_age" \
         --argjson removePercent "$remove_percent" \
         -f ${policyScript})"
@@ -553,10 +624,12 @@ in
       type = lib.types.ints.unsigned;
       default = 60;
       description = ''
-        Grace period: anything added to the library within this many days is
-        left out of the ranking, so it is never touched and does not count
-        towards removePercent. For series the clock restarts whenever a new
-        episode lands. 0 ranks everything that is not a favorite.
+        Grace period: anything that became new within this many days (added
+        to radarr/sonarr, requested in seerr, released, or for series a new
+        episode aired that is on disk) is left out of the ranking, so it is
+        never touched and does not count towards removePercent. Quality
+        upgrades do not restart the clock. 0 ranks everything that is not a
+        favorite.
       '';
     };
 
@@ -568,7 +641,7 @@ in
         series that is not a favorite, unmanaged by radarr/sonarr or inside
         the minAgeDays grace period is ranked by its most recent sign of
         life, the last play by anyone (partial ones included) or the last
-        time something landed on disk for it, whichever is newer, and this
+        time it became new (see minAgeDays), whichever is newer, and this
         many percent from the bottom go. Being a share of the library, it
         also bounds how much a bad API answer can take out in one run.
       '';

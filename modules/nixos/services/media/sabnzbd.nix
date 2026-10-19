@@ -25,6 +25,7 @@
     "d /var/lib/sabnzbd/downloads 0775 sabnzbd media -"
     "d /var/lib/sabnzbd/downloads/radarr 0775 sabnzbd media -"
     "d /var/lib/sabnzbd/downloads/sonarr 0775 sabnzbd media -"
+    "d /var/lib/sabnzbd/downloads/lidarr 0775 sabnzbd media -"
     "d /var/lib/sabnzbd/incomplete 0755 sabnzbd sabnzbd -"
   ];
 
