@@ -340,8 +340,17 @@
     "/var/lib/acme/id.shimme.rs/"
   ];
 
-  services.nginx.virtualHosts."id.shimme.rs" = mkProxyHost {
-    port = 8443;
-    scheme = "https";
-  };
+  services.nginx.virtualHosts."id.shimme.rs" = lib.mkMerge [
+    (mkProxyHost {
+      port = 8443;
+      scheme = "https";
+    })
+    {
+      # Kanidm's base template loads /pkg/override.css after its own
+      # styles as a custom-theming hook; the file it ships is empty.
+      # Serving ours from nginx avoids rebuilding kanidm. (?v= cache
+      # busters are query strings, which location matching ignores.)
+      locations."= /pkg/override.css".alias = "${./kanidm-1996.css}";
+    }
+  ];
 }

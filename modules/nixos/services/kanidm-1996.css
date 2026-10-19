@@ -1,0 +1,324 @@
+/*
+ * kanidm "1996 mode" — in the spirit of https://kagi.com/?year=1996
+ *
+ * Served by nginx at /pkg/override.css, which kanidm's base template
+ * loads after bootstrap and style.css specifically for custom theming.
+ *
+ * Silver bevels, Times New Roman, blue links, blinking banner,
+ * rainbow dividers. Best viewed at 800x600.
+ */
+
+:root,
+[data-bs-theme="light"],
+[data-bs-theme="dark"] {
+  color-scheme: light;
+
+  --bs-body-bg: #c0c0c0;
+  --bs-body-color: #000000;
+  --bs-body-font-family: "Times New Roman", Times, serif;
+  --bs-body-font-size: 1.05rem;
+
+  --bs-link-color: #0000ee;
+  --bs-link-hover-color: #ff0000;
+  --bs-link-color-rgb: 0, 0, 238;
+  --bs-link-hover-color-rgb: 255, 0, 0;
+
+  --bs-border-radius: 0;
+  --bs-border-radius-sm: 0;
+  --bs-border-radius-lg: 0;
+  --bs-border-radius-xl: 0;
+  --bs-border-radius-xxl: 0;
+  --bs-border-radius-pill: 0;
+
+  --bs-secondary-bg: #c0c0c0;
+  --bs-tertiary-bg: #d4d0c8;
+}
+
+/* no soft edges in 1996 */
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Times New Roman", Times, serif !important;
+  font-weight: bold !important;
+  color: #000080;
+}
+
+/* ============================= links ============================= */
+
+a {
+  color: #0000ee !important;
+  text-decoration: underline !important;
+}
+
+a:visited {
+  color: #551a8b !important;
+}
+
+a:hover,
+a:active {
+  color: #ff0000 !important;
+}
+
+/* ====================== blinking banner ========================== */
+
+@keyframes blink-1996 {
+  50% { visibility: hidden; }
+}
+
+main::before {
+  content: "\2605 \00b7 Welcome to the IDENTITY ZONE \00b7 \2605";
+  display: block;
+  text-align: center;
+  font-family: "Comic Sans MS", "Times New Roman", cursive;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ff00ff;
+  padding: 0.5rem 0 0.25rem;
+  animation: blink-1996 1s step-end infinite;
+}
+
+/* rainbow divider, the crown jewel of any 1996 homepage */
+main::after {
+  content: "You are visitor \2116 000001337 \00b7 Best viewed in Netscape Navigator 2.0 at 800\00d7 600";
+  display: block;
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.75rem;
+  color: #000;
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 6px solid;
+  border-image: linear-gradient(
+    to right,
+    #ff0000, #ff9900, #ffff00, #00bb00, #0000ff, #9900ff
+  ) 1;
+}
+
+/* ================== Win95-style beveled chrome =================== */
+
+.btn,
+button.btn,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-dark,
+.btn-light,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-danger,
+.btn-outline-dark {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 2px outset #ffffff !important;
+  font-family: "Times New Roman", Times, serif !important;
+  font-weight: bold;
+  padding: 2px 14px;
+}
+
+.btn:hover {
+  background: #d4d0c8 !important;
+}
+
+.btn:active,
+.btn.active,
+.btn:focus-visible {
+  border-style: inset !important;
+  background: #b0b0b0 !important;
+}
+
+.btn:disabled,
+.btn.disabled {
+  color: #808080 !important;
+  border-style: outset !important;
+}
+
+/* dotted focus ring, like god intended */
+:focus,
+:focus-visible,
+.form-control:focus,
+.btn:focus {
+  outline: 1px dotted #000000 !important;
+  outline-offset: -4px;
+}
+
+/* ========================= form fields =========================== */
+
+.form-control,
+.form-select,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+  background: #ffffff !important;
+  color: #000 !important;
+  border: 2px inset #ffffff !important;
+  font-family: "Courier New", Courier, monospace !important;
+}
+
+.form-control::placeholder {
+  color: #808080 !important;
+  font-style: italic;
+}
+
+.form-check-input {
+  border: 2px inset #ffffff !important;
+  background-color: #ffffff;
+}
+
+.form-check-input:checked {
+  background-color: #000080 !important;
+  border-color: #808080 !important;
+}
+
+.form-label,
+.form-check-label {
+  font-weight: bold;
+}
+
+/* ================= cards / modals / alerts / lists =============== */
+
+.card,
+.modal-content,
+.list-group-item,
+.accordion-item,
+.toast,
+.dropdown-menu {
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  border: 2px outset #ffffff !important;
+}
+
+.card-header,
+.modal-header {
+  background: #000080 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  border-bottom: 2px groove #ffffff !important;
+}
+
+.card-header *,
+.modal-header * {
+  color: #ffffff !important;
+}
+
+.alert {
+  background: #ffffcc !important;
+  color: #000 !important;
+  border: 2px outset #ffffff !important;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.alert-danger {
+  background: #ffcccc !important;
+}
+
+.alert-success {
+  background: #ccffcc !important;
+}
+
+.badge {
+  background: #008080 !important;
+  color: #ffffff !important;
+  border: 1px outset #ffffff;
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* ====================== navbar & side menu ======================= */
+
+.navbar,
+nav.navbar {
+  background: #000080 !important;
+  border-bottom: 2px outset #ffffff;
+}
+
+.navbar a,
+.navbar .navbar-brand,
+.navbar .nav-link {
+  color: #ffffff !important;
+  font-weight: bold;
+  text-decoration: none !important;
+}
+
+.navbar a:hover {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+.side-menu {
+  background: #c0c0c0;
+  border: 2px outset #ffffff;
+}
+
+.side-menu-item {
+  text-decoration: none !important;
+  color: #0000ee !important;
+}
+
+.side-menu-item:hover,
+.side-menu-item.active {
+  background: #000080 !important;
+  color: #ffffff !important;
+}
+
+.side-menu-item.active .icon-container img,
+.side-menu-item:hover .icon-container img {
+  filter: invert(100%) !important;
+}
+
+/* ====================== misc kanidm bits ========================= */
+
+/* neumorphic TOTP pillbox -> beveled gray box */
+.totp-display-container {
+  background: #c0c0c0 !important;
+  border: 2px inset #ffffff;
+}
+
+.totp-display {
+  font-family: "Courier New", Courier, monospace !important;
+  font-weight: bold;
+}
+
+#cred-update-commit-bar {
+  background: #c0c0c0 !important;
+  border: 2px outset #ffffff;
+}
+
+hr {
+  border: 0 !important;
+  height: 6px !important;
+  opacity: 1 !important;
+  background: linear-gradient(
+    to right,
+    #ff0000, #ff9900, #ffff00, #00bb00, #0000ff, #9900ff
+  ) !important;
+}
+
+table,
+.table {
+  background: #ffffff !important;
+  border: 2px inset #ffffff !important;
+  font-family: "Courier New", Courier, monospace;
+}
+
+code, pre, kbd {
+  font-family: "Courier New", Courier, monospace !important;
+  background: #ffffff;
+  border: 1px inset #ffffff;
+}
+
+/* old gray scrollbars */
+html {
+  scrollbar-color: #808080 #d4d0c8;
+}
