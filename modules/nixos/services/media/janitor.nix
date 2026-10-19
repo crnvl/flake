@@ -9,31 +9,35 @@ let
   cfg = config.my.mediaJanitor;
 
   helpText = pkgs.writeText "media-janitor-help.txt" ''
-    media-janitor - evict media nobody is watching and free the storage box
+    media-janitor - evict the least watched media and free the storage box
 
     usage: media-janitor [options]
 
       --delete        actually remove things; without this it is a dry run
+      --ranking       print the full ranking and exit
       --json          print the full policy report as JSON and exit
       --no-webhook    do not post the result to discord
       -h, --help      this text
 
-    Reads per-user watch data from jellyfin and evicts movies and series that
-    are stale (last played by anyone too long ago) or that were never played
-    and have sat on disk long enough. Whole series are the unit of removal, so
-    recent activity anywhere in a show protects all of its seasons; abandoned
-    view progress does not. Jellyfin favorites are never touched, and neither
-    is anything added recently. Eviction deletes the files through radarr and
-    sonarr (without import exclusions) and drops the seerr media entry, so
-    everything can be re-requested later.
+    Reads per-user watch data from jellyfin and ranks every movie and series
+    by its most recent sign of life: the last time anyone played it, or the
+    last time something landed on disk for it (a fresh request, a new
+    season), whichever is newer. The bottom ${toString cfg.removePercent}% of that ranking gets
+    evicted. Whole series are the unit of removal, so recent activity
+    anywhere in a show lifts all of its seasons. Jellyfin favorites and
+    anything added in the last ${toString cfg.minAgeDays} days are left out of the ranking
+    entirely. Eviction deletes the files through radarr and sonarr (without
+    import exclusions) and drops the seerr media entry, so everything can be
+    re-requested later.
 
     Needs to run as root: the seerr api key lives in its state directory and
     the other keys are agenix secrets.
   '';
 
   # Joins jellyfin watch data (aggregated across all users) with radarr,
-  # sonarr and seerr state, applies the retention policy and emits the
-  # removal candidates, most stale first, capped at $maxPerRun.
+  # sonarr and seerr state, ranks every title that is fair game by its most
+  # recent sign of life and emits the full ranking plus the bottom
+  # $removePercent of it as removal candidates, least active first.
   policyScript = pkgs.writeText "media-janitor-policy.jq" ''
     # Jellyfin timestamps carry 7-digit fractional seconds, which
     # fromdateiso8601 refuses, so strip them (and normalise the zone) first.
@@ -48,18 +52,29 @@ let
         )
       end;
 
-    def verdict($now; $minAge; $unwatched; $retention):
+    def day: todate | .[0:10];
+
+    # Titles that stay out of the ranking altogether, so they neither get
+    # evicted nor count towards the share that does.
+    def protection($now; $minAge):
       if .favorite then "favorite"
       elif .arr == null then "unmanaged"
       elif .added == null then "undated"
       elif ($now - .added) < ($minAge * 86400) then "added recently"
-      elif .lastPlayed == null then
-        (if ($now - .added) >= ($unwatched * 86400)
-         then "remove: never watched"
-         else "unwatched, waiting" end)
-      elif ($now - .lastPlayed) >= ($retention * 86400)
-      then "remove: gone stale"
-      else "watched recently" end;
+      else null end;
+
+    def entry($now):
+      {
+        type: .type,
+        title: .title,
+        arrId: .arr.id,
+        size: .arr.size,
+        seerrIds: .seerrIds,
+        idleDays: ((($now - .lastActivity) / 86400) | floor),
+        reason: (if .lastPlayed == null then "never watched, added \(.added | day)"
+                 elif .lastPlayed >= .added then "last watched \(.lastPlayed | day)"
+                 else "last watched \(.lastPlayed | day), \(if .type == "series" then "new episodes" else "added" end) \(.added | day)" end)
+      };
 
     ($jfItems[0] // []) as $items
     | ($jfEpisodes[0] // []) as $episodes
@@ -89,8 +104,8 @@ let
         | map({ key: (.[0].tvdbId | tostring), value: map(.id) })
         | from_entries
       ) as $seerrByTvdb
-    # One row per user per item comes in; fold to one per item. Any recent
-    # play by anyone protects it, any favorite mark by anyone protects it.
+    # One row per user per item comes in; fold to one per item. A play by
+    # anyone counts for everyone, any favorite mark by anyone protects it.
     | ($items
         | map(select(.type == "Movie"))
         | group_by(.id)
@@ -103,9 +118,9 @@ let
           })
       ) as $movies
     # Series activity and freshness live on the episodes: the newest episode
-    # DateCreated keeps shows with a freshly added season out of reach, and
-    # the newest LastPlayedDate across all users and seasons is what "actively
-    # watching" means.
+    # DateCreated lifts shows with a freshly added season, and the newest
+    # LastPlayedDate across all users and seasons is what "actively watching"
+    # means.
     | ($episodes
         | map(select(.series != null))
         | group_by(.series)
@@ -141,35 +156,61 @@ let
                   arr: (if .key == null then null else ($sonarrByTvdb[.key | tostring] // null) end),
                   seerrIds: (if .key == null then [] else ($seerrByTvdb[.key | tostring] // []) end) } ]
       )
-    | map(. + { verdict: verdict($now; $minAgeDays; $unwatchedAfterDays; $watchedRetentionDays) }) as $all
+    # A title's standing is its most recent sign of life: the last play by
+    # anyone, or the last time something landed on disk for it (the request
+    # being fulfilled, an upgrade, a new season), whichever is newer.
+    | map(. + { lastActivity: ([ .lastPlayed, .added ] | max) })
+    | map(. + { protectedBy: protection($now; $minAgeDays) }) as $all
+    # Most recently active first, so the tail of the list is what goes.
     | ($all
-        | map(select(.verdict | startswith("remove")))
-        | sort_by(.lastPlayed // .added)
-      ) as $due
-    | $due[0:$maxPerRun] as $chosen
+        | map(select(.protectedBy == null))
+        | sort_by(.lastActivity)
+        | reverse
+      ) as $ranked
+    | ($ranked | length) as $n
+    | (($n * $removePercent / 100) | floor) as $cut
+    | [ $ranked
+        | to_entries[]
+        | { rank: (.key + 1), remove: (.key >= ($n - $cut)) } + (.value | entry($now))
+      ] as $ranking
+    | ($ranking | map(select(.remove)) | reverse) as $chosen
     | {
         generated: ($now | todate),
-        thresholds: {
-          minAgeDays: $minAgeDays,
-          unwatchedAfterDays: $unwatchedAfterDays,
-          watchedRetentionDays: $watchedRetentionDays,
-          maxPerRun: $maxPerRun
+        policy: {
+          removePercent: $removePercent,
+          minAgeDays: $minAgeDays
         },
-        verdicts: ($all | group_by(.verdict) | map({ key: .[0].verdict, value: length }) | from_entries),
-        deferred: (($due | length) - ($chosen | length)),
-        totalSize: ($chosen | map(.arr.size) | add // 0),
-        candidates: ($chosen | map({
-            type: .type,
-            title: .title,
-            arrId: .arr.id,
-            size: .arr.size,
-            seerrIds: .seerrIds,
-            reason: (if .lastPlayed == null
-                     then "never watched, added \(.added | todate | .[0:10])"
-                     else "last watched \(.lastPlayed | todate | .[0:10])" end),
-            idleDays: ((($now - (.lastPlayed // .added)) / 86400) | floor)
-          }))
+        summary: {
+          titles: ($all | length),
+          ranked: $n,
+          removing: ($chosen | length),
+          protected: ($all
+            | map(select(.protectedBy != null))
+            | group_by(.protectedBy)
+            | map({ key: .[0].protectedBy, value: length })
+            | from_entries)
+        },
+        totalSize: ($chosen | map(.size // 0) | add // 0),
+        ranking: $ranking,
+        protected: ($all
+          | map(select(.protectedBy != null) | { type, title, protectedBy })
+          | sort_by(.protectedBy, (.title // "" | ascii_downcase))),
+        candidates: $chosen
       }
+  '';
+
+  # Renders the report as a table for --ranking.
+  rankingScript = pkgs.writeText "media-janitor-ranking.jq" ''
+    def pad($w): tostring | . + ([ range(length; $w) ] | map(" ") | join(""));
+    def lpad($w): tostring | ([ range(length; $w) ] | map(" ") | join("")) + .;
+    def gib: ((. // 0) / 1073741824 * 10 | round) / 10 | "\(.) GiB";
+
+    (.ranking | length | tostring | length) as $rw
+    | "\(.summary.ranked) titles ranked, the bottom \(.policy.removePercent)% (\(.summary.removing) titles, \(.totalSize | gib)) is marked with -",
+      (.summary.protected | to_entries[] | "\(.value) left out: \(.key)"),
+      "",
+      (.ranking[]
+        | "\(if .remove then "-" else " " end) \(.rank | lpad($rw))  \("\(.idleDays)d" | lpad(5))  \(.type | pad(6))  \(.size | gib | lpad(10))  \(.title) (\(.reason))")
   '';
 
   # Turns the run outcome into a discord webhook payload.
@@ -186,12 +227,17 @@ let
     .removed as $r
     | (.failed // []) as $failed
     | ($r | map(.size // 0) | add // 0) as $bytes
-    | ($r
-        | map("**\(.title)**\(if .type == "series" then " (series)" else "" end) — \(.size | human), \(.reason)")
-        | join("\n")
-        | .[0:3900]
+    | ($r | map("**\(.title)**\(if .type == "series" then " (series)" else "" end) — \(.size | human), \(.reason)")) as $all
+    # A tenth of a big library does not fit an embed, so stop at whole
+    # lines before discord's 4096 character limit and count the rest.
+    | (reduce $all[] as $l ({ text: "", n: 0, full: false };
+        if .full or ((.text | length) + ($l | length) + 1) > 3900 then .full = true
+        else (.text += ((if .text == "" then "" else "\n" end) + $l)) | (.n += 1) end)
+      ) as $acc
+    | ($acc.text
+        + (if $acc.n < ($all | length) then "\n… and \(($all | length) - $acc.n) more" else "" end)
       ) as $lines
-    | ([ (if .deferred > 0 then "\(.deferred) more over the limit, due next run" else empty end),
+    | ([ "bottom \(.percent)% of \(.ranked) ranked titles",
          (if ($failed | length) > 0 then "FAILED to remove: \($failed | join(", "))" else empty end),
          (if .dryRun then "dry run — nothing was actually deleted" else empty end)
        ] | join(" · ")) as $foot
@@ -203,9 +249,9 @@ let
                       then "would remove \($r | length) items, freeing \($bytes | human)"
                       else "removed \($r | length) items, freed \($bytes | human)" end),
               color: (if .dryRun then 16426522 else 15092822 end),
-              description: $lines
+              footer: { text: $foot }
             }
-            + (if $foot == "" then {} else { footer: { text: $foot } } end)
+            + (if $lines == "" then {} else { description: $lines } end)
           )
         ]
       }
@@ -231,12 +277,11 @@ let
       sonarr_key_file=${lib.escapeShellArg (toString cfg.sonarrKeyFile)}
       webhook_file=${lib.escapeShellArg (toString cfg.discordWebhookFile)}
       min_age=${toString cfg.minAgeDays}
-      unwatched_after=${toString cfg.unwatchedAfterDays}
-      watched_retention=${toString cfg.watchedRetentionDays}
-      max_per_run=${toString cfg.maxPerRun}
+      remove_percent=${toString cfg.removePercent}
 
       delete=false
       as_json=false
+      as_ranking=false
       webhook=true
 
       usage() { cat ${helpText}; }
@@ -247,6 +292,7 @@ let
           --delete) delete=true ;;
           --dry-run) delete=false ;;
           --json) as_json=true ;;
+          --ranking) as_ranking=true ;;
           --no-webhook) webhook=false ;;
           -h|--help) usage; exit 0 ;;
           *) usage >&2; die "unknown argument $1" ;;
@@ -372,9 +418,7 @@ let
         --slurpfile sonarr "$tmp/sonarr.json" \
         --slurpfile seerr "$tmp/seerr.json" \
         --argjson minAgeDays "$min_age" \
-        --argjson unwatchedAfterDays "$unwatched_after" \
-        --argjson watchedRetentionDays "$watched_retention" \
-        --argjson maxPerRun "$max_per_run" \
+        --argjson removePercent "$remove_percent" \
         -f ${policyScript})"
 
       if [ "$as_json" = true ]; then
@@ -382,10 +426,16 @@ let
         exit 0
       fi
 
+      if [ "$as_ranking" = true ]; then
+        jq -r -f ${rankingScript} <<< "$report"
+        exit 0
+      fi
+
       count="$(jq '.candidates | length' <<< "$report")"
       if [ "$count" -eq 0 ]; then
         echo "media-janitor: nothing to remove"
-        jq -r '.verdicts | to_entries[] | "  \(.value) \(.key)"' <<< "$report"
+        jq -r '"  \(.summary.ranked) titles ranked, the bottom \(.policy.removePercent)% of that rounds down to none",
+               (.summary.protected | to_entries[] | "  \(.value) left out: \(.key)")' <<< "$report"
         exit 0
       fi
 
@@ -430,8 +480,8 @@ let
         fi
       else
         jq -c '.candidates[]' <<< "$report" > "$tmp/removed.jsonl"
-        echo "media-janitor: dry run, would remove:"
-        jq -r '.candidates[] | "  \(.title) [\(.type)] — \(((.size // 0) / 1073741824 * 10 | round) / 10) GiB, \(.reason)"' <<< "$report"
+        jq -r '"media-janitor: dry run, would remove the bottom \(.policy.removePercent)% (\(.summary.removing) of \(.summary.ranked) ranked titles):",
+               (.candidates[] | "  #\(.rank) \(.title) [\(.type)] — \(((.size // 0) / 1073741824 * 10 | round) / 10) GiB, \(.reason)")' <<< "$report"
       fi
 
       jq -s '.' "$tmp/removed.jsonl" > "$tmp/removed.json"
@@ -442,10 +492,11 @@ let
       if [ "$delete" = true ]; then dry_json=false; else dry_json=true; fi
       outcome="$(jq -n \
         --argjson dryRun "$dry_json" \
-        --argjson deferred "$(jq '.deferred' <<< "$report")" \
+        --argjson ranked "$(jq '.summary.ranked' <<< "$report")" \
+        --argjson percent "$remove_percent" \
         --slurpfile removed "$tmp/removed.json" \
         --slurpfile failed "$tmp/failed.json" \
-        '{ dryRun: $dryRun, deferred: $deferred,
+        '{ dryRun: $dryRun, ranked: $ranked, percent: $percent,
            removed: ($removed[0] // []), failed: ($failed[0] // []) }')"
 
       if [ "$webhook" = true ]; then
@@ -499,39 +550,27 @@ in
     };
 
     minAgeDays = lib.mkOption {
-      type = lib.types.ints.positive;
+      type = lib.types.ints.unsigned;
       default = 60;
       description = ''
-        Grace period: nothing added to the library within this many days is
-        ever touched, no matter its watch state. For series the clock restarts
-        whenever a new episode lands.
+        Grace period: anything added to the library within this many days is
+        left out of the ranking, so it is never touched and does not count
+        towards removePercent. For series the clock restarts whenever a new
+        episode lands. 0 ranks everything that is not a favorite.
       '';
     };
 
-    unwatchedAfterDays = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 120;
-      description = "Remove media never played by anyone once it is this many days old.";
-    };
-
-    watchedRetentionDays = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 90;
+    removePercent = lib.mkOption {
+      type = lib.types.ints.between 1 100;
+      default = 10;
       description = ''
-        Remove media whose most recent play by anyone lies further back than
-        this. Any playback activity counts, including partial ones, so a
-        series someone is actively working through stays, while abandoned
-        view progress does not protect anything.
-      '';
-    };
-
-    maxPerRun = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 15;
-      description = ''
-        Safety cap on removals per run. The most stale items go first and the
-        rest waits for the next run, so a bad API answer or misconfiguration
-        cannot wipe the whole library in one night.
+        Share of the ranking evicted per run, rounded down. Every movie and
+        series that is not a favorite, unmanaged by radarr/sonarr or inside
+        the minAgeDays grace period is ranked by its most recent sign of
+        life, the last play by anyone (partial ones included) or the last
+        time something landed on disk for it, whichever is newer, and this
+        many percent from the bottom go. Being a share of the library, it
+        also bounds how much a bad API answer can take out in one run.
       '';
     };
 
@@ -540,7 +579,7 @@ in
       default = true;
       description = ''
         While true the timer only reports what it would remove, both to the
-        journal and to discord. Set to false once the verdicts look sane.
+        journal and to discord. Set to false once the ranking looks sane.
       '';
     };
 
@@ -597,7 +636,7 @@ in
     environment.systemPackages = [ janitorScript ];
 
     systemd.services.media-janitor = {
-      description = "evict stale media and its arr/seerr tracking";
+      description = "evict the least watched media and its arr/seerr tracking";
       after = [
         "network-online.target"
         "jellyfin.service"
