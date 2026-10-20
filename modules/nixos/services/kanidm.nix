@@ -71,6 +71,7 @@
         nextcloud_admins = { };
         lily_git_users = { };
         aurral_users = { };
+        navidrome_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -87,6 +88,7 @@
             "nextcloud_admins"
             "lily_git_users"
             "aurral_users"
+            "navidrome_users"
           ];
         };
 
@@ -313,6 +315,22 @@
           preferShortUsername = true;
 
           scopeMaps.aurral_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+        };
+
+        # oauth2-proxy in front of navidrome (see navidrome.nix), with S256
+        # PKCE.
+        navidrome = {
+          displayName = "navidrome";
+          originUrl = "https://music.shimme.rs/oauth2/callback";
+          originLanding = "https://music.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-navidrome-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.navidrome_users = [
             "openid"
             "profile"
             "email"

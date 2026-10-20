@@ -23,7 +23,9 @@ let
     "Vault" = "https://vault.shimme.rs";
     "Cloud" = "https://cloud.shimme.rs";
     "Seerr" = "https://seerr.shimme.rs";
-    "Music" = "https://music.shimme.rs";
+    # / redirects to kanidm; the Subsonic API bypasses it and answers 200
+    # (with an auth error body) only if navidrome itself is up.
+    "Music" = "https://music.shimme.rs/rest/ping.view";
     "Aurral" = "https://aurral.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";

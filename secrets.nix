@@ -14,6 +14,8 @@ let
       "kanidm-oauth2-lily-git-secret"
       "kanidm-oauth2-aurral-secret"
       "aurral-env"
+      "kanidm-oauth2-navidrome-secret"
+      "oauth2-proxy-cookie-secret"
       "grafana-secret-key"
       "alertmanager-env"
       "mullvad-wg.conf"
