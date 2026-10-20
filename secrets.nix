@@ -12,6 +12,8 @@ let
       "kanidm-oauth2-nextcloud-secret"
       "kanidm-oauth2-grafana-secret"
       "kanidm-oauth2-lily-git-secret"
+      "kanidm-oauth2-aurral-secret"
+      "aurral-env"
       "grafana-secret-key"
       "alertmanager-env"
       "mullvad-wg.conf"

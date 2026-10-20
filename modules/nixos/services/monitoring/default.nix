@@ -24,6 +24,7 @@ let
     "Cloud" = "https://cloud.shimme.rs";
     "Seerr" = "https://seerr.shimme.rs";
     "Music" = "https://music.shimme.rs";
+    "Aurral" = "https://aurral.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";

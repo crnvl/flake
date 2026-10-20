@@ -70,6 +70,7 @@
         nextcloud_users = { };
         nextcloud_admins = { };
         lily_git_users = { };
+        aurral_users = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -85,6 +86,7 @@
             "nextcloud_users"
             "nextcloud_admins"
             "lily_git_users"
+            "aurral_users"
           ];
         };
 
@@ -300,6 +302,21 @@
             joinType = "array";
             valuesByGroup.nextcloud_admins = [ "admin" ];
           };
+        };
+
+        # Aurral sends an S256 PKCE challenge, so PKCE stays enforced.
+        aurral = {
+          displayName = "aurral";
+          originUrl = "https://aurral.shimme.rs/sso/callback";
+          originLanding = "https://aurral.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-aurral-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.aurral_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
         };
 
         # Forgejo on git.lily.pizza, auth source named "shimmers". Forgejo
