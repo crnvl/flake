@@ -22,7 +22,12 @@
 
   # media: /mnt/chroma library, sabnzbd/qbittorrent downloads, and the slskd
   # downloads dir (setgid media, see slskd.nix) so imports can move files out.
-  users.users.lidarr.extraGroups = [ "media" ];
+  # sabnzbd: its job dirs are created sabnzbd:sabnzbd, so moving finished
+  # downloads out needs that group (same as sonarr and radarr).
+  users.users.lidarr.extraGroups = [
+    "media"
+    "sabnzbd"
+  ];
 
   my.vpn.portMappings = [
     {
