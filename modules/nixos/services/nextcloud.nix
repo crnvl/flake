@@ -45,6 +45,10 @@ let
 in
 {
   age.secrets = {
+    # Password of the local "admin" account the original install created.
+    # nixpkgs no longer takes it as config (new installs skip the admin user),
+    # so nothing reads this; it stays decrypted as the break-glass login for
+    # when OIDC is down.
     nextcloud-admin-password = {
       file = ../../../hosts/shimmers/secrets/nextcloud-admin-password.age;
       owner = "nextcloud";
@@ -74,8 +78,6 @@ in
 
     config = {
       dbtype = "pgsql";
-      adminuser = "admin";
-      adminpassFile = config.age.secrets.nextcloud-admin-password.path;
     };
 
     extraApps = {
