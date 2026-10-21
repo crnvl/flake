@@ -30,6 +30,16 @@
                        'sent=$body_bytes_sent rt=$request_time '
                        'urt="$upstream_response_time" ua="$http_user_agent"';
     '';
+
+    # *.shimme.rs is a wildcard record, so typos and scanners land here with
+    # names no vhost claims. Without an explicit default, nginx hands them to
+    # whichever vhost sorts first (then api.p.5-htp.store), certificate and
+    # all. Refuse them instead: no TLS handshake, and 444 (close) on plain HTTP.
+    virtualHosts."_" = {
+      default = true;
+      rejectSSL = true;
+      locations."/".return = "444";
+    };
   };
 
   security.acme = {
