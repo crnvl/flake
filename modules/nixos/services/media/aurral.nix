@@ -47,11 +47,26 @@ in
 
     # Lidarr reports library files under /mnt/chroma/music; the same path
     # inside aurral's chroot lets it verify and play them. Read-only: imports
-    # stay Lidarr's job. No DOWNLOAD_FOLDER on purpose, so aurral's own
-    # downloaders (yt-dlp, slskd) have nowhere to write outside the VPN.
+    # stay Lidarr's job.
     serviceConfig.BindReadOnlyPaths = [ "/mnt/chroma/music" ];
+    # Playlist downloads go through slskd and SABnzbd, which download inside
+    # the VPN namespace; aurral then moves (and retags) the finished files
+    # into its own download folder under /var/lib/aurral. Those dirs are
+    # group-writable by media, and the sources point at the namespace
+    # address (192.168.15.1) from aurral's settings, which live in its DB.
+    #
+    # yt-dlp is switched off in those settings on purpose: aurral runs on the
+    # host network, so it would download straight from this machine's IP.
+    # (Leaving DOWNLOAD_FOLDER unset does not stop it, aurral just falls back
+    # to a folder under its data dir.)
+    serviceConfig.SupplementaryGroups = [ "media" ];
     unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
   };
+
+  services.aurral.directories = [
+    config.services.slskd.settings.directories.downloads
+    "/var/lib/sabnzbd/downloads/aurral"
+  ];
 
   services.nginx.virtualHosts.${domain} = lib.mkMerge [
     (mkProxyHost { inherit port; })

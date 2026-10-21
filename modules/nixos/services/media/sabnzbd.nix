@@ -26,6 +26,9 @@
     "d /var/lib/sabnzbd/downloads/radarr 0775 sabnzbd media -"
     "d /var/lib/sabnzbd/downloads/sonarr 0775 sabnzbd media -"
     "d /var/lib/sabnzbd/downloads/lidarr 0775 sabnzbd media -"
+    # aurral's category. setgid so job dirs stay in media: aurral moves the
+    # finished files out and retags them in place (see aurral.nix).
+    "d /var/lib/sabnzbd/downloads/aurral 2775 sabnzbd media -"
     "d /var/lib/sabnzbd/incomplete 0755 sabnzbd sabnzbd -"
   ];
 
