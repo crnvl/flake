@@ -13,7 +13,9 @@ in
       rpc-host-whitelist-enabled = false;
       rpc-whitelist = "127.0.0.1,${wgNamespace.bridgeAddress}";
 
-      ratio-limit = 1.0;
+      # Never seed: a zero ratio limit is met the moment a torrent finishes,
+      # so it gets stopped right away.
+      ratio-limit = 0;
       ratio-limit-enabled = true;
       idle-seeding-limit = 1440;
       idle-seeding-limit-enabled = true;

@@ -26,10 +26,17 @@ in
         TempPathEnabled = true;
         Preallocation = false;
 
-        GlobalMaxRatio = 2.0;
-        GlobalMaxSeedingMinutes = 20160;
-        GlobalMaxInactiveSeedingMinutes = 4320;
-        GlobalMaxRatioAction = 3;
+        # Never seed: with every share limit at zero a torrent has met its
+        # limits the moment it finishes, so qBittorrent stops it right away.
+        # The action has to be Stop rather than RemoveWithContent: deleting
+        # would race Sonarr/Radarr's import. A stopped torrent that hit its
+        # limits is what the arrs treat as removable, so they import it and
+        # then drop it from the client together with its leftover files
+        # (their download clients have "remove completed" enabled).
+        GlobalMaxRatio = 0;
+        GlobalMaxSeedingMinutes = 0;
+        GlobalMaxInactiveSeedingMinutes = 0;
+        ShareLimitAction = "Stop";
 
         QueueingSystemEnabled = true;
         MaxActiveDownloads = 5;
