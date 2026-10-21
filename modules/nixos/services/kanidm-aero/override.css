@@ -1,0 +1,947 @@
+/*
+ * kanidm "aero": Frutiger Aero / Windows 7.
+ *
+ * Served by nginx at /pkg/override.css, which kanidm's base template loads
+ * after bootstrap and its own style.css as a custom-theming hook. The images
+ * next to this file are served from /pkg/aero/ (see kanidm.nix).
+ *
+ * The templates can't be changed, so pages are told apart by structure:
+ *   - body > main#main: login, consent and error pages. These get the
+ *     Windows 7 logon screen: user tile, white glowing text, glossy controls.
+ *   - #main > main (signed-in pages) and body > main.container-lg (the
+ *     credential reset link): an Aero glass window, with the navbar turned
+ *     into the taskbar.
+ * Everything sits on a Frutiger Aero desktop: sky, aurora, bubbles, hills.
+ */
+
+/* ============================ palette ============================ */
+
+/* kanidm flips bootstrap to its dark palette when the OS prefers dark.
+ * Windows 7 had no dark mode, so pin everything bootstrap's dark mode would
+ * change. The [data-bs-theme] selectors outrank bootstrap's own. */
+:root,
+:root[data-bs-theme="light"],
+:root[data-bs-theme="dark"] {
+  color-scheme: light;
+
+  --aero-font: "Segoe UI", Selawik, Frutiger, "Frutiger LT Std", "Myriad Pro",
+    "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --aero-mono: Consolas, "Lucida Console", "DejaVu Sans Mono", monospace;
+  --aero-heading: #1e3287;
+
+  /* Explorer's hover and selection highlights */
+  --aero-hover-bg: linear-gradient(#fafbfd, #ebf3fd);
+  --aero-hover-border: #b8d6fb;
+  --aero-selected-bg: linear-gradient(#dcebfc, #c1dbfc);
+  --aero-selected-border: #7da2ce;
+
+  /* window glass in the default "Sky" colour, with a reflection or two */
+  --aero-glass:
+    linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.18) 30px,
+      rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.2)) border-box,
+    linear-gradient(110deg, rgba(255, 255, 255, 0) 14%, rgba(255, 255, 255, 0.28) 19%,
+      rgba(255, 255, 255, 0.08) 24%, rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0) 58%, rgba(255, 255, 255, 0.18) 62%,
+      rgba(255, 255, 255, 0) 68%) border-box,
+    linear-gradient(rgba(124, 186, 240, 0.55), rgba(78, 148, 214, 0.5)) border-box;
+
+  --bs-body-font-family: var(--aero-font);
+  --bs-body-font-size: 0.95rem;
+  --bs-font-monospace: var(--aero-mono);
+
+  --bs-body-color: #1e1e1e;
+  --bs-body-color-rgb: 30, 30, 30;
+  --bs-body-bg: #fff;
+  --bs-body-bg-rgb: 255, 255, 255;
+  --bs-emphasis-color: #000;
+  --bs-emphasis-color-rgb: 0, 0, 0;
+  --bs-secondary-color: #5b6b80;
+  --bs-secondary-color-rgb: 91, 107, 128;
+  --bs-secondary-bg: #f0f0f0;
+  --bs-secondary-bg-rgb: 240, 240, 240;
+  --bs-tertiary-color: rgba(30, 30, 30, 0.5);
+  --bs-tertiary-color-rgb: 30, 30, 30;
+  --bs-tertiary-bg: #f1f5fb;
+  --bs-tertiary-bg-rgb: 241, 245, 251;
+  --bs-heading-color: inherit;
+
+  --bs-link-color: #0066cc;
+  --bs-link-color-rgb: 0, 102, 204;
+  --bs-link-hover-color: #3399ff;
+  --bs-link-hover-color-rgb: 51, 153, 255;
+  --bs-code-color: #003399;
+  --bs-highlight-color: #1e1e1e;
+  --bs-highlight-bg: #ffffe1;
+
+  --bs-border-color: #d5dfe5;
+  --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
+  --bs-light-border-subtle: #d6e5f5;
+  --bs-dark-border-subtle: #adb5bd;
+
+  --bs-primary-text-emphasis: #052c65;
+  --bs-secondary-text-emphasis: #2b2f32;
+  --bs-success-text-emphasis: #0a3622;
+  --bs-info-text-emphasis: #055160;
+  --bs-warning-text-emphasis: #664d03;
+  --bs-danger-text-emphasis: #58151c;
+  --bs-light-text-emphasis: #495057;
+  --bs-dark-text-emphasis: #495057;
+  --bs-primary-bg-subtle: #cfe2ff;
+  --bs-secondary-bg-subtle: #e2e3e5;
+  --bs-success-bg-subtle: #d1e7dd;
+  --bs-info-bg-subtle: #cff4fc;
+  --bs-warning-bg-subtle: #fff3cd;
+  --bs-danger-bg-subtle: #f8d7da;
+  --bs-light-bg-subtle: #fcfcfd;
+  --bs-dark-bg-subtle: #ced4da;
+  --bs-primary-border-subtle: #9ec5fe;
+  --bs-secondary-border-subtle: #c4c8cb;
+  --bs-success-border-subtle: #a3cfbb;
+  --bs-info-border-subtle: #9eeaf9;
+  --bs-warning-border-subtle: #ffe69c;
+  --bs-danger-border-subtle: #f1aeb5;
+
+  --bs-form-valid-color: #2e8b1e;
+  --bs-form-valid-border-color: #4cae2c;
+  --bs-form-invalid-color: #c42b1c;
+  --bs-form-invalid-border-color: #d9443a;
+}
+
+/* the few dark-mode rules that aren't variables on the root */
+:root[data-bs-theme="dark"] .form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+:root[data-bs-theme="dark"] .btn-close {
+  filter: none;
+}
+
+::selection {
+  background: #3399ff;
+  color: #fff;
+}
+
+/* ============================ desktop ============================ */
+
+html {
+  min-height: 100%;
+  background-color: #3d9ce6;
+  background:
+    url("/pkg/aero/hills.svg") center bottom / 100% max(150px, 26vh) no-repeat fixed,
+    url("/pkg/aero/aurora.svg") center / 100% 100% no-repeat fixed,
+    radial-gradient(ellipse 55% 45% at 18% 5%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%) fixed,
+    radial-gradient(ellipse 90% 45% at 50% 100%, rgba(220, 250, 255, 0.8), rgba(220, 250, 255, 0) 70%) fixed,
+    linear-gradient(#0a4a9e 0%, #1873cc 28%, #3d9ce6 52%, #86cdf5 74%, #d3f1ff 100%) fixed;
+  scrollbar-color: #b9c7d8 #e9eff6;
+}
+
+body {
+  background: transparent !important;
+  color: var(--bs-body-color);
+}
+
+/* bubbles, drifting very slowly */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    url("/pkg/aero/bubble.svg"), url("/pkg/aero/bubble.svg"),
+    url("/pkg/aero/bubble.svg"), url("/pkg/aero/bubble.svg"),
+    url("/pkg/aero/bubble.svg"), url("/pkg/aero/bubble.svg"),
+    url("/pkg/aero/bubble.svg"), url("/pkg/aero/bubble.svg"),
+    url("/pkg/aero/bubble.svg"), url("/pkg/aero/bubble.svg"),
+    url("/pkg/aero/bubble.svg");
+  background-position:
+    5% 68%, 11% 50%, 19% 79%, 4% 28%, 28% 16%,
+    63% 10%, 83% 20%, 91% 46%, 75% 63%, 95% 75%, 58% 84%;
+  background-size:
+    96px, 36px, 54px, 62px, 30px,
+    22px, 132px, 46px, 74px, 28px, 40px;
+  background-repeat: no-repeat;
+  animation: aero-drift 16s ease-in-out infinite alternate;
+}
+
+@keyframes aero-drift {
+  from { transform: translateY(1.5vh); }
+  to { transform: translateY(-1.5vh); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+.footer.bg-body-tertiary {
+  background: transparent !important;
+}
+
+.footer .text-muted {
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 2px rgba(0, 30, 10, 0.85);
+}
+
+.footer a {
+  color: #fff;
+}
+
+/* ==================== logon screen (login etc.) ==================== */
+
+body > main#main,
+body > h2 {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 25, 70, 0.75), 0 0 14px rgba(0, 40, 100, 0.5);
+}
+
+body > main#main {
+  padding: 2rem 1rem;
+}
+
+body > main#main a:not(.btn) {
+  color: #fff;
+}
+
+body > main#main a:not(.btn):hover {
+  color: #d4f0ff;
+}
+
+body > main#main h2,
+body > main#main h3 {
+  font-weight: 300;
+}
+
+body > main#main > h3 {
+  font-size: 1.85rem;
+  margin-bottom: 1.1rem;
+}
+
+/* the user tile */
+.kanidm_logo {
+  width: 8.5rem;
+  height: 8.5rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  object-fit: contain;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 7px;
+  background: linear-gradient(160deg, #ffffff 0%, #eef6fe 48%, #d8e9fb 52%, #f3f9ff 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 35, 85, 0.45),
+    0 0 0 4px rgba(255, 255, 255, 0.18),
+    0 8px 22px rgba(0, 20, 60, 0.5);
+}
+
+body > main#main .form-label,
+body > main#main .form-check-label {
+  color: #fff;
+}
+
+body > main#main .form-control {
+  min-width: 16rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(0, 20, 60, 0.55);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body > main#main .form-control:focus {
+  border-color: #1e6fd9;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 0 10px 2px rgba(120, 200, 255, 0.85);
+}
+
+body > main#main .btn:not(.w-100) {
+  min-width: 7rem;
+}
+
+body > main#main hr {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+}
+
+/* ========================== aero windows ========================== */
+
+#main > main,
+body > main.container-lg {
+  --aero-titlebar: 30px;
+  position: relative;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  padding-top: 1rem !important;
+  padding-bottom: 1.5rem !important;
+  border: 8px solid transparent;
+  border-top-width: var(--aero-titlebar);
+  border-radius: 8px;
+  background: linear-gradient(#fff, #fff) padding-box, var(--aero-glass);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 14px 40px rgba(0, 25, 70, 0.45);
+  outline: 1px solid rgba(255, 255, 255, 0.4);
+  outline-offset: -2px;
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+}
+
+/* title, with the glow Windows draws behind text on glass */
+#main > main::before,
+body > main.container-lg::before {
+  content: "id.shimme.rs";
+  position: absolute;
+  top: calc(-1 * var(--aero-titlebar));
+  left: -2px;
+  height: var(--aero-titlebar);
+  padding-left: 22px;
+  line-height: var(--aero-titlebar);
+  font-size: 0.85rem;
+  color: #000;
+  text-shadow: 0 0 8px #fff, 0 0 8px #fff, 0 0 3px #fff;
+  background: url("/pkg/img/favicon.png") left center / 16px no-repeat;
+  pointer-events: none;
+}
+
+#main > main::after,
+body > main.container-lg::after {
+  content: "";
+  position: absolute;
+  top: calc(-1 * var(--aero-titlebar));
+  right: -2px;
+  width: 102px;
+  height: 20px;
+  background: url("/pkg/aero/caption.svg") no-repeat;
+  pointer-events: none;
+}
+
+/* The reset page centres its window with my-auto, whose !important
+ * margins would glue the title bar to the top of the screen. */
+body:has(> main.container-lg) {
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 575.98px) {
+  #main > main,
+  body > main.container-lg {
+    --aero-titlebar: 26px;
+    width: auto;
+    margin-inline: 0.4rem;
+    border-width: 26px 4px 4px;
+    border-radius: 6px;
+  }
+
+  #main > main {
+    margin-top: 0;
+  }
+}
+
+#main > main h2,
+#main > main h3,
+#main > main h4,
+body > main.container-lg h2,
+body > main.container-lg h3,
+body > main.container-lg h4 {
+  color: var(--aero-heading);
+  font-weight: 400;
+}
+
+#main > main h4,
+body > main.container-lg h4 {
+  font-size: 1.2rem;
+}
+
+/* Explorer's command bar, for the heading right at the top of a window */
+#main > main > div:first-child:has(> h2) {
+  margin: -1rem calc(var(--bs-gutter-x) * -0.5) 1.25rem;
+  padding: 0.5rem calc(var(--bs-gutter-x) * 0.5);
+  border-bottom: 1px solid #a0afc3;
+  background: linear-gradient(#fdfeff 0%, #f0f6fd 45%, #e6effb 55%, #dbe7f8 100%);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+#main > main > div:first-child:has(> h2) > h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+#main > main > div:first-child:has(> h2) + hr {
+  display: none;
+}
+
+hr {
+  height: 1px;
+  border: 0;
+  opacity: 1;
+  background: linear-gradient(to right, rgba(168, 195, 227, 0), #a8c3e3 12%, #a8c3e3 88%, rgba(168, 195, 227, 0));
+}
+
+/* ====================== taskbar and start orb ====================== */
+
+nav.navbar {
+  --bs-navbar-color: #fff;
+  --bs-navbar-hover-color: #fff;
+  --bs-navbar-active-color: #fff;
+  --bs-navbar-brand-color: #fff;
+  --bs-navbar-brand-hover-color: #fff;
+  background-color: rgba(16, 40, 78, 0.55) !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 48%,
+    rgba(255, 255, 255, 0) 52%, rgba(255, 255, 255, 0.08)) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  backdrop-filter: blur(12px) saturate(1.5);
+}
+
+@media (min-width: 768px) {
+  nav.navbar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+    height: 42px;
+    margin: 0 !important;
+    padding: 0;
+    border-bottom: 0;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  nav.navbar > .container-lg {
+    max-width: none;
+    height: 100%;
+    padding: 0 0.5rem 0 0.3rem;
+  }
+
+  body:has(> nav.navbar) {
+    padding-bottom: 42px;
+  }
+}
+
+nav.navbar .navbar-brand {
+  margin-right: 1rem;
+  padding: 0;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+nav.navbar .navbar-toggler-img {
+  width: 36px;
+  height: 36px;
+  padding: 8px 5px;
+  object-fit: contain;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 72% 46% at 50% 22%, rgba(255, 255, 255, 0.85),
+      rgba(255, 255, 255, 0.15) 70%, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(circle at 50% 110%, #8ff0ff 0%, #3aa8f0 30%, #135ec4 62%, #0a2f78 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 10, 40, 0.8),
+    0 0 0 2px rgba(255, 255, 255, 0.25),
+    0 0 12px 2px rgba(110, 200, 255, 0.55);
+}
+
+nav.navbar .nav-link {
+  margin: 0 0.15rem;
+  padding: 0.4rem 0.9rem !important;
+  color: #fff !important;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  border-radius: 3px;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+nav.navbar .nav-link:hover,
+nav.navbar .nav-link:focus-visible {
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 100%, rgba(140, 210, 255, 0.6), rgba(140, 210, 255, 0) 70%),
+    linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.14) 50%,
+      rgba(255, 255, 255, 0.04) 50%, rgba(255, 255, 255, 0.2));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+nav.navbar .navbar-toggler {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 767.98px) {
+  nav.navbar .navbar-nav {
+    row-gap: 0.25rem;
+    padding: 0.5rem 0;
+  }
+}
+
+/* ===================== control panel side pane ===================== */
+
+.side-menu {
+  padding: 0.75rem 0.5rem;
+  border: 1px solid #c3d4ea;
+  border-radius: 3px;
+  background: linear-gradient(#f6f9fd 0%, #e3ecf8 45%, #cddcf0 100%);
+}
+
+@media (min-width: 576px) {
+  #main > main .side-menu {
+    margin: -1rem 0 -1.5rem calc(var(--bs-gutter-x) * -0.5);
+    padding-top: 1.25rem;
+    border-width: 0 1px 0 0;
+    border-radius: 0;
+    box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(0, 0, 0, 0.3),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+.side-menu .side-menu-item {
+  color: #0066cc !important;
+  border: 1px solid transparent;
+  border-radius: 3px !important;
+}
+
+.side-menu .side-menu-item:hover {
+  color: #3399ff !important;
+  border-color: var(--aero-hover-border);
+  background: var(--aero-hover-bg);
+}
+
+.side-menu .side-menu-item.active {
+  color: #000 !important;
+  border-color: var(--aero-selected-border);
+  background: var(--aero-selected-bg);
+}
+
+/* tint the grey icons Windows blue */
+.side-menu .side-menu-item .icon-container img {
+  filter: invert(27%) sepia(85%) saturate(1300%) hue-rotate(198deg) brightness(0.9);
+}
+
+.side-menu .list-group-item {
+  background: transparent;
+  border: 0;
+}
+
+/* ============================= buttons ============================= */
+
+/* Every button is a gloss layer over a base gradient. The plain one is the
+ * Windows 7 push button, the coloured ones are proper Frutiger Aero candy. */
+.btn {
+  --aero-gloss: linear-gradient(rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 50.1%, rgba(255, 255, 255, 0.12) 100%);
+  --aero-base: linear-gradient(#ececec, #cfcfcf);
+  --aero-base-hover: linear-gradient(#e3f4fd, #a7d9f5);
+  --aero-base-active: linear-gradient(#cde9f8, #68b3db);
+  --aero-border: #707070;
+  --aero-border-hover: #3c7fb1;
+  --aero-border-active: #2c628b;
+  --aero-fg: #000;
+  --aero-fg-hover: #000;
+  --aero-glow: 0 0 0 transparent;
+  --aero-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  --bs-btn-border-radius: 3px;
+  --bs-btn-font-family: var(--aero-font);
+
+  color: var(--aero-fg) !important;
+  border-color: var(--aero-border) !important;
+  background-color: transparent !important;
+  background-image: var(--aero-gloss), var(--aero-base) !important;
+  box-shadow: var(--aero-shadow) !important;
+  text-shadow: none;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  --aero-base: var(--aero-base-hover);
+  --aero-border: var(--aero-border-hover);
+  --aero-fg: var(--aero-fg-hover);
+  --aero-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55), var(--aero-glow);
+}
+
+.btn:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+
+.btn:active,
+.btn.active,
+.btn.show {
+  --aero-gloss: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 50.1%);
+  --aero-base: var(--aero-base-active);
+  --aero-border: var(--aero-border-active);
+  --aero-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+  --aero-gloss: linear-gradient(transparent, transparent);
+  --aero-base: linear-gradient(#f4f4f4, #f4f4f4);
+  --aero-border: #adb2b5;
+  --aero-fg: #838383;
+  --aero-shadow: none;
+  opacity: 1;
+  text-shadow: none !important;
+}
+
+.btn-primary,
+.btn-success,
+.btn-danger {
+  --aero-fg: #fff;
+  --aero-fg-hover: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+.btn-primary {
+  --aero-base: linear-gradient(#5cb4f0, #1c76c8);
+  --aero-base-hover: linear-gradient(#7ccaf8, #2a8ce0);
+  --aero-base-active: linear-gradient(#2a7fc9, #135ea8);
+  --aero-border: #0f4f8f;
+  --aero-border-hover: #0f4f8f;
+  --aero-border-active: #0a3c70;
+  --aero-glow: 0 0 8px rgba(90, 180, 255, 0.85);
+}
+
+.btn-success {
+  --aero-base: linear-gradient(#7fd35a, #3d9a22);
+  --aero-base-hover: linear-gradient(#97e270, #4bb02b);
+  --aero-base-active: linear-gradient(#45a326, #2d7a17);
+  --aero-border: #2a6d16;
+  --aero-border-hover: #2a6d16;
+  --aero-border-active: #1f5510;
+  --aero-glow: 0 0 8px rgba(120, 220, 90, 0.85);
+}
+
+.btn-danger {
+  --aero-base: linear-gradient(#ef7d6f, #c3301f);
+  --aero-base-hover: linear-gradient(#f79585, #d63e2b);
+  --aero-base-active: linear-gradient(#c8392a, #962012);
+  --aero-border: #8a1d10;
+  --aero-border-hover: #8a1d10;
+  --aero-border-active: #6c150b;
+  --aero-glow: 0 0 8px rgba(255, 110, 90, 0.8);
+}
+
+.btn-warning {
+  --aero-base: linear-gradient(#ffd877, #f0a20b);
+  --aero-base-hover: linear-gradient(#ffe394, #f7b42b);
+  --aero-base-active: linear-gradient(#f2a915, #c98200);
+  --aero-border: #a16e00;
+  --aero-border-hover: #a16e00;
+  --aero-border-active: #7f5600;
+  --aero-fg: #3b2900;
+  --aero-fg-hover: #3b2900;
+  --aero-glow: 0 0 8px rgba(255, 200, 70, 0.85);
+}
+
+.btn-outline-danger {
+  --aero-fg: #b4231b;
+  --aero-fg-hover: #b4231b;
+}
+
+.btn-outline-primary {
+  --aero-fg: #0066cc;
+  --aero-fg-hover: #0066cc;
+}
+
+/* =========================== form fields =========================== */
+
+.form-control,
+.form-select {
+  color: #000;
+  background-color: #fff;
+  border: 1px solid;
+  border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea;
+  border-radius: 2px;
+  font-family: inherit;
+  text-shadow: none;
+}
+
+.form-control:hover,
+.form-select:hover {
+  border-color: #5794bf #b7d5ea #c7e2f1 #c5daed;
+}
+
+.form-control:focus,
+.form-select:focus {
+  color: #000;
+  background-color: #fff;
+  border-color: #3d7bad #a4c9e3 #b7d9ed #b5cfe7;
+  box-shadow: 0 0 0 2px rgba(51, 153, 255, 0.2);
+}
+
+.form-control[readonly],
+.form-control:disabled,
+.form-select:disabled {
+  background-color: #f4f4f4;
+}
+
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+.input-group-text {
+  background: linear-gradient(#f7f7f7, #e6e6e6);
+  border-color: #abadb3;
+}
+
+.form-check-input {
+  border-color: #8e8f8f;
+}
+
+.form-check-input:focus {
+  border-color: #3d7bad;
+  box-shadow: 0 0 0 2px rgba(51, 153, 255, 0.3);
+}
+
+/* a glossy toggle: knob, gloss and base layers in both states */
+.form-switch .form-check-input {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3cdefs%3e%3clinearGradient id='k' x1='0' y1='0' x2='0' y2='1'%3e%3cstop offset='0' stop-color='%23fff'/%3e%3cstop offset='1' stop-color='%23d3dbe4'/%3e%3c/linearGradient%3e%3c/defs%3e%3ccircle r='3.3' fill='url(%23k)' stroke='%235f7183' stroke-width='.45'/%3e%3c/svg%3e") !important;
+  border: 1px solid #8e99a6;
+  background-color: transparent !important;
+  background-image:
+    var(--bs-form-switch-bg),
+    linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 50%),
+    linear-gradient(#c4cbd3, #eef1f4) !important;
+  background-size: contain, 100% 100%, 100% 100% !important;
+  background-position: left center, 0 0, 0 0 !important;
+  background-repeat: no-repeat !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.form-switch .form-check-input:checked {
+  border-color: #0f4f8f;
+  background-image:
+    var(--bs-form-switch-bg),
+    linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 50.1%),
+    linear-gradient(#5cb4f0, #1c76c8) !important;
+  background-position: right center, 0 0, 0 0 !important;
+}
+
+/* ========================= cards and lists ========================= */
+
+/* application tiles: icons in Explorer's large icon view */
+.card {
+  --bs-card-bg: transparent;
+  --bs-card-border-color: transparent;
+  --bs-card-border-radius: 3px;
+  --bs-card-inner-border-radius: 2px;
+}
+
+.card:hover {
+  border-color: var(--aero-hover-border);
+  background: var(--aero-hover-bg);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.card:active,
+.card:focus-within {
+  border-color: var(--aero-selected-border);
+  background: var(--aero-selected-bg);
+}
+
+.card label {
+  margin-bottom: 0.5rem;
+  color: #1e1e1e;
+}
+
+.oauth2-img {
+  filter: drop-shadow(0 4px 4px rgba(0, 40, 90, 0.25));
+}
+
+.list-group {
+  --bs-list-group-bg: #fff;
+  --bs-list-group-color: #1e1e1e;
+  --bs-list-group-border-color: #dbe5f1;
+  --bs-list-group-border-radius: 3px;
+}
+
+.list-group-item-action:hover {
+  background: var(--aero-hover-bg);
+}
+
+.list-group-item.active {
+  color: #000;
+  border-color: var(--aero-selected-border);
+  background: var(--aero-selected-bg);
+}
+
+.badge {
+  border: 1px solid #1d4a85;
+  color: #fff !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0) 50%),
+    linear-gradient(#5c8fd0, #24589e) !important;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.table {
+  --bs-table-bg: #fff;
+  --bs-table-color: #1e1e1e;
+  --bs-table-border-color: #e5ecf4;
+  --bs-table-striped-bg: #f5f9fd;
+  --bs-table-hover-bg: #ebf3fd;
+}
+
+.table > thead th {
+  color: #4c607a;
+  font-weight: 400;
+  border-bottom-color: #d5dfe5;
+  background: linear-gradient(#fff, #f2f5f9);
+}
+
+/* the address bar */
+.breadcrumb {
+  --bs-breadcrumb-divider: "\25B8";
+  padding: 0.3rem 0.6rem;
+  border: 1px solid;
+  border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea;
+  border-radius: 2px;
+  background: #fff;
+}
+
+code {
+  padding: 0 0.25em;
+  border: 1px solid #d6e5f5;
+  border-radius: 2px;
+  background: #f1f5fb;
+}
+
+/* =================== alerts, balloons and dialogs =================== */
+
+.alert {
+  --bs-alert-border-radius: 4px;
+  position: relative;
+  padding: 0.7rem 1rem 0.7rem 2.75rem;
+  border: 1px solid #9cbde3;
+  color: #1e3287;
+  background: linear-gradient(#fbfdff, #e5f0fc);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 3px rgba(0, 30, 80, 0.2);
+  text-shadow: none;
+}
+
+/* the round, glossy status icon */
+.alert::before {
+  content: "i";
+  position: absolute;
+  top: 0.72rem;
+  left: 0.85rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  color: #fff;
+  font: italic bold 0.85rem/1.3rem Georgia, "Times New Roman", serif;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 50% 100%, #6fc4ff, #1d6fd0 60%, #134f9e);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.alert-danger {
+  border-color: #df9b94;
+  color: #7d1d10;
+  background: linear-gradient(#fffafa, #fde4e1);
+}
+
+.alert-danger::before {
+  content: "\2715";
+  font: bold 0.7rem/1.3rem var(--aero-font);
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 50% 100%, #ff9a85, #d12f1c 60%, #9e1a0c);
+}
+
+.alert-warning {
+  border-color: #e2c868;
+  color: #5a4500;
+  background: linear-gradient(#fffff6, #fff5cc);
+}
+
+.alert-warning::before {
+  content: "!";
+  font: bold 0.85rem/1.3rem var(--aero-font);
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 50% 100%, #ffe27a, #f2a20c 60%, #c27a00);
+}
+
+.alert-success {
+  border-color: #9fd18a;
+  color: #24561a;
+  background: linear-gradient(#f8fff4, #e1f6d5);
+}
+
+.alert-success::before {
+  content: "\2713";
+  font: bold 0.8rem/1.3rem var(--aero-font);
+  background:
+    radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 50% 100%, #a9f08a, #3fa52a 60%, #237615);
+}
+
+/* notification balloon */
+.toast {
+  color: #1e1e1e;
+  border: 1px solid #767676;
+  border-radius: 5px;
+  background: linear-gradient(#fff, #e4e5f0) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.totp-display-container {
+  border: 1px solid #a6c4e6;
+  border-radius: 6px;
+  background: linear-gradient(#fff, #e9f1fb);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(0, 30, 80, 0.15);
+}
+
+.totp-display {
+  font-family: var(--aero-mono);
+  color: var(--aero-heading);
+}
+
+/* dialogs: glass frame, white body, grey button strip */
+.modal-backdrop {
+  --bs-backdrop-opacity: 0.25;
+}
+
+.modal-content {
+  padding: 0 7px 7px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  background: var(--aero-glass);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 14px 45px rgba(0, 20, 60, 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+}
+
+.modal-header {
+  min-height: 30px;
+  padding: 0 0.35rem;
+  border: 0;
+}
+
+.modal-title {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #000;
+  text-shadow: 0 0 8px #fff, 0 0 8px #fff, 0 0 3px #fff;
+}
+
+.modal-body {
+  color: #1e1e1e;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-bottom: 0;
+  background: #fff;
+}
+
+.modal-footer {
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-top-color: #dfdfdf;
+  border-radius: 0;
+  background: #f0f0f0;
+}

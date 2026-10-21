@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="102" height="20" viewBox="0 0 102 20">
+  <!-- Windows 7 caption buttons: minimise, maximise, close. Decoration only. -->
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".6"/>
+      <stop offset=".48" stop-color="#fff" stop-opacity=".3"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".35"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eca598"/>
+      <stop offset=".48" stop-color="#d56a5a"/>
+      <stop offset=".5" stop-color="#c4402c"/>
+      <stop offset="1" stop-color="#e0864f"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M.5 0V15.5A4 4 0 0 0 4.5 19.5H55.5V0Z" fill="url(#glass)"/>
+  <path d="M55.5 0V19.5H97.5A4 4 0 0 0 101.5 15.5V0Z" fill="url(#red)"/>
+
+  <path d="M1.5 0V15.5A3 3 0 0 0 4.5 18.5H27.5V0M29.5 0V18.5H54.5V0M56.5 0V18.5H97.5A3 3 0 0 0 100.5 15.5V0"
+        fill="none" stroke="#fff" stroke-opacity=".4"/>
+  <path d="M.5 0V15.5A4 4 0 0 0 4.5 19.5H97.5A4 4 0 0 0 101.5 15.5V0" fill="none"
+        stroke="#000" stroke-opacity=".55"/>
+  <path d="M28.5 0V19.5M55.5 0V19.5" stroke="#000" stroke-opacity=".45"/>
+
+  <!-- minimise -->
+  <rect x="9.5" y="11.5" width="10" height="3" fill="#fff" stroke="#1c2b3a" stroke-opacity=".75"/>
+  <!-- maximise -->
+  <rect x="36.5" y="5.5" width="11" height="9" fill="none" stroke="#1c2b3a" stroke-opacity=".75" stroke-width="3.2"/>
+  <rect x="36.5" y="5.5" width="11" height="9" fill="none" stroke="#fff" stroke-width="1.4"/>
+  <rect x="35.8" y="4.8" width="12.4" height="2.6" fill="#fff"/>
+  <!-- close -->
+  <path d="M74 5.5L83 13.5M83 5.5L74 13.5" stroke="#5a1408" stroke-opacity=".8"
+        stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M74 5.5L83 13.5M83 5.5L74 13.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

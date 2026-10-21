@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+  <defs>
+    <filter id="soft" x="-10%" y="-60%" width="120%" height="220%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="haze" x="-10%" y="-60%" width="120%" height="220%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="rayblur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <!-- sunbeams fade out with distance from the sun -->
+    <radialGradient id="rayfade" gradientUnits="userSpaceOnUse" cx="290" cy="40" r="1100">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <mask id="raymask" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900">
+      <rect width="1600" height="900" fill="url(#rayfade)"/>
+    </mask>
+
+    <linearGradient id="ribbonA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset=".3" stop-color="#e8fcff" stop-opacity=".5"/>
+      <stop offset=".65" stop-color="#b9f2ff" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ribbonB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c9ffd2" stop-opacity="0"/>
+      <stop offset=".4" stop-color="#c9ffd2" stop-opacity=".55"/>
+      <stop offset=".8" stop-color="#9fe8ff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#9fe8ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset=".25" stop-color="#fff" stop-opacity=".7"/>
+      <stop offset=".75" stop-color="#fff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <g mask="url(#raymask)">
+    <g fill="#fff" opacity=".2" filter="url(#rayblur)">
+      <path d="M290 40L360 900H470Z"/>
+      <path d="M290 40L720 900H860Z"/>
+      <path d="M290 40L1150 900H1330Z"/>
+      <path d="M290 40L1600 640V780Z"/>
+      <path d="M290 40L1600 300V390Z"/>
+    </g>
+  </g>
+
+  <!-- the Vista/7 aurora swooshes -->
+  <path d="M-100 600C250 420 650 720 1050 520S1500 330 1700 380" fill="none"
+        stroke="url(#ribbonA)" stroke-width="110" filter="url(#soft)"/>
+  <path d="M-100 660C300 510 700 770 1100 590S1550 430 1700 460" fill="none"
+        stroke="url(#ribbonB)" stroke-width="34" filter="url(#haze)"/>
+  <path d="M-100 628C280 466 680 742 1080 552S1530 376 1700 418" fill="none"
+        stroke="url(#line)" stroke-width="2.5"/>
+  <path d="M-100 676C320 532 720 788 1120 608S1570 448 1700 478" fill="none"
+        stroke="url(#line)" stroke-width="1.5" opacity=".7"/>
+</svg>

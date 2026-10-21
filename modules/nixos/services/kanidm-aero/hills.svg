@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c3ef7c"/>
+      <stop offset=".3" stop-color="#7ccc3e"/>
+      <stop offset="1" stop-color="#2c8419"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a4e85a"/>
+      <stop offset=".22" stop-color="#5cba2b"/>
+      <stop offset="1" stop-color="#1b6510"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="frontclip">
+      <path d="M0 290C420 190 900 330 1600 235V400H0Z"/>
+    </clipPath>
+    <filter id="glow" x="-5%" y="-50%" width="110%" height="200%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+  </defs>
+
+  <!-- back hill and the light catching its crest -->
+  <path d="M0 200C250 110 560 100 840 175C1120 250 1380 140 1600 165V400H0Z" fill="url(#back)"/>
+  <path d="M0 200C250 110 560 100 840 175C1120 250 1380 140 1600 165" fill="none"
+        stroke="#fff" stroke-opacity=".55" stroke-width="5" filter="url(#glow)"/>
+
+  <!-- front hill, glossy like everything else in 2009 -->
+  <path d="M0 290C420 190 900 330 1600 235V400H0Z" fill="url(#front)"/>
+  <g clip-path="url(#frontclip)">
+    <ellipse cx="430" cy="260" rx="420" ry="55" fill="url(#sheen)"/>
+    <ellipse cx="1320" cy="262" rx="300" ry="38" fill="url(#sheen)" opacity=".7"/>
+  </g>
+  <path d="M0 290C420 190 900 330 1600 235" fill="none"
+        stroke="#fff" stroke-opacity=".6" stroke-width="4" filter="url(#glow)"/>
+</svg>

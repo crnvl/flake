@@ -383,9 +383,11 @@
     {
       # Kanidm's base template loads /pkg/override.css after its own
       # styles as a custom-theming hook; the file it ships is empty.
-      # Serving ours from nginx avoids rebuilding kanidm. (?v= cache
-      # busters are query strings, which location matching ignores.)
-      locations."= /pkg/override.css".alias = "${./kanidm-1996.css}";
+      # Serving ours, and the images it uses under /pkg/aero/, from nginx
+      # avoids rebuilding kanidm. (?v= cache busters are query strings,
+      # which location matching ignores.)
+      locations."= /pkg/override.css".alias = "${./kanidm-aero}/override.css";
+      locations."^~ /pkg/aero/".alias = "${./kanidm-aero}/";
     }
   ];
 }
