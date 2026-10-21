@@ -231,6 +231,15 @@
             "nextcloud_users"
           ];
         };
+
+        yannick = {
+          displayName = "yannick";
+          mailAddresses = [ "yannick@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "vaultwarden_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
