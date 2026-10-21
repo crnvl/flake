@@ -8,6 +8,9 @@
 let
   domain = "aurral.shimme.rs";
   port = 3001;
+  # aurral's fallback download folder (no DOWNLOAD_FOLDER set), also what it
+  # has stored as downloadFolderPath.
+  playlistFolder = "${config.services.aurral.dataDir}/downloads/aurral";
 in
 {
   # Raw client secret for kanidm's basicSecretFile.
@@ -66,6 +69,27 @@ in
   services.aurral.directories = [
     config.services.slskd.settings.directories.downloads
     "/var/lib/sabnzbd/downloads/aurral"
+  ];
+
+  # Playback: aurral registers its download folder as a second Navidrome
+  # library, by the path it sees it under, and syncs its playlists into it.
+  # Its Navidrome URL (in its settings) is http://127.0.0.1:4533 rather than
+  # music.shimme.rs: the public vhost sits behind oauth2-proxy, which turns
+  # aurral's API login into a redirect. Navidrome only trusts the Remote-User
+  # header when it is actually sent, so a plain password login from loopback
+  # still works. Streams are proxied by aurral's backend, so the loopback URL
+  # never reaches a browser.
+  systemd.services.navidrome.serviceConfig.BindReadOnlyPaths = [
+    "-${playlistFolder}"
+  ];
+
+  # Navidrome runs with PrivateUsers=true, so group access is out (see
+  # navidrome.nix), and aurral writes 0660/0770 by design: its data dir holds
+  # its database, encryption key included. A named-user ACL works under
+  # PrivateUsers, and the default entry makes new files and folders inherit
+  # it. Applied when the folder exists (aurral creates it on first start).
+  systemd.tmpfiles.rules = [
+    "A+ ${playlistFolder} - - - - u:navidrome:r-x,d:u:navidrome:r-x"
   ];
 
   services.nginx.virtualHosts.${domain} = lib.mkMerge [
