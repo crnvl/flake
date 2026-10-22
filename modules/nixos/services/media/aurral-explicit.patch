@@ -1,0 +1,82 @@
+diff -ruN a/backend/services/trackMatching/postDownloadValidator.js b/backend/services/trackMatching/postDownloadValidator.js
+--- a/backend/services/trackMatching/postDownloadValidator.js
++++ b/backend/services/trackMatching/postDownloadValidator.js
+@@ -21,7 +21,7 @@
+ import { parseFile } from "music-metadata";
+ import { buildTrackRequest } from "./trackIdentity.js";
+ import { getFileName, getFileBaseName, claimedTitle } from "./candidateNormalizer.js";
+-import { getCoreTitle, extractVariants } from "./semanticPolicy.js";
++import { getCoreTitle, extractVariants, buildRequestVariantProfile } from "./semanticPolicy.js";
+ import { runMatcherOperation } from "./beetsClient.js";
+ import {
+   toProtocolRequest,
+@@ -176,6 +176,37 @@
+       filePath,
+       quality: quality.quality,
+       actual: { tags: actual, durationMs: actualDurationMs },
++      actualDurationMs,
++      parsedTags: actual,
++    };
++  }
++
++  // nixos: reject the clean (edited) version by its tags, which often carry
++  // the rating when file and folder names don't. Counts as a failed
++  // download, so aurral moves on to the next source. A request that asks
++  // for clean keeps it. Only markers that mean "edited" count: iTunes
++  // advisory 2, or an edited/censored rating. A RATING=Clean text tag does
++  // not: Amazon and Qobuz rippers write it for every non-explicit track.
++  const cleanTag = buildRequestVariantProfile(trackRequest).contentRating === "clean"
++    ? null
++    : Object.values(parsed?.native || {}).flat().find((tag) => {
++      const id = String(tag?.id || "").toUpperCase().replace(/^TXXX:/, "");
++      const value = String(tag?.value ?? "").trim().toLowerCase();
++      if (id === "ITUNESADVISORY" || id === "RTNG") return value === "2";
++      if (id === "RATING" || id === "CONTENTRATING") {
++        return /^(edited|censored)$/.test(value);
++      }
++      return false;
++    });
++  if (cleanTag) {
++    return {
++      decision: POST_DOWNLOAD_DECISIONS.FAILED,
++      valid: false,
++      blocked: false,
++      reason: `downloaded file is the clean version (${cleanTag.id}=${cleanTag.value})`,
++      filePath,
++      quality: quality.quality,
++      actual: { tags: actual, durationMs: actualDurationMs },
+       actualDurationMs,
+       parsedTags: actual,
+     };
+diff -ruN a/backend/services/trackMatching/semanticPolicy.js b/backend/services/trackMatching/semanticPolicy.js
+--- a/backend/services/trackMatching/semanticPolicy.js
++++ b/backend/services/trackMatching/semanticPolicy.js
+@@ -87,7 +87,11 @@
+     : /\bstereo\b/.test(text)
+       ? "stereo"
+       : null;
+-  const contentRating = /\bclean\b/.test(text)
++  // nixos: only a version descriptor marks the clean version ("(Clean)",
++  // "[Edited]", "(Clean Version)", "Song - Clean.mp3"), so names such as
++  // Clean Bandit or "Come Clean" aren't taken for it.
++  const contentRating =
++    /[([]\s*(clean|edited|censored)(\s+(version|edit))?\s*[)\]]|\s-\s(clean|edited|censored)(\s+version)?(\.[a-z0-9]{2,5})?$/i.test(rawText)
+     ? "clean"
+     : /\bexplicit\b/.test(text)
+       ? "explicit"
+@@ -174,8 +178,14 @@
+     }
+   } else if (expected.contentRating && !actual.contentRating) {
+     score -= 10;
++  } else if (actual.contentRating === "clean") {
++    // nixos: a request without a rating wants the explicit (original)
++    // version, so a clean/edited candidate contradicts it like a mismatched
++    // rating does; aurral then tries the next source instead.
++    contradictions.push("content-rating-clean");
++    score -= 80;
+   } else if (actual.contentRating) {
+-    score -= 6;
++    score += 2;
+   }
+ 
+   return { score, contradictions };

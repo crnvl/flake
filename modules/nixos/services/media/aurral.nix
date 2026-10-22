@@ -37,14 +37,21 @@ in
     # them create flows and import playlists, which download through slskd
     # and SABnzbd. aurral has no setting for new users' permissions, so this
     # flips the built-in default; each new account stores its permissions on
-    # creation, so existing accounts are unaffected. Tests are skipped since
-    # only the installed default changes; the code is upstream's, tested in
-    # nixpkgs.
+    # creation, so existing accounts are unaffected.
+    #
+    # aurral-explicit.patch: downloads always take the explicit version. A
+    # source named or tagged as the clean/edited version counts as a
+    # mismatch, so aurral moves on to the next one; if only clean copies
+    # turn up, the track is skipped rather than censored.
+    #
+    # Both are applied to the installed files; tests are skipped since only
+    # those change and the rest is upstream's code, tested in nixpkgs.
     package = pkgs.aurral.overrideAttrs (old: {
       doCheck = false;
       postInstall = (old.postInstall or "") + ''
         substituteInPlace $out/lib/node_modules/aurral/backend/db/helpers/users.js \
           --replace-fail "accessFlow: false," "accessFlow: true,"
+        patch -d $out/lib/node_modules/aurral -p1 < ${./aurral-explicit.patch}
       '';
     });
 
