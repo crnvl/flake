@@ -28,7 +28,9 @@ in
     settings = {
       Address = "127.0.0.1";
       Port = 4533;
-      MusicFolder = "/mnt/chroma/music";
+      # Lidarr's root folder, next to media/movies and media/tv on the
+      # storage box (also Jellyfin's music library).
+      MusicFolder = "/mnt/chroma/media/music";
 
       # No inotify over CIFS, so the folder watcher is useless; rescan on a
       # schedule instead. Lidarr can also trigger a scan right after imports

@@ -8,9 +8,11 @@
 let
   domain = "aurral.shimme.rs";
   port = 3001;
-  # aurral's fallback download folder (no DOWNLOAD_FOLDER set), also what it
-  # has stored as downloadFolderPath.
-  playlistFolder = "${config.services.aurral.dataDir}/downloads/aurral";
+  # On the storage box next to media/music, not on the system disk. aurral
+  # has this stored as its downloadFolderPath (settings, in its DB). The
+  # folder itself was created once by hand: tmpfiles would touch the
+  # automounted storage box early in boot.
+  playlistFolder = "/mnt/chroma/media/aurral";
 in
 {
   # Raw client secret for kanidm's basicSecretFile.
@@ -48,15 +50,16 @@ in
     after = [ "kanidm.service" ];
     wants = [ "kanidm.service" ];
 
-    # Lidarr reports library files under /mnt/chroma/music; the same path
-    # inside aurral's chroot lets it verify and play them. Read-only: imports
-    # stay Lidarr's job.
-    serviceConfig.BindReadOnlyPaths = [ "/mnt/chroma/music" ];
+    # Lidarr reports library files under /mnt/chroma/media/music; the same
+    # path inside aurral's chroot lets it verify and play them. Read-only:
+    # imports stay Lidarr's job.
+    serviceConfig.BindReadOnlyPaths = [ "/mnt/chroma/media/music" ];
     # Playlist downloads go through slskd and SABnzbd, which download inside
     # the VPN namespace; aurral then moves (and retags) the finished files
-    # into its own download folder under /var/lib/aurral. Those dirs are
-    # group-writable by media, and the sources point at the namespace
-    # address (192.168.15.1) from aurral's settings, which live in its DB.
+    # into its playlist folder on the storage box. The download dirs are
+    # group-writable by media, as is everything on the storage box mount,
+    # and the sources point at the namespace address (192.168.15.1) from
+    # aurral's settings, which live in its DB.
     #
     # yt-dlp is switched off in those settings on purpose: aurral runs on the
     # host network, so it would download straight from this machine's IP.
@@ -69,27 +72,20 @@ in
   services.aurral.directories = [
     config.services.slskd.settings.directories.downloads
     "/var/lib/sabnzbd/downloads/aurral"
+    playlistFolder
   ];
 
-  # Playback: aurral registers its download folder as a second Navidrome
+  # Playback: aurral registers its playlist folder as a second Navidrome
   # library, by the path it sees it under, and syncs its playlists into it.
   # Its Navidrome URL (in its settings) is http://127.0.0.1:4533 rather than
   # music.shimme.rs: the public vhost sits behind oauth2-proxy, which turns
   # aurral's API login into a redirect. Navidrome only trusts the Remote-User
   # header when it is actually sent, so a plain password login from loopback
   # still works. Streams are proxied by aurral's backend, so the loopback URL
-  # never reaches a browser.
+  # never reaches a browser. The storage box mount makes everything 0664/0775,
+  # so Navidrome can read it despite PrivateUsers (see navidrome.nix).
   systemd.services.navidrome.serviceConfig.BindReadOnlyPaths = [
     "-${playlistFolder}"
-  ];
-
-  # Navidrome runs with PrivateUsers=true, so group access is out (see
-  # navidrome.nix), and aurral writes 0660/0770 by design: its data dir holds
-  # its database, encryption key included. A named-user ACL works under
-  # PrivateUsers, and the default entry makes new files and folders inherit
-  # it. Applied when the folder exists (aurral creates it on first start).
-  systemd.tmpfiles.rules = [
-    "A+ ${playlistFolder} - - - - u:navidrome:r-x,d:u:navidrome:r-x"
   ];
 
   services.nginx.virtualHosts.${domain} = lib.mkMerge [

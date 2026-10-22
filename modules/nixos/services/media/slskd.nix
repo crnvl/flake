@@ -57,7 +57,7 @@ in
 
       # Share the library back; many Soulseek users refuse to serve
       # non-sharers. Read-only (the module adds it to ReadOnlyPaths).
-      shares.directories = [ "/mnt/chroma/music" ];
+      shares.directories = [ "/mnt/chroma/media/music" ];
 
       # Mullvad has no port forwarding, so nothing reaches this from outside;
       # we can only connect out to peers that accept inbound connections.
