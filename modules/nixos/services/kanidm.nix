@@ -6,6 +6,29 @@
   ...
 }:
 
+let
+  # Extra links for the signed-in navbar (see the id.shimme.rs vhost below).
+  # They end up inside a single-quoted nginx string, so no single quotes.
+  navbarLinks =
+    ''<ul class="navbar-nav">''
+    +
+      lib.concatMapStrings
+        (
+          link:
+          ''<li><a class="nav-link" href="${link.url}" target="_blank" rel="noopener noreferrer">${link.label}</a></li>''
+        )
+        [
+          {
+            label = "Status";
+            url = "https://status.shimme.rs";
+          }
+          {
+            label = "Discord";
+            url = "https://discord.gg/A5bE2Ffzwn";
+          }
+        ]
+    + "</ul>";
+in
 {
   age.secrets =
     lib.genAttrs
@@ -388,6 +411,16 @@
     (mkProxyHost {
       port = 8443;
       scheme = "https";
+      # Extra links in the navbar, which only signed-in pages have (with the
+      # aero theme it is the taskbar). Kanidm's templates are compiled in, so
+      # nginx adds them on the way through, just before the "Sign out" list.
+      # sub_filter only sees uncompressed responses, so ask kanidm for those;
+      # nginx compresses again towards the browser.
+      locationExtraConfig = ''
+        proxy_set_header Accept-Encoding "";
+        sub_filter_once on;
+        sub_filter '<ul class="navbar-nav ms-md-auto">' '${navbarLinks}<ul class="navbar-nav ms-md-auto">';
+      '';
     })
     {
       # Kanidm's base template loads /pkg/override.css after its own
