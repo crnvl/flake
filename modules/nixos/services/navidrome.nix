@@ -9,12 +9,8 @@ let
   domain = "music.shimme.rs";
 
   # Subsonic API (apps, Lidarr's library-update connection), public share
-  # links, and navidrome's own login + native API (Feishin's Navidrome mode,
-  # aurral) can't do a browser OIDC flow; they keep navidrome's own auth:
-  # passwords, or the JWT that /auth/login hands out. The web UI's page load
-  # stays behind oauth2-proxy and gets its JWT from the Remote-User header;
-  # its /api calls already authenticate with that JWT (header, or ?jwt= for
-  # the event stream), so they work unchanged here.
+  # links and navidrome's own password login (Feishin's Navidrome mode) can't
+  # do a browser OIDC flow; they keep navidrome's own auth.
   # Clearing Remote-User matters: nginx connects from 127.0.0.1, which
   # navidrome trusts, so a client-supplied header would otherwise be honoured.
   bypassAuth = {
@@ -124,7 +120,36 @@ in
       locations."/share/" = bypassAuth;
       # Only the login itself; /auth/createAdmin stays behind oauth2-proxy.
       locations."= /auth/login" = bypassAuth;
-      locations."/api/" = bypassAuth;
+
+      # The native API serves two kinds of clients. The web UI logs in via
+      # the Remote-User header and gets no JWT from that, so its /api calls
+      # need oauth2-proxy and the header like everything else. Clients that
+      # logged in at /auth/login (Feishin) send navidrome's JWT instead and
+      # have no oauth2-proxy cookie. So: with a JWT, skip oauth2-proxy and
+      # leave Remote-User empty (navidrome then checks the JWT); without
+      # one, the usual oauth2-proxy check and header.
+      locations."/api/" = {
+        proxyPass = "http://127.0.0.1:4533";
+        extraConfig = ''
+          auth_request /_navidrome_api_auth;
+          auth_request_set $navidrome_user $upstream_http_x_auth_request_preferred_username;
+          proxy_set_header Remote-User $navidrome_user;
+        '';
+      };
+      locations."= /_navidrome_api_auth" = {
+        proxyPass = "${config.services.oauth2-proxy.httpAddress}/oauth2/auth?";
+        extraConfig = ''
+          internal;
+          auth_request off;
+          if ($http_x_nd_authorization) {
+            return 204;
+          }
+          # same as the oauth2-proxy module's /oauth2/auth location
+          proxy_set_header X-Scheme $scheme;
+          proxy_set_header Content-Length "";
+          proxy_pass_request_body off;
+        '';
+      };
     }
   ];
 }
