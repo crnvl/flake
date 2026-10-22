@@ -8,8 +8,13 @@
 let
   domain = "music.shimme.rs";
 
-  # Subsonic API (apps, Lidarr's library-update connection) and public share
-  # links can't do a browser OIDC flow; they keep navidrome's own auth.
+  # Subsonic API (apps, Lidarr's library-update connection), public share
+  # links, and navidrome's own login + native API (Feishin's Navidrome mode,
+  # aurral) can't do a browser OIDC flow; they keep navidrome's own auth:
+  # passwords, or the JWT that /auth/login hands out. The web UI's page load
+  # stays behind oauth2-proxy and gets its JWT from the Remote-User header;
+  # its /api calls already authenticate with that JWT (header, or ?jwt= for
+  # the event stream), so they work unchanged here.
   # Clearing Remote-User matters: nginx connects from 127.0.0.1, which
   # navidrome trusts, so a client-supplied header would otherwise be honoured.
   bypassAuth = {
@@ -117,6 +122,9 @@ in
       '';
       locations."/rest/" = bypassAuth;
       locations."/share/" = bypassAuth;
+      # Only the login itself; /auth/createAdmin stays behind oauth2-proxy.
+      locations."= /auth/login" = bypassAuth;
+      locations."/api/" = bypassAuth;
     }
   ];
 }
