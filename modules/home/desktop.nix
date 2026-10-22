@@ -87,6 +87,7 @@
       figma-linux
       blender
       obs-studio
+      feishin
 
       (tor-browser.override {
         extraPrefs = ''
