@@ -48,8 +48,20 @@ in
         UserHeader = "Remote-User";
         LogoutURL = "https://${domain}/oauth2/sign_out";
       };
+
+      # Scrobbling and artist info. The API key and secret come from
+      # navidrome-lastfm-env below; each user links their own Last.fm
+      # account in the web UI (Personal > Scrobble to Last.fm).
+      LastFM.Enabled = true;
     };
   };
+
+  # Contains ND_LASTFM_APIKEY=... and ND_LASTFM_SECRET=... (the same Last.fm
+  # API account aurral uses). Navidrome reads ND_* variables as config, which
+  # keeps both out of the nix store.
+  age.secrets.navidrome-lastfm-env.file = ../../../hosts/shimmers/secrets/navidrome-lastfm-env.age;
+  systemd.services.navidrome.serviceConfig.EnvironmentFile =
+    config.age.secrets.navidrome-lastfm-env.path;
 
   # The library is 0664/0775 jellyfin:media on the CIFS mount, so the world
   # read bits suffice; navidrome runs with PrivateUsers=true, under which

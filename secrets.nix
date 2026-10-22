@@ -16,6 +16,7 @@ let
       "aurral-env"
       "kanidm-oauth2-navidrome-secret"
       "oauth2-proxy-cookie-secret"
+      "navidrome-lastfm-env"
       "grafana-secret-key"
       "alertmanager-env"
       "mullvad-wg.conf"
