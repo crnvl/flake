@@ -252,6 +252,8 @@ in
           groups = [
             "jellyfin_users"
             "nextcloud_users"
+            "aurral_users"
+            "navidrome_users"
           ];
         };
 
