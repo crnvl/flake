@@ -58,6 +58,10 @@ in
       # Share the library back; many Soulseek users refuse to serve
       # non-sharers. Read-only (the module adds it to ReadOnlyPaths).
       shares.directories = [ "/mnt/chroma/media/music" ];
+      # Rescan hourly (minutes; 60 is the minimum). By default slskd only
+      # scans at startup, so imports and Lidarr's renames left it advertising
+      # files that had moved, and kept the share looking smaller than it is.
+      shares.cache.retention = 60;
 
       # Mullvad has no port forwarding, so nothing reaches this from outside;
       # we can only connect out to peers that accept inbound connections.
