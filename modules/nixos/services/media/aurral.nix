@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   mkProxyHost,
   ...
 }:
@@ -30,6 +31,22 @@ in
     enable = true;
     inherit port;
     environmentFile = config.age.secrets.aurral-env.path;
+
+    # New users get aurral's playlist section (the accessFlow permission) by
+    # default: seeing and playing playlists in aurral needs it. It also lets
+    # them create flows and import playlists, which download through slskd
+    # and SABnzbd. aurral has no setting for new users' permissions, so this
+    # flips the built-in default; each new account stores its permissions on
+    # creation, so existing accounts are unaffected. Tests are skipped since
+    # only the installed default changes; the code is upstream's, tested in
+    # nixpkgs.
+    package = pkgs.aurral.overrideAttrs (old: {
+      doCheck = false;
+      postInstall = (old.postInstall or "") + ''
+        substituteInPlace $out/lib/node_modules/aurral/backend/db/helpers/users.js \
+          --replace-fail "accessFlow: false," "accessFlow: true,"
+      '';
+    });
 
     environment = {
       # Only nginx on loopback sits in front of it.
