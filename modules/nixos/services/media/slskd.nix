@@ -1,5 +1,33 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
+let
+  # Posts slskd events to Discord. slskd's own webhooks send its raw event
+  # JSON, which Discord rejects, so this runs as a slskd script instead and
+  # builds the message with slskd-discord.jq. slskd starts it directly (no
+  # shell) with the event in $SLSKD_SCRIPT_DATA; that data comes from the
+  # Soulseek network and is only ever handled by jq. Runs inside slskd's
+  # unit, so the request leaves through the VPN like everything else.
+  discordNotify = pkgs.writeShellApplication {
+    name = "slskd-discord";
+    runtimeInputs = with pkgs; [
+      coreutils
+      curl
+      jq
+    ];
+    text = ''
+      url="$(tr -d '[:space:]' < ${config.age.secrets.slskd-discord-webhook.path})"
+      jq -nc -f ${./slskd-discord.jq} \
+        | curl --fail --silent --show-error --max-time 20 \
+            --header 'Content-Type: application/json' \
+            --data @- "$url" > /dev/null
+    '';
+  };
+in
 {
   # Contains:
   #   SLSKD_SLSK_USERNAME=...  Soulseek network account (auto-registered on
@@ -8,6 +36,13 @@
   #   SLSKD_PASSWORD=...
   #   SLSKD_API_KEY=...        primary (admin) API key, shared with soularr
   age.secrets.slskd-env.file = ../../../../hosts/shimmers/secrets/slskd-env.age;
+
+  # Discord webhook URL for the Soulseek channel.
+  age.secrets.slskd-discord-webhook = {
+    file = ../../../../hosts/shimmers/secrets/slskd-discord-webhook.age;
+    owner = "slskd";
+    group = "slskd";
+  };
 
   services.slskd = {
     enable = true;
@@ -27,6 +62,17 @@
       # Mullvad has no port forwarding, so nothing reaches this from outside;
       # we can only connect out to peers that accept inbound connections.
       soulseek.listen_port = 50300;
+
+      # Finished album folders and private messages go to Discord. Per-file
+      # completions would be one message per track, and uploads from the
+      # share would flood the channel.
+      integrations.scripts.discord = {
+        on = [
+          "DownloadDirectoryComplete"
+          "PrivateMessageReceived"
+        ];
+        run.executable = lib.getExe discordNotify;
+      };
     };
   };
 

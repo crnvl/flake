@@ -28,6 +28,7 @@ let
       "decluttarr-env"
       "lidarr-env"
       "slskd-env"
+      "slskd-discord-webhook"
       "soularr-env"
       "vaultwarden-env"
       "oura-env"
