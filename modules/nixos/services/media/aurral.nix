@@ -43,6 +43,14 @@ in
       # Who may log in at all is the aurral_users scope map in kanidm.nix.
       OIDC_ADMIN_USERS = "aleph";
       OIDC_DEFAULT_ROLE = "user";
+
+      # SABnzbd reports its completed folder as "downloads", relative to its
+      # own data dir; aurral would resolve that against its own working dir.
+      # Point it at the aurral category folder (the one bound in below), so
+      # the storage health check tests the folder aurral actually works in.
+      # Real jobs are unaffected: SABnzbd's history gives absolute paths,
+      # which exist here and are never remapped.
+      PATH_MAPPINGS = "sabnzbd|downloads|/var/lib/sabnzbd/downloads/aurral";
     };
   };
 
