@@ -65,7 +65,7 @@ in
   };
 
   services.nextcloud = {
-    enable = false;
+    enable = true;
     package = pkgs.nextcloud35;
     hostName = domain;
     https = true;

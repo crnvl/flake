@@ -18,7 +18,9 @@
     ../../modules/nixos/services/vpn.nix
     ../../modules/nixos/services/monero.nix
     ../../modules/nixos/services/vaultwarden.nix
-    ../../modules/nixos/services/nextcloud.nix
+    # Disabled for now; the kanidm OAuth2 client and the "Cloud" uptime probe
+    # follow services.nextcloud.enable automatically.
+    # ../../modules/nixos/services/nextcloud.nix
     ../../modules/nixos/services/mail.nix
 
     ../../modules/nixos/services/media/sabnzbd.nix

@@ -296,7 +296,7 @@
           ];
         };
 
-        nextcloud = {
+        nextcloud = lib.mkIf config.services.nextcloud.enable {
           displayName = "nextcloud";
           originUrl = "https://cloud.shimme.rs/apps/user_oidc/code";
           originLanding = "https://cloud.shimme.rs";

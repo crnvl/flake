@@ -21,7 +21,6 @@ let
     "Identity" = "https://id.shimme.rs";
     "Jellyfin" = "https://jellyfin.shimme.rs";
     "Vault" = "https://vault.shimme.rs";
-    "Cloud" = "https://cloud.shimme.rs";
     "Seerr" = "https://seerr.shimme.rs";
     # / redirects to kanidm; the Subsonic API bypasses it and answers 200
     # (with an auth error body) only if navidrome itself is up.
@@ -30,6 +29,9 @@ let
     "Shift" = "https://shift.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";
+  }
+  // lib.optionalAttrs config.services.nextcloud.enable {
+    "Cloud" = "https://cloud.shimme.rs";
   };
 
   mkProbeTargets =
