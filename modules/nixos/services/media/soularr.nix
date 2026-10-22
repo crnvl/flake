@@ -22,8 +22,17 @@ let
     url_base = /
     download_dir = ${slskdDownloads}
     delete_searches = False
-    stalled_timeout = 3600
-    remote_queue_timeout = 300
+    # Despite the name, a total limit counted from when an album is queued,
+    # progress or not. Slow uploaders (~100 KiB/s is common) need more than
+    # the default hour for a FLAC album. soularr starts no new searches
+    # until its current batch finishes, so this is also the longest new
+    # requests can be held up.
+    stalled_timeout = 10800
+    # How long an album may sit entirely in the peer's upload queue before
+    # it is cancelled. Queues are normal on Soulseek; at the default 300
+    # every busy uploader got cancelled, and the next run usually picked
+    # the same one again, landing at the back of its queue.
+    remote_queue_timeout = 1800
 
     [Release Settings]
     use_selected_lidarr_release = False
