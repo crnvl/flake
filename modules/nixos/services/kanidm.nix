@@ -183,6 +183,8 @@ in
             "jellyfin_users"
             "nextcloud_users"
             "vaultwarden_users"
+            "aurral_users"
+            "navidrome_users"
           ];
         };
 
