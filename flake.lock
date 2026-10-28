@@ -488,11 +488,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793186250,
-        "narHash": "sha256-FO2ioXpg19W84LivOlAK9TYWw0CgZYeh3sxS+NHffTI=",
+        "lastModified": 1793187998,
+        "narHash": "sha256-eQvAv3avhxooIWKMfLDKKU7vUtrqRUbvRKomchLbnI8=",
         "ref": "refs/heads/main",
-        "rev": "0a23c975b7d931c6050a45dd12465359a322d44f",
-        "revCount": 22,
+        "rev": "2875bab984db904313b6484c5b4ed12f45c2b387",
+        "revCount": 23,
         "type": "git",
         "url": "ssh://git@git-gay-unuo/67/unuo"
       },
