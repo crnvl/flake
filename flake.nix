@@ -36,6 +36,11 @@
       url = "git+ssh://git@git-gay-unuo/67/unuo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Its dark-ambient branch, run as a second channel (same deploy key).
+    unuo-dark = {
+      url = "git+ssh://git@git-gay-unuo/67/unuo?ref=dark-ambient";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
@@ -101,6 +106,7 @@
             inputs.catshift.nixosModules.default
             inputs.proxyagain.nixosModules.default
             inputs.unuo.nixosModules.default
+            inputs.unuo-dark.nixosModules.dark
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix
