@@ -34,6 +34,7 @@ let
       "oura-env"
       "location-env"
       "proxyagain-deploy-key"
+      "unuo-deploy-key"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"
       "maddy-rxby-password"

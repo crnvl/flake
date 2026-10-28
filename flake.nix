@@ -30,6 +30,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Private like proxyagain: fetched with its own deploy key through the
+    # "git-gay-unuo" host alias (see hosts/shimmers/default.nix).
+    unuo = {
+      url = "git+ssh://git@git-gay-unuo/67/unuo";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 
@@ -93,6 +100,7 @@
             inputs.vpn-confinement.nixosModules.default
             inputs.catshift.nixosModules.default
             inputs.proxyagain.nixosModules.default
+            inputs.unuo.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix
