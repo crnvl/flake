@@ -38,6 +38,7 @@
     ../../modules/nixos/services/media/tunarr.nix
     ../../modules/nixos/services/media/tagesschau.nix
     ../../modules/nixos/services/media/decluttarr.nix
+    ../../modules/nixos/services/media/haiku-tv.nix
     # Webcam -> Jellyfin Live TV; disabled for now, re-enable together with
     # hosts/corridors/webcam.nix.
     # ../../modules/nixos/services/media/webcam-livetv.nix
@@ -89,11 +90,28 @@
     mode = "0400";
   };
 
+  # Same arrangement for the private unuo flake input (haiku-tv), with its
+  # own read-only deploy key and host alias. It needs the same one-time
+  # bootstrap as proxyagain the first time it is introduced.
+  age.secrets.unuo-deploy-key = {
+    file = ./secrets/unuo-deploy-key.age;
+    owner = "aleph";
+    group = "users";
+    mode = "0400";
+  };
+
   programs.ssh.extraConfig = ''
     Host git-gay-proxyagain
       HostName git.gay
       User git
       IdentityFile ${config.age.secrets.proxyagain-deploy-key.path}
+      IdentitiesOnly yes
+      StrictHostKeyChecking accept-new
+
+    Host git-gay-unuo
+      HostName git.gay
+      User git
+      IdentityFile ${config.age.secrets.unuo-deploy-key.path}
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
   '';
