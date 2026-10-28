@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
+    ./disko-initrd-workaround.nix
   ];
 
   system.stateVersion = "25.11";
