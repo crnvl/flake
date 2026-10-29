@@ -99,11 +99,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1793237173,
-        "narHash": "sha256-rcEPSlLb9m2CPvX00G98LBaWR1bcQQ2Qo9J+S9zSb5Q=",
+        "lastModified": 1793237817,
+        "narHash": "sha256-PXVa8o2PqZ2j2GEkA8Frq1MBVJOBqFlSWqpg1dFVB+I=",
         "ref": "refs/heads/main",
-        "rev": "d942aa0f67b350be0659a8dcc1c6cb52ec4deddd",
-        "revCount": 25,
+        "rev": "86f5f32cd719deefea9c0d56d93880d629451b27",
+        "revCount": 27,
         "type": "git",
         "url": "https://git.gay/67/exo"
       },
