@@ -123,7 +123,12 @@ in
           "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
           "browser.urlbar.suggest.quicksuggest.sponsored" = false;
 
-          "media.peerconnection.enabled" = false;
+          # WebRTC is needed for direct peer-to-peer connections (e.g. exo on
+          # share.shimme.rs). Local addresses stay hidden behind mDNS names
+          # (Firefox's default), and only the default route's interface is
+          # used, so other interfaces (VPN internals, bridges) aren't exposed.
+          "media.peerconnection.enabled" = true;
+          "media.peerconnection.ice.default_address_only" = true;
           "dom.security.https_only_mode" = true;
           "privacy.resistFingerprinting" = true;
           "geo.enabled" = false;
