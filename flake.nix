@@ -25,6 +25,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Deliberately not following our nixpkgs: exo pins its wasm-bindgen crate
+    # to the exact wasm-bindgen-cli version in its own lock, and a different
+    # nixpkgs would break its web build.
+    exo.url = "git+https://git.gay/67/exo";
+
     proxyagain = {
       url = "git+ssh://git@git-gay-proxyagain/67/proxyagain";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -104,6 +109,7 @@
             inputs.agenix.nixosModules.default
             inputs.vpn-confinement.nixosModules.default
             inputs.catshift.nixosModules.default
+            inputs.exo.nixosModules.default
             inputs.proxyagain.nixosModules.default
             inputs.unuo.nixosModules.default
             inputs.unuo-dark.nixosModules.dark

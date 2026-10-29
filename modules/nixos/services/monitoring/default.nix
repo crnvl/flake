@@ -27,6 +27,7 @@ let
     "Music" = "https://music.shimme.rs/rest/ping.view";
     "Aurral" = "https://aurral.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
+    "Share" = "https://share.shimme.rs";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";
   }

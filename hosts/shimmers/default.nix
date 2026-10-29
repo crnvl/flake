@@ -44,6 +44,7 @@
     # ../../modules/nixos/services/media/webcam-livetv.nix
 
     ../../modules/nixos/services/catshift.nix
+    ../../modules/nixos/services/exo.nix
     ../../modules/nixos/services/proxyagain.nix
   ];
 
