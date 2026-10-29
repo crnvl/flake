@@ -36,24 +36,6 @@
     memoryPercent = 50;
   };
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      # Vesktop's arRPC bundles a snapshot of Discord's detectable games list
-      # that only knows Deadlock by its old project8.exe binary, so the game
-      # never shows up as an activity. Add the current deadlock.exe name; jq
-      # leaves the list alone once a newer snapshot already has it.
-      vesktop = prev.vesktop.overrideAttrs (old: {
-        preBuild = (old.preBuild or "") + ''
-          db=node_modules/arrpc/src/process/detectable.json
-          jq -e 'any(.[]; .id == "1276737795012165766")' "$db" >/dev/null
-          jq '(.[] | select(.id == "1276737795012165766" and (.executables | all(.name != "win64/deadlock.exe"))) | .executables)
-            += [{ is_launcher: false, name: "win64/deadlock.exe", os: "win32" }]' "$db" > detectable.json
-          mv detectable.json "$db"
-        '';
-      });
-    })
-  ];
-
   programs = {
     niri = {
       enable = true;
