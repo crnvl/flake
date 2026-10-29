@@ -218,6 +218,8 @@ in
           mailAddresses = [ "nobelboje@shimme.rs" ];
           groups = [
             "jellyfin_users"
+            "aurral_users"
+            "navidrome_users"
           ];
         };
 
