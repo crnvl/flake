@@ -154,6 +154,7 @@
     obsidian
     inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     rar
+    sonic-pi
   ];
 
   systemd.services = lib.mkIf config.services.mullvad-vpn.enable {
