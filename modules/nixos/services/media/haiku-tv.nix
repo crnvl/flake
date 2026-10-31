@@ -14,10 +14,10 @@
 #   (the channel is matched to its guide by tvg-id "haiku").
 #
 # A second channel plays unuo's dark-ambient branch (the unuo-dark input):
-# dark ambient after LORN and Ben Frost's DARK, glitchy and granular, with a
-# beat, pads and drones. It evolves a layer at a time instead of being
-# re-arranged every 10 minutes, in /var/lib/haiku-tv-dark. Jellyfin setup as
-# above with port 8741 (tvg-id "haiku-dark" keeps the guides apart).
+# dark ambient after LORN and Ben Frost's DARK, glitchy and granular, with
+# pads and drones (the drums are off). It evolves a layer at a time instead
+# of being re-arranged every 10 minutes, in /var/lib/haiku-tv-dark. Jellyfin
+# setup as above with port 8741 (tvg-id "haiku-dark" keeps the guides apart).
 { ... }:
 
 {
@@ -30,5 +30,6 @@
     enable = true;
     listenAddr = "127.0.0.1:8741";
     evolve = true;
+    drums = false;
   };
 }

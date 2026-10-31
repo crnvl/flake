@@ -613,11 +613,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793188735,
-        "narHash": "sha256-ilCFuSwg3h4In84GtblIMwEypAVGYNOnhbbNqCbyIg0=",
+        "lastModified": 1793468176,
+        "narHash": "sha256-iOFtYL186FPFpc/RG9CWdPtuSiY5axx6sgj1CMw0+a8=",
         "ref": "refs/heads/main",
-        "rev": "f0a954160f67e503150e3c42d18e3db9e41e039d",
-        "revCount": 24,
+        "rev": "31560a0ab6ddc95757b72b4b9532f4d72cf2a881",
+        "revCount": 25,
         "type": "git",
         "url": "ssh://git@git-gay-unuo/67/unuo"
       },
@@ -634,11 +634,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793206119,
-        "narHash": "sha256-bVK9LizgcFmbaUD1NeYhOpqBb4rWb24hCN4tn7SUM7Q=",
+        "lastModified": 1793468296,
+        "narHash": "sha256-OpPCZ2u5XjQ9AXh83bL0+HVTKeQ+Iu3K5x5nuGoM5vQ=",
         "ref": "dark-ambient",
-        "rev": "126915ebeed29de1389f8ead65c7dde5bcf91af0",
-        "revCount": 57,
+        "rev": "e4d62c96a36d500181594e13e04dae0c676e8001",
+        "revCount": 58,
         "type": "git",
         "url": "ssh://git@git-gay-unuo/67/unuo"
       },
