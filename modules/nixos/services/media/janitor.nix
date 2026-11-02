@@ -24,8 +24,10 @@ let
     last time it became new (added to radarr/sonarr, requested in seerr, a
     movie's release, a series' newest aired episode that is on disk),
     whichever is newer. File dates are ignored, so quality upgrades do not
-    count. The bottom ${toString cfg.removePercent}% of that ranking gets
-    evicted. Whole series are the unit of removal, so recent activity
+    count. Titles get evicted from the bottom of that ranking up until
+    ${cfg.storagePath} is back to ${toString cfg.targetFreePercent}% free, but never more than
+    ${toString cfg.maxRemovePercent}% of the ranking in one run; with enough space free, nothing
+    goes. Whole series are the unit of removal, so recent activity
     anywhere in a show lifts all of its seasons. Jellyfin favorites and
     anything that became new in the last ${toString cfg.minAgeDays} days are left out of the
     ranking entirely. Eviction deletes the files through radarr and sonarr
@@ -38,8 +40,9 @@ let
 
   # Joins jellyfin watch data (aggregated across all users) with radarr,
   # sonarr and seerr state, ranks every title that is fair game by its most
-  # recent sign of life and emits the full ranking plus the bottom
-  # $removePercent of it as removal candidates, least active first.
+  # recent sign of life and emits the full ranking plus, from its bottom,
+  # enough titles to free $needBytes (at most $maxRemovePercent of it) as
+  # removal candidates, least active first.
   policyScript = pkgs.writeText "media-janitor-policy.jq" ''
     # Jellyfin timestamps carry 7-digit fractional seconds, which
     # fromdateiso8601 refuses, so strip them (and normalise the zone) first.
@@ -105,6 +108,7 @@ let
     | ($seerr[0] // []) as $seerrMedia
     | ($requests[0] // []) as $seerrRequests
     | now as $now
+    | ([ $storage.size * $targetFreePercent / 100 - $storage.avail, 0 ] | max | floor) as $needBytes
     | ($seerrRequests | requestedBy("movie"; "tmdbId")) as $requestedByTmdb
     | ($seerrRequests | requestedBy("tv"; "tvdbId")) as $requestedByTvdb
     # Freshness only counts things that make a title new to us: it being
@@ -200,7 +204,12 @@ let
         | reverse
       ) as $ranked
     | ($ranked | length) as $n
-    | (($n * $removePercent / 100) | floor) as $cut
+    | (($n * $maxRemovePercent / 100) | floor) as $cap
+    # Least active first, until enough is freed or the cap is reached.
+    | ($ranked | reverse | map(.arr.size // 0)) as $bottomUp
+    | (reduce range(0; $cap) as $i ({ cut: 0, freed: 0 };
+        if .freed >= $needBytes then . else .cut += 1 | .freed += $bottomUp[$i] end)
+      ).cut as $cut
     | [ $ranked
         | to_entries[]
         | { rank: (.key + 1), remove: (.key >= ($n - $cut)) } + (.value | entry($now))
@@ -209,12 +218,16 @@ let
     | {
         generated: ($now | todate),
         policy: {
-          removePercent: $removePercent,
+          targetFreePercent: $targetFreePercent,
+          maxRemovePercent: $maxRemovePercent,
           minAgeDays: $minAgeDays
         },
+        storage: $storage,
+        needBytes: $needBytes,
         summary: {
           titles: ($all | length),
           ranked: $n,
+          cap: $cap,
           removing: ($chosen | length),
           protected: ($all
             | map(select(.protectedBy != null))
@@ -238,7 +251,8 @@ let
     def gib: ((. // 0) / 1073741824 * 10 | round) / 10 | "\(.) GiB";
 
     (.ranking | length | tostring | length) as $rw
-    | "\(.summary.ranked) titles ranked, the bottom \(.policy.removePercent)% (\(.summary.removing) titles, \(.totalSize | gib)) is marked with -",
+    | "\(.storage.avail | gib) of \(.storage.size | gib) free, the target is \(.policy.targetFreePercent)%\(if .needBytes > 0 then ", \(.needBytes | gib) short" else "" end)",
+      "\(.summary.ranked) titles ranked, \(.summary.removing) of them (\(.totalSize | gib), at most \(.summary.cap) per run) marked with -",
       (.summary.protected | to_entries[] | "\(.value) left out: \(.key)"),
       "",
       (.ranking[]
@@ -269,7 +283,8 @@ let
     | ($acc.text
         + (if $acc.n < ($all | length) then "\n… and \(($all | length) - $acc.n) more" else "" end)
       ) as $lines
-    | ([ "bottom \(.percent)% of \(.ranked) ranked titles",
+    | ([ "back to \(.target)% free, least watched of \(.ranked) ranked titles first",
+         (if .needBytes > $bytes then "still \(.needBytes - $bytes | human) short, the per-run cap was reached" else empty end),
          (if ($failed | length) > 0 then "FAILED to remove: \($failed | join(", "))" else empty end),
          (if .dryRun then "dry run — nothing was actually deleted" else empty end)
        ] | join(" · ")) as $foot
@@ -309,7 +324,9 @@ let
       sonarr_key_file=${lib.escapeShellArg (toString cfg.sonarrKeyFile)}
       webhook_file=${lib.escapeShellArg (toString cfg.discordWebhookFile)}
       min_age=${toString cfg.minAgeDays}
-      remove_percent=${toString cfg.removePercent}
+      storage_path=${lib.escapeShellArg cfg.storagePath}
+      target_free=${toString cfg.targetFreePercent}
+      max_remove=${toString cfg.maxRemovePercent}
 
       delete=false
       as_json=false
@@ -384,6 +401,14 @@ let
       trap 'rm -rf "$tmp"' EXIT
 
       # -- gather ------------------------------------------------------------
+
+      # As the storage box itself reports it, so everything on it counts,
+      # backups included.
+      [ -d "$storage_path" ] || die "$storage_path does not exist, is the storage box mounted?"
+      read -r storage_size storage_avail < <(df --output=size,avail -B1 "$storage_path" | tail -n 1) \
+        || die "df failed for $storage_path"
+      storage="$(jq -nc --argjson size "$storage_size" --argjson avail "$storage_avail" '{ size: $size, avail: $avail }')" \
+        || die "df gave nonsense for $storage_path: $storage_size $storage_avail"
 
       users="$(jf_get "$jellyfin_url/Users")" || die "jellyfin unreachable at $jellyfin_url"
       mapfile -t user_ids < <(jq -r '.[].Id' <<< "$users")
@@ -489,7 +514,9 @@ let
         --slurpfile seerr "$tmp/seerr.json" \
         --slurpfile requests "$tmp/requests.json" \
         --argjson minAgeDays "$min_age" \
-        --argjson removePercent "$remove_percent" \
+        --argjson storage "$storage" \
+        --argjson targetFreePercent "$target_free" \
+        --argjson maxRemovePercent "$max_remove" \
         -f ${policyScript})"
 
       if [ "$as_json" = true ]; then
@@ -505,7 +532,10 @@ let
       count="$(jq '.candidates | length' <<< "$report")"
       if [ "$count" -eq 0 ]; then
         echo "media-janitor: nothing to remove"
-        jq -r '"  \(.summary.ranked) titles ranked, the bottom \(.policy.removePercent)% of that rounds down to none",
+        jq -r 'def gib: ((. // 0) / 1073741824 * 10 | round) / 10 | "\(.) GiB";
+               if .needBytes == 0
+               then "  \(.storage.avail | gib) free, at least the \(.policy.targetFreePercent)% wanted"
+               else "  \(.needBytes | gib) short of \(.policy.targetFreePercent)% free, but \(.summary.ranked) ranked titles allow no removals at \(.policy.maxRemovePercent)% per run" end,
                (.summary.protected | to_entries[] | "  \(.value) left out: \(.key)")' <<< "$report"
         exit 0
       fi
@@ -551,7 +581,7 @@ let
         fi
       else
         jq -c '.candidates[]' <<< "$report" > "$tmp/removed.jsonl"
-        jq -r '"media-janitor: dry run, would remove the bottom \(.policy.removePercent)% (\(.summary.removing) of \(.summary.ranked) ranked titles):",
+        jq -r '"media-janitor: dry run, \(.needBytes / 1073741824 | round) GiB short of \(.policy.targetFreePercent)% free, would remove \(.summary.removing) of \(.summary.ranked) ranked titles:",
                (.candidates[] | "  #\(.rank) \(.title) [\(.type)] — \(((.size // 0) / 1073741824 * 10 | round) / 10) GiB, \(.reason)")' <<< "$report"
       fi
 
@@ -564,10 +594,11 @@ let
       outcome="$(jq -n \
         --argjson dryRun "$dry_json" \
         --argjson ranked "$(jq '.summary.ranked' <<< "$report")" \
-        --argjson percent "$remove_percent" \
+        --argjson needBytes "$(jq '.needBytes' <<< "$report")" \
+        --argjson target "$target_free" \
         --slurpfile removed "$tmp/removed.json" \
         --slurpfile failed "$tmp/failed.json" \
-        '{ dryRun: $dryRun, ranked: $ranked, percent: $percent,
+        '{ dryRun: $dryRun, ranked: $ranked, needBytes: $needBytes, target: $target,
            removed: ($removed[0] // []), failed: ($failed[0] // []) }')"
 
       if [ "$webhook" = true ]; then
@@ -627,23 +658,43 @@ in
         Grace period: anything that became new within this many days (added
         to radarr/sonarr, requested in seerr, released, or for series a new
         episode aired that is on disk) is left out of the ranking, so it is
-        never touched and does not count towards removePercent. Quality
+        never touched and does not count towards maxRemovePercent. Quality
         upgrades do not restart the clock. 0 ranks everything that is not a
         favorite.
       '';
     };
 
-    removePercent = lib.mkOption {
+    storagePath = lib.mkOption {
+      type = lib.types.str;
+      default = "/mnt/chroma/media";
+      description = ''
+        A path on the storage the media lives on. Free space is measured for
+        the whole filesystem it is on, so anything else stored there counts.
+      '';
+    };
+
+    targetFreePercent = lib.mkOption {
+      type = lib.types.ints.between 0 100;
+      default = 15;
+      description = ''
+        Free space to get back to. Every movie and series that is not a
+        favorite, unmanaged by radarr/sonarr or inside the minAgeDays grace
+        period is ranked by its most recent sign of life, the last play by
+        anyone (partial ones included) or the last time it became new (see
+        minAgeDays), whichever is newer, and titles go from the bottom up
+        until removing them gets the storage back to this much free. With at
+        least this much free already, nothing is removed.
+      '';
+    };
+
+    maxRemovePercent = lib.mkOption {
       type = lib.types.ints.between 1 100;
       default = 10;
       description = ''
-        Share of the ranking evicted per run, rounded down. Every movie and
-        series that is not a favorite, unmanaged by radarr/sonarr or inside
-        the minAgeDays grace period is ranked by its most recent sign of
-        life, the last play by anyone (partial ones included) or the last
-        time it became new (see minAgeDays), whichever is newer, and this
-        many percent from the bottom go. Being a share of the library, it
-        also bounds how much a bad API answer can take out in one run.
+        At most this share of the ranking, rounded down, goes in one run,
+        however far below targetFreePercent the storage is; later runs pick
+        up the rest. Being a share of the library, it also bounds how much a
+        bad API answer can take out at once.
       '';
     };
 
@@ -658,7 +709,9 @@ in
 
     onCalendar = lib.mkOption {
       type = lib.types.str;
-      default = "*-*-01 05:00:00";
+      # Daily is cheap: runs with enough space free remove nothing and stay
+      # quiet, and a filling disk gets caught within a day.
+      default = "*-*-* 05:00:00";
       description = "When the timer fires, systemd.time(7) syntax.";
     };
 
@@ -715,6 +768,7 @@ in
         "jellyfin.service"
       ];
       wants = [ "network-online.target" ];
+      unitConfig.RequiresMountsFor = [ cfg.storagePath ];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = lib.concatStringsSep " " (
