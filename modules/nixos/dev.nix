@@ -39,5 +39,6 @@
     usbmuxd
     iloader
     codex
+    mdbook
   ];
 }
