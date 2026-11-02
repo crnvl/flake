@@ -44,7 +44,12 @@ in
     # mismatch, so aurral moves on to the next one; if only clean copies
     # turn up, the track is skipped rather than censored.
     #
-    # Both are applied to the installed files; tests are skipped since only
+    # aurral-album-artist-path.patch: an album requested from one artist's
+    # page can belong to another MusicBrainz artist. Lidarr adds that one
+    # from the requesting artist's settings, and aurral used to send the
+    # folder along, so What So Not ended up in "Buunshin (1)".
+    #
+    # All are applied to the installed files; tests are skipped since only
     # those change and the rest is upstream's code, tested in nixpkgs.
     package = pkgs.aurral.overrideAttrs (old: {
       doCheck = false;
@@ -52,6 +57,7 @@ in
         substituteInPlace $out/lib/node_modules/aurral/backend/db/helpers/users.js \
           --replace-fail "accessFlow: false," "accessFlow: true,"
         patch -d $out/lib/node_modules/aurral -p1 < ${./aurral-explicit.patch}
+        patch -d $out/lib/node_modules/aurral -p1 < ${./aurral-album-artist-path.patch}
       '';
     });
 

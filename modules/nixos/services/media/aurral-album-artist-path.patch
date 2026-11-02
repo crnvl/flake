@@ -1,0 +1,23 @@
+diff -ruN a/backend/services/lidarrClient.js b/backend/services/lidarrClient.js
+--- a/backend/services/lidarrClient.js
++++ b/backend/services/lidarrClient.js
+@@ -1333,11 +1333,18 @@
+             artist.monitor || artist.addOptions?.monitor || "none",
+           );
+ 
++    // nixos: the release group can belong to a different MusicBrainz artist
++    // (a collab or feature credited to someone else). Lidarr then adds that
++    // artist from this template, path included, and disambiguates the clash
++    // as "<this artist> (1)". Without a path it names the folder after the
++    // artist it actually adds; existing artists keep their own path.
++    const { path: _path, ...artistTemplate } = effectiveArtist;
++
+     const lidarrAlbum = {
+       title: albumName,
+       foreignAlbumId: albumMbid,
+       artistId: artistId,
+-      artist: effectiveArtist,
++      artist: artistTemplate,
+       monitored: options.monitored !== false,
+       anyReleaseOk: true,
+       images: [],
