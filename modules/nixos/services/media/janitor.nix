@@ -709,9 +709,9 @@ in
 
     onCalendar = lib.mkOption {
       type = lib.types.str;
-      # Daily is cheap: runs with enough space free remove nothing and stay
-      # quiet, and a filling disk gets caught within a day.
-      default = "*-*-* 05:00:00";
+      # Runs with enough space free remove nothing and stay quiet, so this
+      # only decides how quickly a filling disk gets caught.
+      default = "Mon *-*-* 05:00:00";
       description = "When the timer fires, systemd.time(7) syntax.";
     };
 
