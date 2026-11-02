@@ -50,7 +50,6 @@ in
       carla
       lsp-plugins
       surge-xt
-      supercollider-with-sc3-plugins
       ni-iso-rescue
     ];
 
