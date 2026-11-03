@@ -8,6 +8,8 @@
 let
   cfg = config.my.mediaTranscode;
 
+  library = "/mnt/chroma/media";
+
   helpText = pkgs.writeText "media-transcode-help.txt" ''
     media-transcode - re-encode large H.264 files to HEVC to save space
 
@@ -28,6 +30,10 @@ let
     most ${toString cfg.maxSizePercent}% of its size; either way the file is not tried again until
     radarr or sonarr replace it. The file keeps its name, radarr or sonarr
     rescan it and jellyfin is told to probe it again.
+
+    A run stops before the storage box would drop below ${toString cfg.minFreeGiB} GiB free.
+    Replaced originals stay in the box's snapshots until those expire, so
+    for a few days every re-encode costs space instead of saving it.
 
     --list and --status need root for the API keys.
   '';
@@ -74,6 +80,7 @@ let
       min_mbps=${toString cfg.minMbps}
       min_age=${toString cfg.minAgeDays}
       max_percent=${toString cfg.maxSizePercent}
+      min_free=$(( ${toString cfg.minFreeGiB} * 1073741824 ))
       state="''${STATE_DIRECTORY:-/var/lib/media-transcode}"
       results="$state/results.jsonl"
       work="$state/work"
@@ -98,6 +105,15 @@ let
       )
 
       gib() { awk -v b="$1" 'BEGIN { printf "%.1f GiB", b / 1073741824 }'; }
+
+      free_bytes() {
+        df --output=avail -B1 ${lib.escapeShellArg library} | tail -n 1 | tr -d '[:space:]'
+      }
+
+      # Whether writing this many more bytes to the box leaves min_free.
+      room_for() { # <bytes>
+        [ $(( $(free_bytes) - $1 )) -ge "$min_free" ]
+      }
 
       candidates() {
         local radarr_key sonarr_key series done_json
@@ -141,6 +157,7 @@ let
         else
           echo "nothing done yet"
         fi
+        echo "free: $(gib "$(free_bytes)"), runs stop at ${toString cfg.minFreeGiB} GiB"
         candidates | jq -r '
           def gib: (. / 1073741824 * 10 | round) / 10 | "\(.) GiB";
           "left: \(length) files, \(map(.size) | add // 0 | gib), \(map(.secs) | add // 0 | . / 3600 | round) h of video"'
@@ -191,6 +208,7 @@ let
       }
 
       cifs_tmp=""
+      out_of_room=0
       cleanup() {
         rm -rf "''${work:?}"/*
         if [ -n "$cifs_tmp" ]; then
@@ -269,6 +287,14 @@ let
           return 0
         fi
 
+        # The original stays in the snapshots, so the new file is all extra
+        # for now. Not recorded: it is tried again once there is room.
+        if ! room_for "$after"; then
+          log "not enough room to swap in $src, keeping the original"
+          out_of_room=1
+          return 0
+        fi
+
         # Copied next to the original first, so the swap is one rename on
         # the share. A rename can fail while someone is playing the file.
         cifs_tmp="$(dirname "$src")/.$(basename "$src").transcoded"
@@ -299,9 +325,18 @@ let
         log "$total files to do"
         while IFS= read -r c <&3; do
           n=$(( n + 1 ))
+          # The output is at most as big as the original, so this is the
+          # most the swap can take.
+          if ! room_for "$(jq -r .size <<< "$c")"; then
+            log "stopping with $(gib "$(free_bytes)") free; replaced files give their space back as the snapshots holding them expire"
+            break
+          fi
           log "[$n/$total] $(jq -r '"\(.path) (\(.mbps * 10 | round / 10) Mbit/s, \(.size / 1073741824 * 10 | round / 10) GiB)"' <<< "$c")"
           transcode "$c"
           rm -f "$work"/*
+          if [ "$out_of_room" = 1 ]; then
+            break
+          fi
         done 3< "$queue"
         rm -f "$queue"
       }
@@ -331,7 +366,7 @@ let
     User = "media-transcode";
     # Write access to the library, which is 0664/0775 jellyfin:media.
     SupplementaryGroups = [ "media" ];
-    ReadWritePaths = [ "/mnt/chroma/media" ];
+    ReadWritePaths = [ library ];
     StateDirectory = "media-transcode";
     LoadCredential = [
       "radarr:${config.age.secrets.radarr-api-key.path}"
@@ -404,6 +439,19 @@ in
       type = lib.types.ints.between 1 100;
       default = 80;
       description = "Keep the original unless the new file is at most this share of its size.";
+    };
+
+    minFreeGiB = lib.mkOption {
+      type = lib.types.ints.unsigned;
+      default = 200;
+      description = ''
+        Stop before the storage box drops below this much free space. The
+        box keeps daily snapshots that count against its quota, so a
+        replaced original only gives its space back once the last snapshot
+        holding it expires (5 days at the moment). Until then each re-encode
+        costs the size of the new file. The next run picks up where this
+        one stopped once there is room again.
+      '';
     };
 
     crf = lib.mkOption {
