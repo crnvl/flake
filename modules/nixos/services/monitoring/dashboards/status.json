@@ -117,7 +117,7 @@
       "type": "bargauge",
       "title": "Uptime (24h)",
       "transparent": true,
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "gridPos": { "h": 14, "w": 12, "x": 0, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -165,7 +165,7 @@
       "type": "bargauge",
       "title": "Uptime (30d)",
       "transparent": true,
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "gridPos": { "h": 14, "w": 12, "x": 12, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -213,7 +213,7 @@
       "type": "timeseries",
       "title": "Response Time",
       "transparent": true,
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 21 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 27 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -268,7 +268,7 @@
       "type": "gauge",
       "title": "CPU",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -313,7 +313,7 @@
       "type": "gauge",
       "title": "Memory",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -358,7 +358,7 @@
       "type": "gauge",
       "title": "Disk /",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -403,7 +403,7 @@
       "type": "gauge",
       "title": "Media Storage",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -448,7 +448,7 @@
       "type": "stat",
       "title": "Host Uptime",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
@@ -488,7 +488,7 @@
       "type": "stat",
       "title": "Requests/s",
       "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 29 },
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 35 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
