@@ -54,10 +54,10 @@ in
     package = pkgs.aurral.overrideAttrs (old: {
       doCheck = false;
       postInstall = (old.postInstall or "") + ''
-        substituteInPlace $out/lib/node_modules/aurral/backend/db/helpers/users.js \
+        substituteInPlace $out/lib/aurral/backend/db/helpers/users.ts \
           --replace-fail "accessFlow: false," "accessFlow: true,"
-        patch -d $out/lib/node_modules/aurral -p1 < ${./aurral-explicit.patch}
-        patch -d $out/lib/node_modules/aurral -p1 < ${./aurral-album-artist-path.patch}
+        patch -d $out/lib/aurral -p1 < ${./aurral-explicit.patch}
+        patch -d $out/lib/aurral -p1 < ${./aurral-album-artist-path.patch}
       '';
     });
 

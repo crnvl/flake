@@ -1,9 +1,8 @@
-diff -ruN a/backend/services/lidarrClient.js b/backend/services/lidarrClient.js
---- a/backend/services/lidarrClient.js
-+++ b/backend/services/lidarrClient.js
-@@ -1333,11 +1333,18 @@
-             artist.monitor || artist.addOptions?.monitor || "none",
-           );
+--- a/backend/services/lidarrClient.ts
++++ b/backend/services/lidarrClient.ts
+@@ -1679,11 +1679,18 @@
+         ? artist
+         : await this.updateArtistMonitoring(artistId, artist.addOptions?.monitor || "none");
  
 +    // nixos: the release group can belong to a different MusicBrainz artist
 +    // (a collab or feature credited to someone else). Lidarr then adds that
