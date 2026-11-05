@@ -46,7 +46,7 @@ in
       });
 
   services.kanidm = {
-    package = pkgs.kanidm_1_11.withSecretProvisioning;
+    package = pkgs.kanidm_1_12.withSecretProvisioning;
 
     client = {
       enable = true;
@@ -395,7 +395,7 @@ in
     };
   };
 
-  environment.systemPackages = [ pkgs.kanidm_1_11 ];
+  environment.systemPackages = [ pkgs.kanidm_1_12 ];
 
   security.acme.certs."id.shimme.rs" = {
     group = "acme";
