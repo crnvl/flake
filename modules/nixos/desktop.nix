@@ -9,6 +9,7 @@
 {
   imports = [
     ../../modules/nixos/backup.nix
+    ../../modules/nixos/helium.nix
   ];
 
   fonts = {

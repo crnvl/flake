@@ -224,23 +224,23 @@
         "type": "github"
       }
     },
-    "helium-nix": {
+    "helium": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1782022846,
-        "narHash": "sha256-OdUUVz+CZfPlsrdy4Nprn53JP/tccWTLhsc0iGOJr7c=",
-        "owner": "penal-colony",
-        "repo": "helium-nix",
-        "rev": "73afc17b6285242545452fa3c3f737993f807b18",
+        "lastModified": 1793894983,
+        "narHash": "sha256-Edf2dXsfHch4YEjzSdBY5+CEmBTBWa5psnlDWExBKWk=",
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
+        "rev": "9fe3f8f48c8c25b0d245d13d6c91d4cf77adc729",
         "type": "github"
       },
       "original": {
-        "owner": "penal-colony",
-        "repo": "helium-nix",
+        "owner": "oxcl",
+        "repo": "nix-flake-helium-browser",
         "type": "github"
       }
     },
@@ -489,7 +489,7 @@
         "disko": "disko",
         "exo": "exo",
         "firefox-addons": "firefox-addons",
-        "helium-nix": "helium-nix",
+        "helium": "helium",
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
         "niri": "niri",
