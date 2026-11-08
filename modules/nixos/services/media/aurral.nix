@@ -113,6 +113,30 @@ in
     playlistFolder
   ];
 
+  # aurral never searches a failed track again by itself, but Soulseek
+  # results change with who is online. Puts every failed playlist track back
+  # in the queue once a day. Tracks the user blocked or removed stay alone.
+  # The API key lives in aurral's DB (it generates it), hence root and sqlite.
+  systemd.services.aurral-retry-failed = {
+    description = "re-search failed aurral downloads";
+    after = [ "aurral.service" ];
+    requires = [ "aurral.service" ];
+    startAt = "daily";
+    path = with pkgs; [
+      curl
+      sqlite
+    ];
+    script = ''
+      key="$(sqlite3 -readonly /var/lib/aurral/aurral.db \
+        "SELECT json_extract(value, '$.general.apiKey') FROM settings WHERE key = 'integrations'")"
+      curl --fail-with-body --silent --show-error --max-time 900 \
+        --request POST --header "X-Api-Key: $key" \
+        http://127.0.0.1:${toString port}/api/playlists/research-missing
+      echo
+    '';
+    serviceConfig.Type = "oneshot";
+  };
+
   # Playback: aurral registers its playlist folder as a second Navidrome
   # library, by the path it sees it under, and syncs its playlists into it.
   # Its Navidrome URL (in its settings) is http://127.0.0.1:4533 rather than
