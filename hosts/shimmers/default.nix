@@ -55,7 +55,10 @@
   networking = {
     hostName = "shimmers";
     hosts = {
-      "127.0.0.1" = [ "id.shimme.rs" ];
+      "127.0.0.1" = [
+        "id.shimme.rs"
+        "jellyfin.shimme.rs"
+      ];
     };
   };
 
