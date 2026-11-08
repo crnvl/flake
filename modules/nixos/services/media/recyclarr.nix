@@ -19,6 +19,7 @@ let
   # Releases without a language tag count as the original language, which
   # is what radarr and sonarr fall back to when they cannot parse one.
   mainProfile = "Original + German";
+  animeProfile = "Anime";
 
   languageScores = rec {
     originalGerman = 2000;
@@ -100,6 +101,7 @@ let
       radarr_key_file=${lib.escapeShellArg config.age.secrets.radarr-api-key.path}
       sonarr_key_file=${lib.escapeShellArg config.age.secrets.sonarr-api-key.path}
       main_profile=${lib.escapeShellArg mainProfile}
+      anime_profile=${lib.escapeShellArg animeProfile}
       retired=${lib.escapeShellArg (builtins.toJSON retiredProfiles)}
 
       dry_run=false
@@ -308,6 +310,25 @@ let
         done <<< "$(jq -c '.[]' <<< "$old")"
       }
 
+      # Without an anime profile, seerr files anime requests under the main
+      # profile, so point it at the one recyclarr manages.
+      seerr_anime() {
+        local anime servers s
+        anime="$(arr sonarr GET qualityprofile | jq --arg n "$anime_profile" 'map(select(.name == $n)) | first | .id // empty')"
+        if [ -z "$anime" ]; then
+          log "sonarr: no $anime_profile profile yet, leaving seerr's anime profile alone"
+          return 0
+        fi
+        servers="$(seerr GET settings/sonarr | jq -c --argjson p "$anime" --arg n "$anime_profile" '
+          .[] | select(.activeAnimeProfileId != $p) | .activeAnimeProfileId = $p | .activeAnimeProfileName = $n')"
+        while read -r s; do
+          [ -n "$s" ] || continue
+          seerr PUT "settings/sonarr/$(jq -r .id <<< "$s")" \
+            "$(jq -c 'del(.id) | with_entries(select(.value != null))' <<< "$s")" > /dev/null
+          log "seerr: $(jq -r .name <<< "$s") now requests anime as $anime_profile"
+        done <<< "$servers"
+      }
+
       for app in radarr sonarr; do
         prefer_usenet "$app"
       done
@@ -315,6 +336,7 @@ let
       for app in radarr sonarr; do
         retire "$app"
       done
+      seerr_anime
     '';
   };
 
@@ -421,7 +443,7 @@ in
           })
           {
             trash_id = "20e0fc959f1f1704bed501f23bdae76f"; # [Anime] Remux-1080p
-            name = "Anime";
+            name = animeProfile;
             reset_unmatched_scores.enabled = true;
             quality_sort = "top";
             upgrade = {
@@ -470,7 +492,7 @@ in
                 score = seasonPackScore;
               }
               {
-                name = "Anime";
+                name = animeProfile;
                 score = 10;
               }
             ];
