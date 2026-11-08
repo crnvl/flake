@@ -426,10 +426,11 @@ in
             quality_sort = "top";
             upgrade = {
               allowed = true;
-              until_quality = "Bluray-1080p";
+              until_quality = "1080p";
               until_score = 10000;
             };
-            qualities = hd1080;
+            # Same groups as the main profile, so usenet wins ties here too.
+            qualities = byResolution;
           }
         ];
 
