@@ -105,15 +105,6 @@ in
 
     window-rules = [
       {
-        matches = [
-          {
-            app-id = "firefox$";
-            title = "^Picture-in-Picture$";
-          }
-        ];
-        open-floating = true;
-      }
-      {
         matches = [ { app-id = "^fl64\\.exe$"; } ];
         open-fullscreen = true;
       }
