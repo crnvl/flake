@@ -8,9 +8,9 @@
 let
   domain = "music.shimme.rs";
 
-  # Subsonic API (apps, Lidarr's library-update connection), public share
-  # links and navidrome's own password login (Feishin's Navidrome mode) can't
-  # do a browser OIDC flow; they keep navidrome's own auth.
+  # Subsonic API (apps), public share links and navidrome's own password
+  # login (Feishin's Navidrome mode) can't do a browser OIDC flow; they keep
+  # navidrome's own auth.
   # Clearing Remote-User matters: nginx connects from 127.0.0.1, which
   # navidrome trusts, so a client-supplied header would otherwise be honoured.
   bypassAuth = {
@@ -34,8 +34,8 @@ in
       MusicFolder = "/mnt/chroma/media/music";
 
       # No inotify over CIFS, so the folder watcher is useless; rescan on a
-      # schedule instead. Lidarr can also trigger a scan right after imports
-      # via a Subsonic connection (Settings > Connect) pointed at navidrome.
+      # schedule instead. That is also how Lidarr's imports show up: its
+      # Subsonic connection was dropped, an hourly scan is soon enough.
       Scanner = {
         WatcherWait = "0";
         Schedule = "@every 1h";

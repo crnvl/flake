@@ -22,8 +22,14 @@
       };
 
       # Share the library back; many Soulseek users refuse to serve
-      # non-sharers. Read-only (the module adds it to ReadOnlyPaths).
-      shares.directories = [ "/mnt/chroma/media/music" ];
+      # non-sharers. Read-only (the module adds it to ReadOnlyPaths). With no
+      # port forwarding (see below) only peers that accept connections can
+      # reach us, so a bigger share is the main lever left: aurral's
+      # playlist folder is shared too.
+      shares.directories = [
+        "/mnt/chroma/media/music"
+        "/mnt/chroma/media/aurral"
+      ];
       # Rescan hourly (minutes; 60 is the minimum). By default slskd only
       # scans at startup, so imports and Lidarr's renames left it advertising
       # files that had moved, and kept the share looking smaller than it is.
@@ -65,10 +71,12 @@
   # otherwise tmpfiles makes it root-owned and systemd's StateDirectory=
   # handling then recursively chowns everything to slskd:slskd, clobbering
   # the media group below.
+  # Downloads untouched for two weeks are removed: Lidarr and aurral move
+  # what they want out within minutes, the rest is failed or partial albums.
   systemd.tmpfiles.rules = [
     "d /var/lib/slskd 0755 slskd slskd -"
     "d /var/lib/slskd/incomplete 2775 slskd media -"
-    "d /var/lib/slskd/downloads 2775 slskd media -"
+    "d /var/lib/slskd/downloads 2775 slskd media 14d"
   ];
 
   my.vpn.ports = [ 5030 ];

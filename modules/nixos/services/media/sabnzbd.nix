@@ -4,6 +4,11 @@
   services.sabnzbd = {
     enable = true;
     allowConfigWrite = true;
+    # Everything it writes is group media, so the arrs and aurral can move,
+    # retag and delete it. A supplementary group isn't enough: sabnzbd sets
+    # its job dirs to 775, which drops the setgid bit, so folders unpacked
+    # inside a job came out sabnzbd:sabnzbd and aurral got EACCES on them.
+    group = "media";
   };
 
   systemd.services.sabnzbd.serviceConfig.ExecStart =
@@ -28,9 +33,9 @@
     "d /var/lib/sabnzbd/downloads/lidarr 0775 sabnzbd media -"
     # aurral's category. setgid so job dirs stay in media: aurral moves the
     # finished files out and retags them in place (see aurral.nix).
-    "d /var/lib/sabnzbd/downloads/aurral 2775 sabnzbd media -"
-    "d /var/lib/sabnzbd/incomplete 0755 sabnzbd sabnzbd -"
+    # aurral grabs a whole album for one playlist track and often leaves the
+    # rest behind, so anything untouched for two weeks is removed.
+    "d /var/lib/sabnzbd/downloads/aurral 2775 sabnzbd media 14d"
+    "d /var/lib/sabnzbd/incomplete 0755 sabnzbd media -"
   ];
-
-  users.users.sabnzbd.extraGroups = [ "media" ];
 }

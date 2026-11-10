@@ -37,11 +37,19 @@ let
   # After that, any file whose tags still differ from what Lidarr would
   # write gets retagged: ones imported before the setting, or edited since.
   #
+  # Quality: the default profile (root folder and aurral requests) used to
+  # take lossless only, so an album nobody had in FLAC never came. Now it
+  # takes 256k and better lossy too, and upgrades to lossless when that
+  # turns up. Clean/edited versions stay rejected by their custom format.
+  #
   # Tubifarry's slskd indexer and download client, plus its Search Sniper.
-  # slskd has no RSS, so after the search on add nothing would look for a
-  # missing album again. Search Sniper searches 5 at random every half hour
-  # (on all indexers, usenet too). It skips albums it searched in the last
-  # week, and pauses while 10 or more downloads are queued.
+  # slskd has no RSS, and usenet is search-only in Prowlarr, so after the
+  # search on add nothing would look for a missing album again. Search
+  # Sniper searches 5 at random every half hour (on all indexers), albums
+  # released in the last 30 days first. It also searches albums below the
+  # quality cutoff, which is what finds the lossless upgrades. It skips
+  # albums it searched in the last week, and pauses while 10 or more
+  # downloads are queued.
   #
   # Search: when nothing turns up, try again with more of the album's
   # metadata. Ignore accents and Vol./Volume spellings, and drop folders
@@ -115,6 +123,26 @@ let
         log "audio tags are now written on import and kept in sync with MusicBrainz"
       fi
 
+      # Found by name, old or new, since ids differ per install. Item ids
+      # are Lidarr's quality groups: 1003 Mid (256k), 1004 High (V0/320)
+      # and 1005 Lossless.
+      current="$(api GET qualityprofile | jq -c \
+        'first(.[] | select(.name == "Lossless" or .name == "Lossless preferred")) // empty')"
+      if [ -z "$current" ]; then
+        log "no Lossless quality profile, leaving quality profiles alone"
+      else
+        wanted="$(jq -c '
+          .name = "Lossless preferred"
+          | .upgradeAllowed = true
+          | .cutoff = 1005
+          | .items |= map(.allowed = ([.id] | inside([1003, 1004, 1005])))
+        ' <<< "$current")"
+        if [ "$(jq -S . <<< "$current")" != "$(jq -S . <<< "$wanted")" ]; then
+          api PUT "qualityprofile/$(jq -r .id <<< "$wanted")" "$wanted" > /dev/null
+          log "quality profile $(jq -r .name <<< "$wanted") updated"
+        fi
+      fi
+
       slskd="$(jq -nc --arg key "$slskd_key" '{ baseUrl: "http://127.0.0.1:5030", apiKey: $key }')"
       provider downloadclient SlskdClient '.name = "Slskd" | .enable = true' \
         "$(jq -c '. + { timeout: 0.5, inclusive: false, cleanStaleDirectories: true }' <<< "$slskd")"
@@ -134,7 +162,9 @@ let
           requestCacheType: 1,
           cacheDirectory: $cache,
           cacheRetentionDays: 7,
-          searchMissing: true
+          searchMissing: true,
+          searchQualityCutoffNotMet: true,
+          prioritizeRecentDays: 30
         }')"
 
       for artist in $(api GET artist | jq -r '.[].id'); do
@@ -157,6 +187,7 @@ in
     enable = true;
     openFirewall = false;
     environmentFiles = [ config.age.secrets.lidarr-env.path ];
+    settings.log.level = "info";
   };
 
   systemd.services.lidarr = {
@@ -195,12 +226,7 @@ in
 
   # media: /mnt/chroma library, sabnzbd/qbittorrent downloads, and the slskd
   # downloads dir (setgid media, see slskd.nix) so imports can move files out.
-  # sabnzbd: its job dirs are created sabnzbd:sabnzbd, so moving finished
-  # downloads out needs that group (same as sonarr and radarr).
-  users.users.lidarr.extraGroups = [
-    "media"
-    "sabnzbd"
-  ];
+  users.users.lidarr.extraGroups = [ "media" ];
 
   my.vpn.portMappings = [
     {
