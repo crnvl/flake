@@ -6,6 +6,25 @@
 }:
 
 let
+  inherit (config.services.lidarr) dataDir;
+
+  # Tubifarry adds slskd as a Lidarr indexer and download client, so
+  # Soulseek results are ranked against the usenet ones by the quality
+  # profile (this replaced soularr). Lidarr only loads plugins from
+  # plugins/<owner>/<name> in its data dir, and the plugin keeps its own
+  # state (settings.resx) next to the DLL, so the folder stays writable and
+  # only the release files are put back on every start. That also undoes
+  # the update the develop builds install by themselves. Develop builds are
+  # the ones for Lidarr 3.1 (master needs 3.2); they report errors to Sentry.
+  tubifarry = pkgs.fetchzip {
+    url = "https://github.com/TypNull/Tubifarry/releases/download/v2.3.0.2/Tubifarry-v2.3.0.2.net8.0.zip";
+    hash = "sha256-Yg4+jJ3LBkBrHs944VXCc/N3hO5e8qM0cRu1ibA2pjA=";
+    stripRoot = false;
+  };
+  tubifarryDir = "${dataDir}/plugins/TypNull/Tubifarry";
+  # Albums Search Sniper searched recently, kept across restarts.
+  searchSniperCache = "${dataDir}/search-sniper";
+
   # Lidarr keeps these in its database, so they are pushed through the API.
   #
   # Tags: Lidarr's default is to never write them, so imports kept whatever
@@ -17,6 +36,22 @@ let
   #
   # After that, any file whose tags still differ from what Lidarr would
   # write gets retagged: ones imported before the setting, or edited since.
+  #
+  # Tubifarry's slskd indexer and download client, plus its Search Sniper.
+  # slskd has no RSS, so after the search on add nothing would look for a
+  # missing album again. Search Sniper searches 5 at random every half hour
+  # (on all indexers, usenet too). It skips albums it searched in the last
+  # week, and pauses while 10 or more downloads are queued.
+  #
+  # Search: when nothing turns up, try again with more of the album's
+  # metadata. Ignore accents and Vol./Volume spellings, and drop folders
+  # whose track count is far off.
+  #
+  # Downloads: give up on a peer that left the album in its upload queue
+  # for half an hour, or sent nothing for an hour; Lidarr then blocklists
+  # that release and searches again. Only Lidarr's own downloads are
+  # tracked, since aurral's playlist downloads share the folder. Album
+  # folders left over after import are removed.
   lidarrSettings = pkgs.writeShellApplication {
     name = "lidarr-settings";
     runtimeInputs = with pkgs; [
@@ -26,6 +61,7 @@ let
     text = ''
       url=http://localhost:8686/api/v1
       key="''${LIDARR__AUTH__APIKEY:?LIDARR__AUTH__APIKEY is not set}"
+      slskd_key="''${SLSKD_API_KEY:?SLSKD_API_KEY is not set}"
 
       log() { echo "lidarr-settings: $*" >&2; }
 
@@ -42,12 +78,64 @@ let
         curl "''${args[@]}" "$url/$2"
       }
 
+      # Adds or updates the <kind> (indexer, downloadclient, metadata) of
+      # this implementation. The filter adjusts the resource, the object
+      # sets fields by name. Saved on every run since Lidarr shows API keys
+      # only masked, so a changed one can't be told apart. forceSave skips
+      # the connection test, which fails while slskd is still logging in.
+      masked='(.fields[] | select(.privacy == "apiKey") | .value) |= "********"'
+      provider() { # <kind> <implementation> <jq filter> <fields json>
+        local current wanted
+        current="$(api GET "$1" | jq -c --arg i "$2" 'first(.[] | select(.implementation == $i)) // empty')"
+        if [ -z "$current" ]; then
+          current="$(api GET "$1/schema" | jq -c --arg i "$2" 'first(.[] | select(.implementation == $i)) // empty')"
+          if [ -z "$current" ]; then
+            log "Lidarr has no $1 $2, is Tubifarry loaded?"
+            exit 1
+          fi
+        fi
+        wanted="$(jq -c --argjson f "$4" \
+          "$3"' | .fields |= map(.name as $n | if $f | has($n) then .value = $f[$n] else . end)' \
+          <<< "$current")"
+        if [ "$(jq '.id // 0' <<< "$current")" = 0 ]; then
+          api POST "$1?forceSave=true" "$wanted" > /dev/null
+          log "added $1 $2"
+          return
+        fi
+        api PUT "$1/$(jq -r .id <<< "$current")?forceSave=true" "$wanted" > /dev/null
+        if [ "$(jq -S "$masked" <<< "$current")" != "$(jq -S "$masked" <<< "$wanted")" ]; then
+          log "updated $1 $2"
+        fi
+      }
+
       current="$(api GET config/metadataprovider)"
       wanted="$(jq -c '.writeAudioTags = "sync" | .scrubAudioTags = false' <<< "$current")"
       if [ "$(jq -S . <<< "$current")" != "$(jq -S . <<< "$wanted")" ]; then
         api PUT "config/metadataprovider/$(jq -r .id <<< "$wanted")" "$wanted" > /dev/null
         log "audio tags are now written on import and kept in sync with MusicBrainz"
       fi
+
+      slskd="$(jq -nc --arg key "$slskd_key" '{ baseUrl: "http://127.0.0.1:5030", apiKey: $key }')"
+      provider downloadclient SlskdClient '.name = "Slskd" | .enable = true' \
+        "$(jq -c '. + { timeout: 0.5, inclusive: false, cleanStaleDirectories: true }' <<< "$slskd")"
+      provider indexer SlskdIndexer \
+        '.name = "Slskd" | .enableRss = false | .enableAutomaticSearch = true | .enableInteractiveSearch = true' \
+        "$(jq -c '. + {
+          useFallbackSearch: true,
+          normalizedSeach: true,
+          handleVolumeVariations: true,
+          trackCountFilter: 3
+        }' <<< "$slskd")"
+      provider metadata SearchSniperTask '.enable = true' \
+        "$(jq -nc --arg cache ${lib.escapeShellArg searchSniperCache} '{
+          refreshInterval: 30,
+          randomPicksPerInterval: 5,
+          stopWhenQueued: 10,
+          requestCacheType: 1,
+          cacheDirectory: $cache,
+          cacheRetentionDays: 7,
+          searchMissing: true
+        }')"
 
       for artist in $(api GET artist | jq -r '.[].id'); do
         files="$(api GET "retag?artistId=$artist" | jq -c 'map(.trackFileId) | unique')"
@@ -61,8 +149,8 @@ let
 in
 {
   # Contains LIDARR__AUTH__APIKEY=... so the API key is pinned declaratively
-  # and can be shared with soularr (soularr-env) without copying it out of
-  # the UI.
+  # and can be shared (aurral-lidarr-webhook reads it) without copying it out
+  # of the UI.
   age.secrets.lidarr-env.file = ../../../../hosts/shimmers/secrets/lidarr-env.age;
 
   services.lidarr = {
@@ -77,9 +165,16 @@ in
       vpnNamespace = "wg";
     };
     unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+
+    preStart = ''
+      mkdir -p ${lib.escapeShellArg tubifarryDir} ${lib.escapeShellArg searchSniperCache}
+      rm -f ${lib.escapeShellArg tubifarryDir}/Lidarr.Plugin.* ${lib.escapeShellArg tubifarryDir}/release_notes.txt
+      install -m 0644 ${tubifarry}/* ${lib.escapeShellArg tubifarryDir}/
+    '';
   };
 
   # On every Lidarr start, and daily to undo changes made in the web UI.
+  # slskd-env for SLSKD_API_KEY, which Tubifarry's slskd providers use.
   systemd.services.lidarr-settings = {
     description = "apply the Lidarr settings kept in nix and retag drifted files";
     after = [ "lidarr.service" ];
@@ -88,7 +183,10 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = lib.getExe lidarrSettings;
-      EnvironmentFile = config.age.secrets.lidarr-env.path;
+      EnvironmentFile = [
+        config.age.secrets.lidarr-env.path
+        config.age.secrets.slskd-env.path
+      ];
       DynamicUser = true;
     };
   };

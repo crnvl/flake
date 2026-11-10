@@ -28,7 +28,6 @@
     ../../modules/nixos/services/media/radarr.nix
     ../../modules/nixos/services/media/lidarr.nix
     ../../modules/nixos/services/media/slskd.nix
-    ../../modules/nixos/services/media/soularr.nix
     ../../modules/nixos/services/media/aurral.nix
     ../../modules/nixos/services/media/seerr.nix
     ../../modules/nixos/services/media/seerr-usage.nix

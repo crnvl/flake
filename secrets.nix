@@ -29,7 +29,6 @@ let
       "decluttarr-env"
       "lidarr-env"
       "slskd-env"
-      "soularr-env"
       "vaultwarden-env"
       "oura-env"
       "location-env"

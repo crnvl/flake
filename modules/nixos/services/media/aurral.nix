@@ -137,6 +137,76 @@ in
     serviceConfig.Type = "oneshot";
   };
 
+  # Lidarr tells aurral about every import. That's the only way a requested
+  # album gets marked available in aurral's request history (and its
+  # "Request available" notification goes out). Lidarr sits in the VPN
+  # namespace and can't open connections to the host, so it goes through
+  # the public vhost. Runs as root to read aurral's API key from its DB
+  # (like aurral-retry-failed), inside the namespace to reach Lidarr, and
+  # like lidarr-settings on every Lidarr start and daily to undo UI edits.
+  systemd.services.aurral-lidarr-webhook = {
+    description = "point Lidarr's import webhook at aurral";
+    after = [
+      "aurral.service"
+      "lidarr.service"
+    ];
+    wants = [ "aurral.service" ];
+    wantedBy = [ "lidarr.service" ];
+    startAt = "daily";
+    path = with pkgs; [
+      curl
+      jq
+      sqlite
+    ];
+    script = ''
+      aurral_key="$(sqlite3 -readonly /var/lib/aurral/aurral.db \
+        "SELECT json_extract(value, '$.general.apiKey') FROM settings WHERE key = 'integrations'")"
+      if [ -z "$aurral_key" ]; then
+        echo "aurral has no API key yet" >&2
+        exit 1
+      fi
+      hook=https://${domain}/api/webhooks/lidarr
+
+      api() { # <method> <path> [json body]
+        local args=(
+          --fail-with-body --silent --show-error --max-time 60
+          --retry 30 --retry-delay 2 --retry-connrefused
+          --request "$1" --header "X-Api-Key: $LIDARR__AUTH__APIKEY"
+        )
+        if [ "$#" -ge 3 ]; then
+          args+=(--header "Content-Type: application/json" --data-binary "$3")
+        fi
+        curl "''${args[@]}" "http://localhost:8686/api/v1/$2"
+      }
+
+      current="$(api GET notification | jq -c --arg u "$hook" \
+        'first(.[] | select(.implementation == "Webhook" and any(.fields[]; .name == "url" and .value == $u))) // empty')"
+      [ -n "$current" ] || current="$(api GET notification/schema | jq -c 'first(.[] | select(.implementation == "Webhook"))')"
+      wanted="$(jq -c --arg u "$hook" --arg k "$aurral_key" '
+        .name = "aurral"
+        | with_entries(if (.key | test("^on[A-Z]")) then .value = (.key == "onReleaseImport") else . end)
+        | .fields |= map(
+            if .name == "url" then .value = $u
+            elif .name == "method" then .value = 1
+            elif .name == "headers" then .value = [{ key: "X-Api-Key", value: $k }]
+            else . end)
+      ' <<< "$current")"
+      if [ "$(jq '.id // 0' <<< "$current")" = 0 ]; then
+        api POST "notification?forceSave=true" "$wanted" > /dev/null
+        echo "added the aurral webhook"
+      elif [ "$(jq -S . <<< "$current")" != "$(jq -S . <<< "$wanted")" ]; then
+        api PUT "notification/$(jq -r .id <<< "$current")?forceSave=true" "$wanted" > /dev/null
+        echo "updated the aurral webhook"
+      fi
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      EnvironmentFile = config.age.secrets.lidarr-env.path;
+    };
+  };
+
+  my.vpn.confinedServices = [ "aurral-lidarr-webhook" ];
+
   # Playback: aurral registers its playlist folder as a second Navidrome
   # library, by the path it sees it under, and syncs its playlists into it.
   # Its Navidrome URL (in its settings) is http://127.0.0.1:4533 rather than

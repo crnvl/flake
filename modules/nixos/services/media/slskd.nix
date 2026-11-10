@@ -6,7 +6,8 @@
   #   SLSKD_SLSK_PASSWORD=...  first login if the name is free)
   #   SLSKD_USERNAME=...       web UI login
   #   SLSKD_PASSWORD=...
-  #   SLSKD_API_KEY=...        primary (admin) API key, shared with soularr
+  #   SLSKD_API_KEY=...        primary (admin) API key, shared with Lidarr's
+  #                            Tubifarry providers (see lidarr.nix)
   age.secrets.slskd-env.file = ../../../../hosts/shimmers/secrets/slskd-env.age;
 
   services.slskd = {
@@ -34,9 +35,10 @@
     };
   };
 
-  # Pinned so soularr's container can run as the same uid/gid (podman can't
-  # resolve host user names). 360 is outside both the NixOS static id table
-  # and the dynamic system-user range.
+  # Pinned when soularr's container ran as the same uid/gid (podman can't
+  # resolve host user names); kept so existing files keep their owner. 360
+  # is outside both the NixOS static id table and the dynamic system-user
+  # range.
   users.users.slskd.uid = 360;
   users.groups.slskd.gid = 360;
 
