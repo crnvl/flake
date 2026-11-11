@@ -35,7 +35,6 @@
     ../../modules/nixos/services/media/byparr.nix
     ../../modules/nixos/services/media/recyclarr.nix
     ../../modules/nixos/services/media/tunarr.nix
-    ../../modules/nixos/services/media/tagesschau.nix
     ../../modules/nixos/services/media/decluttarr.nix
     ../../modules/nixos/services/media/haiku-tv.nix
     # Webcam -> Jellyfin Live TV; disabled for now, re-enable together with
