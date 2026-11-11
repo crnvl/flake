@@ -104,7 +104,6 @@ in
           "opensubtitlescom"
           "yifysubtitles"
           "gestdown"
-          "tvsubtitles"
         ];
       };
       auth = {
