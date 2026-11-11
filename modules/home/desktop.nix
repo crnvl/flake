@@ -15,6 +15,34 @@
 
   xdg.enable = true;
 
+  # Helium (modules/nixos/helium.nix) for web pages and links. This file
+  # replaces the hand-edited ~/.config/mimeapps.list, so its other entries
+  # are carried over here.
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications =
+      lib.genAttrs [
+        "text/html"
+        "application/xhtml+xml"
+        "application/x-extension-htm"
+        "application/x-extension-html"
+        "application/x-extension-shtml"
+        "application/x-extension-xht"
+        "application/x-extension-xhtml"
+        "x-scheme-handler/http"
+        "x-scheme-handler/https"
+        "x-scheme-handler/about"
+        "x-scheme-handler/unknown"
+      ] (_: "helium.desktop")
+      // {
+        "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/ton" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/figma" = "figma-linux.desktop";
+        "video/mp4" = "vlc-3.desktop";
+      };
+  };
+
   programs = {
     alacritty.enable = true;
     fuzzel.enable = true;
