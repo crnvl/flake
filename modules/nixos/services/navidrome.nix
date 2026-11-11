@@ -41,6 +41,15 @@ in
         Schedule = "@every 1h";
       };
 
+      # Albums are told apart by album artist and name only. The default also
+      # keys on the MusicBrainz release id and release date, and aurral's
+      # playlist tracks keep whatever release the uploader had tagged (aurral
+      # only rewrites the release group), so one album from three uploads
+      # showed up three times. Lidarr's library has one release per album
+      # anyway. Changing this makes navidrome rescan everything; it carries
+      # playlists, stars and play counts over to the new ids.
+      PID.Album = "albumartistid,album,albumversion";
+
       # Web UI login comes from oauth2-proxy/kanidm via nginx. Unknown
       # usernames are created on first login (random password, which the
       # user can replace without knowing it, for Subsonic apps).
