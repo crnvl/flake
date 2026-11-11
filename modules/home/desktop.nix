@@ -38,6 +38,7 @@
         "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
         "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
         "x-scheme-handler/ton" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/discord" = "vesktop.desktop";
         "x-scheme-handler/figma" = "figma-linux.desktop";
         "video/mp4" = "vlc-3.desktop";
       };
