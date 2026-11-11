@@ -39,10 +39,16 @@
         "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
         "x-scheme-handler/ton" = "org.telegram.desktop.desktop";
         "x-scheme-handler/discord" = "vesktop.desktop";
+        "x-scheme-handler/sgnl" = "signal.desktop";
+        "x-scheme-handler/signalcaptcha" = "signal.desktop";
         "x-scheme-handler/figma" = "figma-linux.desktop";
         "video/mp4" = "vlc-3.desktop";
       };
   };
+
+  # Apps rewrite mimeapps.list in place, which leaves a stray file behind
+  # that would otherwise block activation.
+  xdg.configFile."mimeapps.list".force = true;
 
   programs = {
     alacritty.enable = true;
