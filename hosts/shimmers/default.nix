@@ -26,6 +26,7 @@
     ../../modules/nixos/services/media/prowlarr.nix
     ../../modules/nixos/services/media/sonarr.nix
     ../../modules/nixos/services/media/radarr.nix
+    ../../modules/nixos/services/media/bazarr.nix
     ../../modules/nixos/services/media/lidarr.nix
     ../../modules/nixos/services/media/slskd.nix
     ../../modules/nixos/services/media/aurral.nix
