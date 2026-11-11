@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   mkProxyHost,
   ...
 }:
@@ -77,6 +78,33 @@ in
   # read bits suffice; navidrome runs with PrivateUsers=true, under which
   # supplementary groups like media would be unmapped anyway.
   systemd.services.navidrome.unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+
+  # Navidrome only scrobbles; likes (stars) stay local. This keeps them in
+  # sync with Last.fm's loved tracks both ways, for everyone who linked
+  # Last.fm in the web UI (see the script for how it matches and decides).
+  # Root to read the session keys out of navidrome's DB; it then acts as
+  # each user through the Subsonic API, via the trusted Remote-User header
+  # on loopback.
+  systemd.services.navidrome-lastfm-loves = {
+    description = "sync navidrome likes with Last.fm loved tracks";
+    after = [
+      "navidrome.service"
+      "network-online.target"
+    ];
+    requires = [ "navidrome.service" ];
+    wants = [ "network-online.target" ];
+    startAt = "*:0/10";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = lib.getExe (
+        pkgs.writers.writePython3Bin "navidrome-lastfm-loves" {
+          flakeIgnore = [ "E501" ];
+        } (builtins.readFile ./navidrome-lastfm-loves.py)
+      );
+      EnvironmentFile = config.age.secrets.navidrome-lastfm-env.path;
+      StateDirectory = "navidrome-lastfm-loves";
+    };
+  };
 
   age.secrets.kanidm-oauth2-navidrome-secret = {
     file = ../../../hosts/shimmers/secrets/kanidm-oauth2-navidrome-secret.age;
