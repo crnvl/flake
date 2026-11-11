@@ -28,6 +28,8 @@ let
       "bazarr-password-md5"
       "bazarr-opensubtitlescom-username"
       "bazarr-opensubtitlescom-password"
+      "bazarr-subdl-api-key"
+      "bazarr-subsource-api-key"
       "jellyfin-api-key"
       "media-janitor-webhook"
       "decluttarr-env"

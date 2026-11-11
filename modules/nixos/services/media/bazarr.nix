@@ -80,6 +80,8 @@ in
     bazarr-password-md5.file = ../../../../hosts/shimmers/secrets/bazarr-password-md5.age;
     bazarr-opensubtitlescom-username.file = ../../../../hosts/shimmers/secrets/bazarr-opensubtitlescom-username.age;
     bazarr-opensubtitlescom-password.file = ../../../../hosts/shimmers/secrets/bazarr-opensubtitlescom-password.age;
+    bazarr-subdl-api-key.file = ../../../../hosts/shimmers/secrets/bazarr-subdl-api-key.age;
+    bazarr-subsource-api-key.file = ../../../../hosts/shimmers/secrets/bazarr-subsource-api-key.age;
     radarr-api-key.file = ../../../../hosts/shimmers/secrets/radarr-api-key.age;
     sonarr-api-key.file = ../../../../hosts/shimmers/secrets/sonarr-api-key.age;
   };
@@ -102,6 +104,8 @@ in
         movie_default_profile = 1;
         enabled_providers = [
           "opensubtitlescom"
+          "subdl"
+          "subsource"
           "yifysubtitles"
           "gestdown"
         ];
@@ -126,6 +130,8 @@ in
         username = secret "bazarr-opensubtitlescom-username";
         password = secret "bazarr-opensubtitlescom-password";
       };
+      subdl.api_key = secret "bazarr-subdl-api-key";
+      subsource.apikey = secret "bazarr-subsource-api-key";
     };
   };
 
