@@ -37,8 +37,6 @@
     nixd
     nil
     usbmuxd
-    iloader
-    codex
     mdbook
   ];
 }
