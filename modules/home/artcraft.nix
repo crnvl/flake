@@ -27,10 +27,13 @@ let
         stdenv.cc.cc.lib
       ];
 
-      # winit/wgpu load the display and graphics libraries dynamically.
+      # winit/wgpu load the display and graphics libraries dynamically, and
+      # rfd dlopen()s libdbus to open file dialogs through the XDG portal
+      # (without it, it falls back to zenity and the dialogs never appear).
       runtimeDependencies = map pkgs.lib.getLib (
         with pkgs;
         [
+          dbus
           fontconfig
           libGL
           libx11
