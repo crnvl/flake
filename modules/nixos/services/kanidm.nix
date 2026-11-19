@@ -269,6 +269,14 @@ in
             "vaultwarden_users"
           ];
         };
+
+        petra = {
+          displayName = "petra";
+          mailAddresses = [ "petra@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
