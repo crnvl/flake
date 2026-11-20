@@ -30,9 +30,10 @@ in
     settings = {
       Address = "127.0.0.1";
       Port = 4533;
-      # Lidarr's root folder, next to media/movies and media/tv on the
-      # storage box (also Jellyfin's music library).
-      MusicFolder = "/mnt/chroma/media/music";
+      # Lidarr's root folder, under media/music on the storage box next to
+      # aurral's playlist folder (the second library, see aurral.nix).
+      # Jellyfin's music library is media/music itself, both together.
+      MusicFolder = "/mnt/chroma/media/music/library";
 
       # No inotify over CIFS, so the folder watcher is useless; rescan on a
       # schedule instead. That is also how Lidarr's imports show up: its

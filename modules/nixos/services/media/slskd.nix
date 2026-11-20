@@ -25,11 +25,8 @@
       # non-sharers. Read-only (the module adds it to ReadOnlyPaths). With no
       # port forwarding (see below) only peers that accept connections can
       # reach us, so a bigger share is the main lever left: aurral's
-      # playlist folder is shared too.
-      shares.directories = [
-        "/mnt/chroma/media/music"
-        "/mnt/chroma/media/aurral"
-      ];
+      # playlist folder (media/music/playlists) is shared too.
+      shares.directories = [ "/mnt/chroma/media/music" ];
       # Rescan hourly (minutes; 60 is the minimum). By default slskd only
       # scans at startup, so imports and Lidarr's renames left it advertising
       # files that had moved, and kept the share looking smaller than it is.

@@ -9,11 +9,14 @@
 let
   domain = "aurral.shimme.rs";
   port = 3001;
-  # On the storage box next to media/music, not on the system disk. aurral
-  # has this stored as its downloadFolderPath (settings, in its DB). The
-  # folder itself was created once by hand: tmpfiles would touch the
-  # automounted storage box early in boot.
-  playlistFolder = "/mnt/chroma/media/aurral";
+  # On the storage box under media/music, next to Lidarr's library rather
+  # than inside it: aurral leaves anything in a Lidarr root folder alone, so
+  # it would never clean up or retag its own files there. aurral has this
+  # stored as its downloadFolderPath (settings, in its DB). The folder itself
+  # was created once by hand: tmpfiles would touch the automounted storage
+  # box early in boot.
+  libraryFolder = "/mnt/chroma/media/music/library";
+  playlistFolder = "/mnt/chroma/media/music/playlists";
 in
 {
   # Raw client secret for kanidm's basicSecretFile.
@@ -88,10 +91,10 @@ in
     after = [ "kanidm.service" ];
     wants = [ "kanidm.service" ];
 
-    # Lidarr reports library files under /mnt/chroma/media/music; the same
-    # path inside aurral's chroot lets it verify and play them. Read-only:
+    # Lidarr reports library files under its root folder; the same path
+    # inside aurral's chroot lets it verify and play them. Read-only:
     # imports stay Lidarr's job.
-    serviceConfig.BindReadOnlyPaths = [ "/mnt/chroma/media/music" ];
+    serviceConfig.BindReadOnlyPaths = [ libraryFolder ];
     # Playlist downloads go through slskd and SABnzbd, which download inside
     # the VPN namespace; aurral then moves (and retags) the finished files
     # into its playlist folder on the storage box. The download dirs are
