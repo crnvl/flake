@@ -1,540 +1,125 @@
 {
   "annotations": { "list": [] },
   "editable": false,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 1,
-  "links": [],
-  "panels": [
-    {
-      "id": 1,
-      "type": "stat",
-      "title": "",
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "min(probe_success{service!=\"\"})",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "textMode": "value",
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "wideLayout": true,
-        "percentChangeColorMode": "standard",
-        "showPercentChange": false
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": { "text": "Service Disruption", "color": "red", "index": 0 },
-                "1": { "text": "All Systems Operational", "color": "green", "index": 1 }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 1, "color": "green" }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 2,
-      "type": "state-timeline",
-      "title": "Service Uptime",
-      "transparent": true,
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "probe_success{service!=\"\"}",
-          "instant": false,
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "options": {
-        "mergeValues": true,
-        "showValue": "never",
-        "alignValue": "center",
-        "rowHeight": 0.9,
-        "legend": { "showLegend": false, "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "single", "sort": "none", "hideZeros": false }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "lineWidth": 0,
-            "fillOpacity": 100,
-            "spanNulls": false,
-            "insertNulls": false,
-            "hideFrom": { "tooltip": false, "viz": false, "legend": false },
-            "axisPlacement": "auto"
-          },
-          "color": { "mode": "fixed", "fixedColor": "text" },
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": { "text": "DOWN", "color": "red", "index": 0 },
-                "1": { "text": "UP", "color": "green", "index": 1 }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 1, "color": "green" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 3,
-      "type": "bargauge",
-      "title": "Uptime (24h)",
-      "transparent": true,
-      "gridPos": { "h": 14, "w": 12, "x": 0, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg_over_time(probe_success{service!=\"\"}[24h]) * 100",
-          "instant": true,
-          "range": false,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "horizontal",
-        "displayMode": "basic",
-        "valueMode": "color",
-        "showUnfilled": true,
-        "sizing": "auto",
-        "namePlacement": "auto",
-        "minVizWidth": 8,
-        "minVizHeight": 16,
-        "maxVizHeight": 300
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 2,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 99, "color": "orange" },
-              { "value": 99.9, "color": "green" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 4,
-      "type": "bargauge",
-      "title": "Uptime (30d)",
-      "transparent": true,
-      "gridPos": { "h": 14, "w": 12, "x": 12, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "avg_over_time(probe_success{service!=\"\"}[30d]) * 100",
-          "instant": true,
-          "range": false,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "horizontal",
-        "displayMode": "basic",
-        "valueMode": "color",
-        "showUnfilled": true,
-        "sizing": "auto",
-        "namePlacement": "auto",
-        "minVizWidth": 8,
-        "minVizHeight": 16,
-        "maxVizHeight": 300
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 2,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "red" },
-              { "value": 99, "color": "orange" },
-              { "value": 99.9, "color": "green" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Response Time",
-      "transparent": true,
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 27 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "probe_duration_seconds{service!=\"\"}",
-          "instant": false,
-          "range": true,
-          "legendFormat": "{{service}}"
-        }
-      ],
-      "options": {
-        "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" },
-        "tooltip": { "mode": "multi", "sort": "desc", "hideZeros": false }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "unit": "s",
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "spanNulls": false,
-            "showPoints": "never",
-            "pointSize": 5,
-            "axisPlacement": "auto",
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "insertNulls": false,
-            "scaleDistribution": { "type": "linear" },
-            "stacking": { "mode": "none", "group": "A" },
-            "thresholdsStyle": { "mode": "off" },
-            "hideFrom": { "tooltip": false, "viz": false, "legend": false }
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "value": null, "color": "green" }]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 7,
-      "type": "gauge",
-      "title": "CPU",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "minVizWidth": 75,
-        "minVizHeight": 75
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 0,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "green" },
-              { "value": 75, "color": "orange" },
-              { "value": 90, "color": "red" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 8,
-      "type": "gauge",
-      "title": "Memory",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "minVizWidth": 75,
-        "minVizHeight": 75
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 0,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "green" },
-              { "value": 80, "color": "orange" },
-              { "value": 92, "color": "red" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 9,
-      "type": "gauge",
-      "title": "Disk /",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "(1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "minVizWidth": 75,
-        "minVizHeight": 75
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 0,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "green" },
-              { "value": 80, "color": "orange" },
-              { "value": 90, "color": "red" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 10,
-      "type": "gauge",
-      "title": "Media Storage",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "(1 - node_filesystem_avail_bytes{mountpoint=\"/mnt/chroma\"} / node_filesystem_size_bytes{mountpoint=\"/mnt/chroma\"}) * 100",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "minVizWidth": 75,
-        "minVizHeight": 75
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 0,
-          "min": 0,
-          "max": 100,
-          "unit": "percent",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "value": null, "color": "green" },
-              { "value": 85, "color": "orange" },
-              { "value": 95, "color": "red" }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 11,
-      "type": "stat",
-      "title": "Host Uptime",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "time() - node_boot_time_seconds",
-          "instant": true,
-          "range": false,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "wideLayout": true,
-        "percentChangeColorMode": "standard",
-        "showPercentChange": false
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "unit": "s",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "value": null, "color": "green" }]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 12,
-      "type": "stat",
-      "title": "Requests/s",
-      "transparent": true,
-      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 35 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(nginx_http_requests_total[5m]))",
-          "instant": false,
-          "range": true,
-          "legendFormat": "__auto"
-        }
-      ],
-      "options": {
-        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
-        "orientation": "auto",
-        "textMode": "value",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "wideLayout": true,
-        "percentChangeColorMode": "standard",
-        "showPercentChange": false
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "decimals": 1,
-          "unit": "reqps",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [{ "value": null, "color": "green" }]
-          }
-        },
-        "overrides": []
-      }
-    }
-  ],
-  "preload": false,
+  "title": "shimme.rs status",
+  "description": "Availability of public shimme.rs services, measured from shimmers every 30 seconds.",
+  "uid": "status",
+  "tags": ["public"],
+  "time": { "from": "now-24h", "to": "now" },
+  "timezone": "browser",
   "refresh": "1m",
   "schemaVersion": 39,
-  "tags": ["public"],
-  "templating": { "list": [] },
-  "time": { "from": "now-24h", "to": "now" },
-  "timepicker": {},
-  "timezone": "browser",
-  "title": "shimme.rs status",
-  "uid": "status",
-  "version": 1,
-  "weekStart": ""
+  "version": 2,
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Current service status",
+      "description": "A failed check takes priority. A monitored endpoint without a fresh check is unknown, not healthy.",
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "refId": "A", "instant": true, "range": false,
+        "expr": "min((last_over_time(probe_success{service!=\"\"}[90s]) and on(service) (up{service!=\"\"} == 1)) or on(service) (up{service!=\"\"} * 0 + 0.5)) or vector(0.5)"
+      }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value", "colorMode": "value", "graphMode": "none", "justifyMode": "center", "text": { "valueSize": 32 }
+      },
+      "fieldConfig": {
+        "defaults": { "noValue": "Unknown", "mappings": [{ "type": "value", "options": {
+          "0": { "text": "Service disruption", "color": "red", "index": 0 },
+          "0.5": { "text": "Checks missing", "color": "orange", "index": 1 },
+          "1": { "text": "All services operational", "color": "green", "index": 2 }
+        } }] }, "overrides": []
+      }
+    },
+    {
+      "id": 13, "type": "stat", "title": "Checks passed · 24h",
+      "description": "Percentage of observed endpoint checks that succeeded during the past 24 hours. Missing checks are excluded.",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "refId": "A", "instant": true, "range": false,
+        "expr": "100 * sum(sum_over_time(probe_success{service!=\"\"}[24h])) / sum(count_over_time(probe_success{service!=\"\"}[24h]))"
+      }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value", "colorMode": "none", "graphMode": "none"
+      },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2, "noValue": "No checks" }, "overrides": [] }
+    },
+    {
+      "id": 14, "type": "stat", "title": "Latest check",
+      "description": "Time of the most recent probe sample. Checks run every 30 seconds; this dashboard refreshes every minute.",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "instant": true, "range": false, "expr": "1000 * max(timestamp(probe_success{service!=\"\"}))" }],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value", "colorMode": "none", "graphMode": "none"
+      },
+      "fieldConfig": { "defaults": { "unit": "dateTimeAsLocal", "noValue": "Unknown" }, "overrides": [] }
+    },
+    {
+      "id": 15, "type": "table", "title": "Service availability",
+      "description": "Failures and missing checks sort first. Availability is based on observed probes. Response time is the 95th percentile of measured probe durations over the past hour.",
+      "gridPos": { "h": 15, "w": 24, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "format": "table", "instant": true, "range": false, "expr": "min by (service) ((last_over_time(probe_success{service!=\"\"}[90s]) and on(service) (up{service!=\"\"} == 1)) or on(service) (up{service!=\"\"} * 0 + 0.5))" },
+        { "refId": "B", "format": "table", "instant": true, "range": false, "expr": "100 * avg by (service) (avg_over_time(probe_success{service!=\"\"}[24h]))" },
+        { "refId": "C", "format": "table", "instant": true, "range": false, "expr": "100 * avg by (service) (avg_over_time(probe_success{service!=\"\"}[30d]))" },
+        { "refId": "D", "format": "table", "instant": true, "range": false, "expr": "1000 * max by (service) (quantile_over_time(0.95, probe_duration_seconds{service!=\"\"}[1h]))" }
+      ],
+      "transformations": [
+        { "id": "joinByField", "options": { "byField": "service", "mode": "outerTabular" } },
+        { "id": "filterFieldsByName", "options": { "include": { "pattern": "^(service|Value.*)$" } } },
+        { "id": "organize", "options": { "renameByName": {
+          "service": "Service", "Value #A": "Status", "Value #B": "Uptime · 24h", "Value #C": "Uptime · 30d", "Value #D": "Response · p95"
+        } } }
+      ],
+      "options": { "showHeader": true, "cellHeight": "sm", "sortBy": [{ "displayName": "Status", "desc": false }, { "displayName": "Service", "desc": false }] },
+      "fieldConfig": {
+        "defaults": { "noValue": "—", "custom": { "minWidth": 85 } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Status" }, "properties": [
+            { "id": "noValue", "value": "Unknown" },
+            { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+            { "id": "mappings", "value": [{ "type": "value", "options": {
+              "0": { "text": "Down", "color": "red", "index": 0 },
+              "0.5": { "text": "Unknown", "color": "orange", "index": 1 },
+              "1": { "text": "Operational", "color": "green", "index": 2 }
+            } }] }
+          ] },
+          { "matcher": { "id": "byRegexp", "options": "/^Uptime/" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 2 }] },
+          { "matcher": { "id": "byName", "options": "Response · p95" }, "properties": [{ "id": "unit", "value": "ms" }, { "id": "decimals", "value": 0 }] }
+        ]
+      }
+    },
+    {
+      "id": 2, "type": "state-timeline", "title": "Availability history",
+      "description": "Each reading summarizes the preceding 5 minutes. A single failed check marks the window as disrupted. Gaps indicate missing observations.",
+      "gridPos": { "h": 11, "w": 24, "x": 0, "y": 19 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{
+        "refId": "A", "instant": false, "range": true, "interval": "5m", "legendFormat": "{{service}}",
+        "expr": "min by (service) (min_over_time(probe_success{service!=\"\"}[5m]) or on(service) (up{service!=\"\"} * 0 + 0.5))"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "spanNulls": false },
+          "mappings": [{ "type": "value", "options": {
+            "0": { "text": "Failures", "color": "red", "index": 0 },
+            "0.5": { "text": "No checks", "color": "dark-gray", "index": 1 },
+            "1": { "text": "Passed", "color": "green", "index": 2 }
+          } }]
+        }, "overrides": []
+      },
+      "options": {
+        "mergeValues": true, "showValue": "never", "rowHeight": 0.72,
+        "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
+    }
+  ]
 }
