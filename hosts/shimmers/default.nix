@@ -45,9 +45,19 @@
     ../../modules/nixos/services/catshift.nix
     ../../modules/nixos/services/exo.nix
     ../../modules/nixos/services/proxyagain.nix
+    ../../modules/nixos/services/llm.nix
   ];
 
   system.stateVersion = "26.05";
+
+  # Headroom for the LLM (see llm.nix): idle pages of the other services can
+  # move out instead of the OOM killer stepping in.
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16 * 1024;
+    }
+  ];
 
   my.mediaJanitor.dryRun = false;
   networking = {
