@@ -10,9 +10,7 @@ let
   domain = "grafana.shimme.rs";
   statusDomain = "status.shimme.rs";
 
-  # After creating a shared (public) dashboard in Grafana, paste its token here
-  # (the part after /public-dashboards/ in the share URL) so that
-  # https://status.shimme.rs/ redirects straight to it.
+  # The detailed Grafana view linked from the public service overview.
   publicDashboardToken = "3d7dabda6fbb466290e14b1a59568743";
 
   # Friendly names end up as the "service" label, so panels can use
@@ -34,6 +32,10 @@ let
   // lib.optionalAttrs config.services.nextcloud.enable {
     "Cloud" = "https://cloud.shimme.rs";
   };
+
+  imapProbes = { "Mail (IMAP)" = "mail.shimme.rs:993"; };
+  smtpProbes = { "Mail (SMTP)" = "mail.shimme.rs:25"; };
+  statusServices = builtins.attrNames (httpsProbes // imapProbes // smtpProbes);
 
   mkProbeTargets =
     probes:
@@ -83,25 +85,6 @@ let
     proxyWebsockets = true;
   };
 
-  # A public dashboard host: only the shared-dashboard routes and the static
-  # assets they need are proxied; everything else (login, API, admin) stays
-  # private behind grafana.shimme.rs. / redirects to one specific dashboard
-  # once its share token is known.
-  mkPublicDashboardHost = token: {
-    enableACME = true;
-    forceSSL = true;
-
-    locations =
-      {
-        "^~ /public-dashboards/" = grafanaProxy;
-        "^~ /api/public/" = grafanaProxy;
-        "^~ /public/" = grafanaProxy;
-        "= /favicon.ico" = grafanaProxy;
-      }
-      // lib.optionalAttrs (token != null) {
-        "= /".return = "302 /public-dashboards/${token}";
-      };
-  };
 in
 {
   # Oura ring metrics, surfaced on the "vitals" dashboard.
@@ -319,14 +302,14 @@ in
         job_name = "blackbox-imaps";
         metrics_path = "/probe";
         params.module = [ "tcp_tls" ];
-        static_configs = mkProbeTargets { "Mail (IMAP)" = "mail.shimme.rs:993"; };
+        static_configs = mkProbeTargets imapProbes;
         relabel_configs = blackboxRelabel;
       }
       {
         job_name = "blackbox-smtp";
         metrics_path = "/probe";
         params.module = [ "smtp_banner" ];
-        static_configs = mkProbeTargets { "Mail (SMTP)" = "mail.shimme.rs:25"; };
+        static_configs = mkProbeTargets smtpProbes;
         relabel_configs = blackboxRelabel;
       }
     ];
@@ -454,6 +437,51 @@ in
 
   services.nginx.virtualHosts.${domain} = mkProxyHost { port = 3000; };
 
-  # Public status page.
-  services.nginx.virtualHosts.${statusDomain} = mkPublicDashboardHost publicDashboardToken;
+  # Build one public snapshot per minute, independent of visitor traffic.
+  systemd.services.shimmers-status = {
+    description = "Publish service checks for ${statusDomain}";
+    after = [ "prometheus.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      RuntimeDirectory = "shimmers-status";
+      RuntimeDirectoryPreserve = "yes";
+      ExecStart = lib.escapeShellArgs (
+        [
+          "${pkgs.python3}/bin/python3"
+          "${./status-snapshot.py}"
+          "http://127.0.0.1:9090"
+          "/run/shimmers-status/checks.json"
+        ]
+        ++ statusServices
+      );
+    };
+  };
+  systemd.timers.shimmers-status = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "10s";
+      OnUnitActiveSec = "1min";
+      AccuracySec = "2s";
+    };
+  };
+
+  services.nginx.virtualHosts.${statusDomain} = {
+    enableACME = true;
+    forceSSL = true;
+    root = ./status-page;
+    locations = {
+      "= /".tryFiles = "/index.html =404";
+      "/".tryFiles = "$uri =404";
+      "= /checks.json" = {
+        alias = "/run/shimmers-status/checks.json";
+        extraConfig = ''add_header Cache-Control "no-store" always;'';
+      };
+      "= /history".return = "302 /public-dashboards/${publicDashboardToken}";
+      "^~ /public-dashboards/" = grafanaProxy;
+      "^~ /api/public/" = grafanaProxy;
+      "^~ /public/" = grafanaProxy;
+      "= /favicon.ico" = grafanaProxy;
+    };
+  };
 }
