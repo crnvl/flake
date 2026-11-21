@@ -277,6 +277,16 @@ in
             "jellyfin_users"
           ];
         };
+
+        azur = {
+          displayName = "azur";
+          mailAddresses = [ "azur@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+            "aurral_users"
+            "navidrome_users"
+          ];
+        };
       };
 
       systems.oauth2 = {
