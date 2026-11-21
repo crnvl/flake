@@ -1,10 +1,15 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   # llama-swap on shimmers (modules/nixos/services/llm.nix), forwarded to the
   # same port here by the tunnel below.
   llmPort = 8090;
   llmModel = "shimmers/qwen3.6-35b-a3b-uncensored";
+  docsPython = pkgs.python3.withPackages (p: [
+    p.mcp
+    p.httpx
+    p.anyio
+  ]);
 in
 {
   programs.opencode = {
@@ -60,14 +65,23 @@ in
     };
   };
 
-  # Engagement workspace: anything started under ~/redteam can only use the
-  # self-hosted model, so prompts and findings never reach a cloud provider.
-  # Titles and summaries are redirected too, since they'd otherwise go to
-  # small_model on Copilot.
+  # Engagement sessions, titles and summaries stay on shimmers. The separate
+  # publicdocs tool can send a selected vendor doc to a free, tool-less model.
   home.file."redteam/opencode.json".text = builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     model = llmModel;
     default_agent = "redteam";
+    mcp.servers.publicdocs = {
+      type = "local";
+      cwd = "/";
+      codemode = false;
+      command = [
+        "${docsPython}/bin/python3"
+        "${./opencode-public-docs.py}"
+        "${config.programs.opencode.package}/bin/opencode"
+      ];
+      timeout.execution = 60000;
+    };
     policies = [
       {
         action = "provider.use";
