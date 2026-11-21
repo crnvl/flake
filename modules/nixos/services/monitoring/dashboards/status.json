@@ -9,7 +9,7 @@
   "timezone": "browser",
   "refresh": "1m",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "panels": [
     {
       "id": 1, "type": "stat", "title": "Current service status",
@@ -33,31 +33,26 @@
       }
     },
     {
-      "id": 13, "type": "stat", "title": "Checks passed · 24h",
-      "description": "Percentage of observed endpoint checks that succeeded during the past 24 hours. Missing checks are excluded.",
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 13, "type": "bargauge", "title": "Overall service uptime · 24h",
+      "description": "Percentage of the past 24 hours when all monitored services were up together, sampled every 30 seconds. Samples with missing probe results are excluded.",
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{
         "refId": "A", "instant": true, "range": false,
-        "expr": "100 * sum(sum_over_time(probe_success{service!=\"\"}[24h])) / sum(count_over_time(probe_success{service!=\"\"}[24h]))"
+        "expr": "100 * avg_over_time((min(probe_success{service!=\"\"}) and (count(probe_success{service!=\"\"}) == count(up{service!=\"\"})))[24h:30s])",
+        "legendFormat": "All services"
       }],
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "value", "colorMode": "none", "graphMode": "none"
+        "orientation": "horizontal", "displayMode": "basic", "showUnfilled": true, "valueMode": "color"
       },
-      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2, "noValue": "No checks" }, "overrides": [] }
-    },
-    {
-      "id": 14, "type": "stat", "title": "Latest check",
-      "description": "Time of the most recent probe sample. Checks run every 30 seconds; this dashboard refreshes every minute.",
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "refId": "A", "instant": true, "range": false, "expr": "1000 * max(timestamp(probe_success{service!=\"\"}))" }],
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "value", "colorMode": "none", "graphMode": "none"
-      },
-      "fieldConfig": { "defaults": { "unit": "dateTimeAsLocal", "noValue": "Unknown" }, "overrides": [] }
+      "fieldConfig": { "defaults": {
+        "unit": "percent", "decimals": 2, "min": 0, "max": 100, "noValue": "No data",
+        "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [
+          { "value": null, "color": "red" }, { "value": 99, "color": "orange" }, { "value": 99.9, "color": "green" }
+        ] }
+      }, "overrides": [] }
     },
     {
       "id": 15, "type": "table", "title": "Service availability",
