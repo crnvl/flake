@@ -289,9 +289,11 @@ in
         };
       };
 
+      # Icons shown in the Kanidm app list; see ./kanidm-logos.
       systems.oauth2 = {
         jellyfin = {
           displayName = "jellyfin";
+          imageFile = ./kanidm-logos/jellyfin.svg;
           originUrl = [
             "https://jellyfin.shimme.rs"
             "https://jellyfin.shimme.rs/sso/OID/redirect/kanidm"
@@ -317,6 +319,7 @@ in
 
         catshift = {
           displayName = "catshift";
+          imageFile = ./kanidm-logos/catshift.svg;
           originUrl = "https://shift.shimme.rs/auth/callback";
           originLanding = "https://shift.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-catshift-secret.path;
@@ -332,6 +335,7 @@ in
 
         vaultwarden = {
           displayName = "vaultwarden";
+          imageFile = ./kanidm-logos/vaultwarden.svg;
           originUrl = "https://vault.shimme.rs/identity/connect/oidc-signin";
           originLanding = "https://vault.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-vaultwarden-secret.path;
@@ -345,6 +349,7 @@ in
 
         nextcloud = lib.mkIf config.services.nextcloud.enable {
           displayName = "nextcloud";
+          imageFile = ./kanidm-logos/nextcloud.svg;
           originUrl = "https://cloud.shimme.rs/apps/user_oidc/code";
           originLanding = "https://cloud.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-nextcloud-secret.path;
@@ -365,6 +370,7 @@ in
         # Aurral sends an S256 PKCE challenge, so PKCE stays enforced.
         aurral = {
           displayName = "aurral";
+          imageFile = ./kanidm-logos/aurral.svg;
           originUrl = "https://aurral.shimme.rs/sso/callback";
           originLanding = "https://aurral.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-aurral-secret.path;
@@ -381,6 +387,7 @@ in
         # PKCE.
         navidrome = {
           displayName = "navidrome";
+          imageFile = ./kanidm-logos/navidrome.svg;
           originUrl = "https://music.shimme.rs/oauth2/callback";
           originLanding = "https://music.shimme.rs";
           basicSecretFile = config.age.secrets.kanidm-oauth2-navidrome-secret.path;
@@ -398,6 +405,7 @@ in
         # stays enforced.
         lily_git = {
           displayName = "git.lily.pizza";
+          imageFile = ./kanidm-logos/forgejo.svg;
           originUrl = "https://git.lily.pizza/user/oauth2/shimmers/callback";
           originLanding = "https://git.lily.pizza";
           basicSecretFile = config.age.secrets.kanidm-oauth2-lily-git-secret.path;

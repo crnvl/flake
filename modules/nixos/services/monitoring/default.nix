@@ -432,6 +432,7 @@ in
 
     systems.oauth2.grafana = {
       displayName = "grafana";
+      imageFile = ../kanidm-logos/grafana.svg;
       originUrl = "https://${domain}/login/generic_oauth";
       originLanding = "https://${domain}";
       basicSecretFile = config.age.secrets.kanidm-oauth2-grafana-secret.path;
