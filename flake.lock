@@ -251,11 +251,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795363891,
-        "narHash": "sha256-pR+9nsslJQ+EJFJZWhPSsGQLxF40PhcUBqW/pPri5uY=",
+        "lastModified": 1795365224,
+        "narHash": "sha256-HJG7Mz4NIiyvcuOplWobHN8JDlbhEnaFM49Slfa4rN4=",
         "ref": "refs/heads/main",
-        "rev": "1d49448d44355b70f482e6da91a3cc1ef6c270a9",
-        "revCount": 4,
+        "rev": "3d434504a1a3a39be1311d99c8de87b1bf0d739f",
+        "revCount": 5,
         "type": "git",
         "url": "ssh://git@git-gay-infer/67/infer"
       },
