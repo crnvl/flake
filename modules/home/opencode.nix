@@ -109,6 +109,79 @@ in
     docsWorkspace // { default_agent = "redteam"; }
   );
 
+  # Explicitly opt in to billed, remote text inference only in this workspace.
+  home.file."gpu-review/opencode.json".text = builtins.toJSON (
+    let
+      model = "runpod-review/qwen3.8-27b-review";
+    in
+    {
+      "$schema" = "https://opencode.ai/config.json";
+      inherit model;
+      default_agent = "gpu-review";
+      providers.runpod-review = {
+        name = "Runpod GPU review (billed while awake)";
+        package = "@opencode/ai/providers/openai-compatible";
+        settings = {
+          baseURL = "http://127.0.0.1:18091/v1";
+          headerTimeout = 2100000; # first request may need to copy 16.6 GB
+        };
+        headers."X-Shimmers-GPU-Review" = "1";
+        models."qwen3.8-27b-review" = {
+          name = "Stock Qwen3.8 27B · Runpod A5000";
+          capabilities = {
+            tools = false;
+            input = [ "text" ];
+            output = [ "text" ];
+          };
+          limit = {
+            context = 32768;
+            output = 2048;
+          };
+        };
+      };
+      policies = [
+        {
+          action = "provider.use";
+          resource = "*";
+          effect = "deny";
+        }
+        {
+          action = "provider.use";
+          resource = "runpod-review";
+          effect = "allow";
+        }
+        {
+          action = "tool.use";
+          resource = "*";
+          effect = "deny";
+        }
+      ];
+      agents = {
+        gpu-review = {
+          mode = "primary";
+          inherit model;
+          steps = 1;
+          system = "Review the text supplied by the user. Focus on correctness, reliability and defensive remediation. State uncertainties. You have no tools or access to the user's systems.";
+        };
+        title.model = model;
+        summary.model = model;
+        compaction.model = model;
+      };
+    }
+  );
+
+  # Keep this separate from the existing CPU tunnel: a port conflict here must
+  # not take down local-model access. The tunnel itself cannot start a Pod.
+  systemd.user.services.runpod-review-tunnel = {
+    Unit.Description = "Forward the shimmers GPU review socket";
+    Service = {
+      ExecStart = "${pkgs.openssh}/bin/ssh -NT -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=yes -L 127.0.0.1:18091:/run/runpod-review/chat.sock aleph@shimme.rs";
+      Restart = "always";
+      RestartSec = 10;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   # Opt-in space for public questions: the local advisor picks when to consult
   # the reviewer. No need to mark each question as a shareable brief here.
   home.file."public-docs/opencode.json".text = builtins.toJSON (

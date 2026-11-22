@@ -39,6 +39,7 @@ let
       "oura-env"
       "location-env"
       "proxyagain-deploy-key"
+      "runpod-review-key"
       "unuo-deploy-key"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"

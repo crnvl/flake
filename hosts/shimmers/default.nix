@@ -46,6 +46,7 @@
     ../../modules/nixos/services/exo.nix
     ../../modules/nixos/services/proxyagain.nix
     ../../modules/nixos/services/llm.nix
+    ../../modules/nixos/services/runpod-review
   ];
 
   system.stateVersion = "26.05";
