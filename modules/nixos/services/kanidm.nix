@@ -291,6 +291,7 @@ in
             "jellyfin_users"
             "aurral_users"
             "navidrome_users"
+            "infer_users"
           ];
         };
       };
