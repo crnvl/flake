@@ -86,7 +86,7 @@ in
           };
           compatibility.reasoningField = "reasoning_content";
           limit = {
-            context = 65536;
+            context = 262144;
             output = 4096;
           };
           variants = [
