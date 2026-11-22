@@ -4,7 +4,8 @@ The Rust `runpod-gateway` serves the **same HauhauCS Qwen3.6-35B-A3B
 Uncensored IQ4_XS weights** previously served by llama-swap on shimmers' CPU.
 The existing `shimmers/qwen3.6-35b-a3b-uncensored` model ID stays valid.
 shimmers stores the 18.7 GB GGUF, manages the paid lease and relays requests;
-inference runs in **one Secure Cloud RTX A5000 Pod**. CPU serving is removed
+inference runs in **one Secure Cloud GPU Pod**: A5000 preferred, A40 fallback.
+CPU serving is removed
 on the next server rebuild. The old files are not deleted or re-downloaded.
 
 ## Setup without spending Runpod credit
@@ -65,13 +66,15 @@ explicitly enables it. Inference speed is not yet benchmarked on this path.
   takes priority over active work and can interrupt a request. The Pod's
   container process also has a bounded runtime.
 - **Six GPU-hours per UTC month**, including startup and idle time, with
-  **$0.30/hour compute ceiling** checked before and after allocation. There
-  is no A40 or expensive GPU fallback. No persistent Runpod volume.
+  **$0.60/hour compute ceiling** checked before and after allocation. The
+  A5000 is selected first when available; otherwise the A40 is used if within
+  the ceiling. No other GPU is selected. No persistent Runpod volume.
 - A separate systemd reaper works even if the Rust HTTP gateway crashes.
   Failed deletes stay marked for retry; an ambiguous create is reconciled
   by its durable unique name before another allocation is allowed.
 
-A 30-minute lease is at most about $0.15 planned compute, plus temporary
+A 30-minute lease is at most about $0.30 planned compute (about $0.135 on
+the A5000 at $0.27/hour, or $0.295 on the A40 at $0.59/hour), plus temporary
 disk, tax and cleanup delays. These are **local controls, not a guaranteed
 provider-enforced spending cap**. If shimmers is offline, credentials fail
 or Runpod's API is unreachable, billing can continue. Keep Runpod auto-pay

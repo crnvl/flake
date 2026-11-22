@@ -4,7 +4,8 @@ use serde_json::{Value, json};
 use std::time::Duration;
 
 pub const GPU: &str = "NVIDIA RTX A5000";
-pub const MAX_RATE: f64 = 0.30;
+pub const GPU_PREFERENCE: &[&str] = &[GPU, "NVIDIA A40"];
+pub const MAX_RATE: f64 = 0.60;
 const IMAGE: &str = "ghcr.io/ggml-org/llama.cpp@sha256:ac11e113c61a57b0b0b86414aa8e1b61b9512dcedf8083c5fdedb35b379342cf";
 
 #[derive(Clone)]
@@ -12,6 +13,10 @@ pub struct Api {
     pub client: Client,
     pub base: String,
     key: String,
+}
+
+pub struct Offer {
+    pub gpu: String,
 }
 
 impl Api {
@@ -58,7 +63,7 @@ impl Api {
             .map_err(|_| Error::unavailable("Invalid Runpod response"))
     }
 
-    pub async fn check_price(&self) -> Result<(), Error> {
+    pub async fn check_price(&self) -> Result<Offer, Error> {
         let data = Self::json(
             self.request(
                 reqwest::Method::GET,
@@ -68,23 +73,20 @@ impl Api {
             .await?,
         )
         .await?;
-        let found = data["gpus"]
-            .as_array()
-            .ok_or_else(Error::internal)?
-            .iter()
-            .any(|g| {
-                g["id"] == GPU
+        let available = data["gpus"].as_array().ok_or_else(Error::internal)?;
+        for gpu in GPU_PREFERENCE {
+            if available.iter().any(|g| {
+                g["id"] == *gpu
                     && g["secure"] == true
                     && matches!(g["availability"].as_str(), Some("LOW" | "MEDIUM" | "HIGH"))
                     && valid_rate(g["price"]["secure"].as_f64())
-            });
-        if found {
-            Ok(())
-        } else {
-            Err(Error::unavailable(
-                "A5000 unavailable within the $0.30/hour ceiling",
-            ))
+            }) {
+                return Ok(Offer { gpu: (*gpu).into() });
+            }
         }
+        Err(Error::unavailable(
+            "Neither A5000 nor A40 is available within the $0.60/hour ceiling",
+        ))
     }
 
     pub fn create_body(lease: &Lease, model: &Model) -> Value {
@@ -102,7 +104,7 @@ exec /app/llama-server --model /tmp/model.gguf --alias {} --host 0.0.0.0 --port 
             model.sha256, model.id
         );
         json!({
-            "name": lease.name, "cloud": "SECURE", "gpu": {"id": GPU, "count": 1, "minCudaVersion": "12.8"},
+            "name": lease.name, "cloud": "SECURE", "gpu": {"id": lease.gpu, "count": 1, "minCudaVersion": "12.8"},
             "image": IMAGE, "disk": 40, "mounts": {}, "ports": ["8080/http"],
             "entrypoint": ["/usr/bin/timeout", "--signal=TERM", "1770", "/bin/sh", "-c"], "cmd": [script],
             "env": {"WEIGHTS_TOKEN": lease.download, "LLAMA_API_KEY": lease.bearer}

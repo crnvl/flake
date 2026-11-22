@@ -73,7 +73,7 @@ in
         };
         headers."X-Shimmers-GPU-Review" = "1";
         models."qwen3.6-35b-a3b-uncensored" = {
-          name = "Qwen3.6 35B-A3B Uncensored · Runpod A5000 (paid)";
+          name = "Qwen3.6 35B-A3B Uncensored · Runpod GPU (paid)";
           capabilities = {
             tools = true;
             input = [ "text" ];
@@ -126,7 +126,7 @@ in
       ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
         'sudo systemctl start runpod-review && sudo systemctl start runpod-review-resume'
       ${pkgs.systemd}/bin/systemctl --user restart runpod-review-tunnel
-      printf '%s\n' 'GPU review: your first prompt starts a paid A5000. Run gpu-review-stop when done.' >&2
+      printf '%s\n' 'GPU: your first prompt starts a paid Pod (A5000 preferred, A40 fallback). Run gpu-review-stop for immediate release.' >&2
       exec ${config.programs.opencode.package}/bin/opencode ${lib.escapeShellArg "${config.home.homeDirectory}/gpu-review"} "$@"
     '')
     (pkgs.writeShellScriptBin "gpu-review-stop" ''

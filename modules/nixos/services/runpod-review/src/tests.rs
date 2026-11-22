@@ -10,6 +10,7 @@ struct Fake {
     delete_failure: Arc<AtomicBool>,
     creation: Arc<Mutex<Value>>,
     completion: Arc<Mutex<Value>>,
+    catalog: Arc<Mutex<Value>>,
 }
 struct Fixture {
     _tmp: tempfile::TempDir,
@@ -32,16 +33,23 @@ async fn fixture() -> Fixture {
         delete_failure: Arc::new(AtomicBool::new(false)),
         creation: Arc::new(Mutex::new(Value::Null)),
         completion: Arc::new(Mutex::new(Value::Null)),
+        catalog: Arc::new(Mutex::new(json!({"gpus":[
+            {"id":api::GPU,"secure":true,"availability":"LOW","price":{"secure":0.27}},
+            {"id":"NVIDIA A40","secure":true,"availability":"HIGH","price":{"secure":0.59}}
+        ]}))),
     };
     let router = Router::new()
-        .route("/catalog/gpus", get(|axum::extract::Query(query):axum::extract::Query<std::collections::HashMap<String,String>>| async move {
+        .route("/catalog/gpus", get(|ExtractState(fake):ExtractState<Fake>,axum::extract::Query(query):axum::extract::Query<std::collections::HashMap<String,String>>| async move {
             assert_eq!(query.get("include").unwrap(),"AVAILABILITY");assert_eq!(query.get("cloud").unwrap(),"SECURE");
-            Json(json!({"gpus":[{"id":api::GPU,"secure":true,"availability":"LOW","price":{"secure":0.27}}]}))
+            Json(fake.catalog.lock().await.clone())
         }))
         .route("/pods", post(|ExtractState(fake):ExtractState<Fake>,Json(body):Json<Value>| async move {
-            fake.posts.fetch_add(1,Ordering::SeqCst);*fake.creation.lock().await=body;
+            fake.posts.fetch_add(1,Ordering::SeqCst);
+            let gpu = body["gpu"]["id"].clone();
+            let cost = if gpu == "NVIDIA A40" { 0.59 } else { 0.27 };
+            *fake.creation.lock().await=body;
             if fake.lost_reply.load(Ordering::SeqCst) { StatusCode::BAD_GATEWAY.into_response() }
-            else { Json(json!({"id":"testpod123","cost":0.27,"cloud":"SECURE","gpu":{"id":api::GPU,"count":1}})).into_response() }
+            else { Json(json!({"id":"testpod123","cost":cost,"cloud":"SECURE","gpu":{"id":gpu,"count":1}})).into_response() }
         }).get(|ExtractState(fake):ExtractState<Fake>| async move {
             let body=fake.creation.lock().await;Json(json!({"pods":[{"id":"testpod123","name":body["name"]}],"pagination":{"hasNextPage":false}}))
         }))
@@ -85,6 +93,27 @@ async fn paused_by_default_and_status_is_free() {
         StatusCode::FORBIDDEN
     );
     assert_eq!(f.fake.posts.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn prefers_a5000_then_selects_a40_and_rejects_over_budget() {
+    let f = fixture().await;
+    f.controller.resume().await.unwrap();
+    let first = f.controller.ensure().await.unwrap();
+    assert_eq!(first.gpu, api::GPU);
+    f.controller.pause().await.unwrap();
+    f.fake.catalog.lock().await["gpus"][0]["availability"] = json!("NONE");
+    f.controller.resume().await.unwrap();
+    let fallback = f.controller.ensure().await.unwrap();
+    assert_eq!(fallback.gpu, "NVIDIA A40");
+    assert_eq!(fallback.rate, Some(0.59));
+    assert_eq!(f.controller.status().unwrap()["gpu"], "NVIDIA A40");
+    assert_eq!(f.fake.creation.lock().await["gpu"]["id"], "NVIDIA A40");
+    f.controller.pause().await.unwrap();
+    f.fake.catalog.lock().await["gpus"][1]["price"]["secure"] = json!(0.61);
+    f.controller.resume().await.unwrap();
+    assert!(f.controller.ensure().await.is_err());
+    assert_eq!(f.fake.posts.load(Ordering::SeqCst), 2);
 }
 #[tokio::test]
 async fn concurrent_requests_create_one_pod_and_idle_waits_for_active_users() {
@@ -239,7 +268,7 @@ async fn http_stream_keeps_protocol_and_releases_locks() {
 }
 #[test]
 fn wrong_price_and_id_fail_validation() {
-    assert!(!api::valid_rate(Some(0.59)));
+    assert!(!api::valid_rate(Some(0.69)));
     assert!(!api::valid_rate(Some(f64::NAN)));
     assert!(!api::valid_id("../other-pod"));
     assert!(api::valid_id("known123"));

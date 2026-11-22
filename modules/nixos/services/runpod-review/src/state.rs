@@ -52,6 +52,12 @@ pub struct Lease {
     pub closing: bool,
     #[serde(default)]
     pub model: Option<String>,
+    #[serde(default = "default_gpu")]
+    pub gpu: String,
+}
+
+fn default_gpu() -> String {
+    api::GPU.into()
 }
 
 #[derive(Serialize, Deserialize)]
@@ -197,7 +203,7 @@ impl Controller {
             ));
         }
         let api = self.api()?;
-        api.check_price().await?;
+        let offer = api.check_price().await?;
         let lease = Lease {
             name: format!("shimmers-review-{}", &token()[..24]),
             start: now,
@@ -210,6 +216,7 @@ impl Controller {
             ready: false,
             closing: false,
             model: Some(self.model.id.clone()),
+            gpu: offer.gpu,
         };
         state.lease = Some(lease.clone());
         self.save(&state)?; // durable BEFORE POST; an ambiguous response must not cause a second allocation
@@ -241,7 +248,7 @@ impl Controller {
         self.save(&state)?;
         if !lease.id.as_deref().is_some_and(api::valid_id)
             || pod["cloud"] != "SECURE"
-            || pod["gpu"]["id"] != api::GPU
+            || pod["gpu"]["id"] != lease.gpu
             || pod["gpu"]["count"] != 1
             || !api::valid_rate(lease.rate)
         {
@@ -334,7 +341,7 @@ impl Controller {
         let state = self.read()?;
         let l = state.lease.as_ref();
         Ok(
-            json!({"paused":state.paused, "gpu":api::GPU, "model":self.model.id,
+            json!({"paused":state.paused, "gpu":l.map_or(api::GPU, |l| l.gpu.as_str()), "gpu_preference":api::GPU_PREFERENCE, "model":self.model.id,
                 "pod":l.and_then(|l| l.id.as_ref()), "ready":l.is_some_and(|l| l.ready),
                 "closing":l.is_some_and(|l| l.closing), "idle_timeout_seconds":IDLE,
                 "maximum_lease_seconds":LIFETIME, "hourly_price_ceiling_usd":api::MAX_RATE,
