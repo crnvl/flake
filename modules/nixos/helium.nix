@@ -25,7 +25,6 @@ in
       BrowserSignin = 0;
 
       ShowHomeButton = true;
-      BookmarkBarEnabled = true;
 
       NewTabPageLocation = "https://kagi.com?year=1996";
       HomepageIsNewTabPage = true;
