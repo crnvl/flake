@@ -136,6 +136,10 @@ class Gateway:
                             return result
                     finally:
                         await asyncio.to_thread(self.control.touch, lease)
+        except rp.Paused as exc:
+            # OpenAI-compatible clients classify 409 as retryable. A deliberate
+            # pause requires permission, not repeated inference requests.
+            raise web.HTTPForbidden(text=str(exc)) from None
         except rp.Unavailable as exc:
             raise web.HTTPConflict(text=str(exc)) from None
         except (httpx.HTTPError, BlockingIOError):

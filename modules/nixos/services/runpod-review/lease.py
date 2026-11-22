@@ -33,6 +33,10 @@ class Unavailable(Exception):
     """Safe to show to the caller; never include API bodies, keys or prompts."""
 
 
+class Paused(Unavailable):
+    """An explicit user action is required; retrying must not wake a Pod."""
+
+
 class Api:
     def __init__(self, key):
         self.http = httpx.Client(base_url='https://api.runpod.io/v2/', timeout=20,
@@ -118,7 +122,7 @@ class Controller:
             state = self.read()
             now = self.now()
             if state.get('paused', True):
-                raise Unavailable('GPU review is paused; run gpu-review on your desktop to enable it')
+                raise Paused('GPU review is paused; run gpu-review on your desktop to enable it')
             lease = state['lease']
             if lease:
                 if not lease.get('id') or lease.get('closing') or now >= lease['deadline']:
