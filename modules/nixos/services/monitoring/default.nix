@@ -28,6 +28,8 @@ let
     "Aurral" = "https://aurral.shimme.rs";
     "Shift" = "https://shift.shimme.rs";
     "Share" = "https://share.shimme.rs";
+    # The portal/API process only; never touches (or wakes) the paid GPU.
+    "Infer" = "https://infer.shimme.rs/healthz";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";
   }
