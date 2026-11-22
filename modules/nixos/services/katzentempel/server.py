@@ -130,8 +130,29 @@ def rewrite_bounties_list(data, session_id):
         return None
     for entry in data.get("in_shop", []):
         entry["is_redeemable"] = True
+        entry["is_activateable"] = True
         entry["cr_points"] = get_points_for_session(session_id)
         set_bounty_price(entry["id"], entry.get("needed_points", 0))
+    return json.dumps(data).encode("utf-8")
+
+
+def rewrite_bounties(data, session_id):
+    """Fill progress-bar fields on each bounty so the bar shows full."""
+    if not isinstance(data, list):
+        return None
+    pts = get_points_for_session(session_id)
+    for bounty in data:
+        if not isinstance(bounty, dict):
+            continue
+        bounty["is_redeemable"] = True
+        bounty["is_activateable"] = True
+        if bounty.get("show_progress_bar"):
+            bounty["cr_points"] = pts
+            bounty["cr_rank"] = 0
+            bounty["needed_visits"] = 0
+            bounty["redeem_count"] = 0
+            if bounty.get("ranks") is None:
+                bounty["ranks"] = 1
     return json.dumps(data).encode("utf-8")
 
 
@@ -194,10 +215,12 @@ def rewrite_redeem(data, request_data, session_id):
 
 
 def rewrite_customer_relationships(data, session_id):
-    """Set points to session state value."""
+    """Set loyalty points to session state value."""
     if not isinstance(data, dict):
         return None
-    data["points"] = get_points_for_session(session_id)
+    points = get_points_for_session(session_id)
+    data["points"] = points
+    data["cr_points"] = points
     return json.dumps(data).encode("utf-8")
 
 
@@ -292,12 +315,38 @@ def create_app(upstream=None, trust_proxy=None):
         is_gzip = "content-encoding" in result.headers and "gzip" in result.headers.get("content-encoding", "").lower()
 
         if is_gzip:
+            content = result.content  # requests auto-decompresses .content
+            result.close()
+            # Try to rewrite decompressed content.
+            rewritten = None
+            try:
+                data = json.loads(content)
+            except Exception:
+                data = None
+            if data is not None:
+                if "bounties-list" in request.path:
+                    rewritten = rewrite_bounties_list(data, session_id)
+                elif "bounties/" in request.path and "bounties-list" not in request.path:
+                    rewritten = rewrite_bounties(data, session_id)
+                elif "activity-feed" in request.path:
+                    rewritten = rewrite_activity_feed(data, session_id)
+                elif "redeem" in request.path:
+                    rewritten = rewrite_redeem(data, request_data, session_id)
+                elif "customer-relationships/client/" in request.path:
+                    rewritten = rewrite_customer_relationships(data, session_id)
+            if rewritten is not None:
+                import gzip as _gzip
+                compressed = _gzip.compress(rewritten)
+                outgoing.append(("Content-Encoding", "gzip"))
+                outgoing.append(("Content-Length", str(len(compressed))))
+                return Response(compressed, status=result.status_code, headers=outgoing)
+            # No rewrite: gzip-compress the original content and return.
+            import gzip as _gzip
+            compressed = _gzip.compress(content)
             outgoing.append(("Content-Encoding", "gzip"))
-            def body():
-                yield from result.raw.stream(64 * 1024, decode_content=False)
-            response = Response(stream_with_context(body()), status=result.status_code, headers=outgoing)
-            response.call_on_close(result.close)
-            return response
+            outgoing = [(k, v) for k, v in outgoing if k.lower() != "content-length"]
+            outgoing.append(("Content-Length", str(len(compressed))))
+            return Response(compressed, status=result.status_code, headers=outgoing)
 
         content = result.content
         result.close()
@@ -312,6 +361,8 @@ def create_app(upstream=None, trust_proxy=None):
         if data is not None:
             if "bounties-list" in request.path:
                 rewritten = rewrite_bounties_list(data, session_id)
+            elif "bounties/" in request.path and "bounties-list" not in request.path:
+                rewritten = rewrite_bounties(data, session_id)
             elif "activity-feed" in request.path:
                 rewritten = rewrite_activity_feed(data, session_id)
             elif "redeem" in request.path:
