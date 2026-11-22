@@ -6,9 +6,7 @@
 }:
 
 let
-  # llama-swap on shimmers (modules/nixos/services/llm.nix), forwarded to the
-  # same port here by the tunnel below.
-  llmPort = 8090;
+  # The same Qwen3.6 model ID, now served by the Rust GPU gateway through SSH.
   llmModel = "shimmers/qwen3.6-35b-a3b-uncensored";
   docsPython = pkgs.python3.withPackages (p: [
     p.mcp
@@ -16,7 +14,7 @@ let
     p.anyio
   ]);
 
-  # The session and its housekeeping always use shimmers. The MCP worker makes
+  # The session and its housekeeping use the shimmers -> Runpod route. The MCP worker makes
   # separate, tool-less cloud requests for public documentation or a public brief.
   docsWorkspace = {
     "$schema" = "https://opencode.ai/config.json";
@@ -66,16 +64,16 @@ in
       autoupdate = false; # nix manages the package
 
       providers.shimmers = {
-        name = "shimmers";
+        name = "shimmers → Runpod GPU (paid)";
         package = "@opencode/ai/providers/openai-compatible";
         settings = {
-          baseURL = "http://127.0.0.1:${toString llmPort}/v1";
-          # CPU inference: the first token can take minutes on a long prompt,
-          # longer still when the model has to be loaded first.
-          headerTimeout = 900000;
+          baseURL = "http://127.0.0.1:18091/v1";
+          # The first request copies the existing GGUF to a fresh Pod.
+          headerTimeout = 1860000;
         };
+        headers."X-Shimmers-GPU-Review" = "1";
         models."qwen3.6-35b-a3b-uncensored" = {
-          name = "Qwen3.6 35B-A3B Uncensored (shimmers)";
+          name = "Qwen3.6 35B-A3B Uncensored · Runpod A5000 (paid)";
           capabilities = {
             tools = true;
             input = [ "text" ];
@@ -84,20 +82,24 @@ in
           };
           compatibility.reasoningField = "reasoning_content";
           limit = {
-            context = 131072;
-            output = 32768;
+            context = 65536;
+            output = 4096;
           };
           variants = [
             {
               id = "instant";
               body.chat_template_kwargs.enable_thinking = false;
             }
+            {
+              id = "thinking";
+              body.chat_template_kwargs.enable_thinking = true;
+            }
           ];
         };
       };
 
       agents.redteam = {
-        description = "Security work on the self-hosted uncensored model on shimmers";
+        description = "Security work with Qwen3.6 hosted on an on-demand Runpod GPU";
         mode = "primary";
         model = llmModel;
         color = "#d14b4b";
@@ -109,74 +111,9 @@ in
     docsWorkspace // { default_agent = "redteam"; }
   );
 
-  # Explicitly opt in to billed, remote text inference only in this workspace.
+  # The GPU workspace now has the same agent/tool capabilities as ~/redteam.
   home.file."gpu-review/opencode.json".text = builtins.toJSON (
-    let
-      model = "runpod-review/qwen3.8-27b-aggressive";
-    in
-    {
-      "$schema" = "https://opencode.ai/config.json";
-      inherit model;
-      default_agent = "gpu-review";
-      providers.runpod-review = {
-        name = "Runpod GPU review (billed while awake)";
-        package = "@opencode/ai/providers/openai-compatible";
-        settings = {
-          baseURL = "http://127.0.0.1:18091/v1";
-          headerTimeout = 1860000; # includes copying 17.9 GB to a fresh Pod
-        };
-        headers."X-Shimmers-GPU-Review" = "1";
-        models."qwen3.8-27b-aggressive" = {
-          name = "Qwen3.8 27B Aggressive · Runpod A5000 (paid)";
-          capabilities = {
-            tools = false;
-            input = [ "text" ];
-            output = [ "text" ];
-            reasoning.supported = true;
-          };
-          compatibility.reasoningField = "reasoning_content";
-          body.chat_template_kwargs.enable_thinking = false;
-          variants = [
-            {
-              id = "thinking";
-              body.chat_template_kwargs.enable_thinking = true;
-            }
-          ];
-          limit = {
-            context = 32768;
-            output = 2048;
-          };
-        };
-      };
-      policies = [
-        {
-          action = "provider.use";
-          resource = "*";
-          effect = "deny";
-        }
-        {
-          action = "provider.use";
-          resource = "runpod-review";
-          effect = "allow";
-        }
-        {
-          action = "tool.use";
-          resource = "*";
-          effect = "deny";
-        }
-      ];
-      agents = {
-        gpu-review = {
-          mode = "primary";
-          inherit model;
-          steps = 1;
-          system = "Review the text supplied by the user. Focus on correctness, reliability and defensive remediation. State uncertainties. You have no tools or access to the user's systems.";
-        };
-        title.model = model;
-        summary.model = model;
-        compaction.model = model;
-      };
-    }
+    docsWorkspace // { default_agent = "redteam"; }
   );
 
   home.packages = [
@@ -204,8 +141,7 @@ in
     '')
   ];
 
-  # Keep this separate from the existing CPU tunnel: a port conflict here must
-  # not take down local-model access. The tunnel itself cannot start a Pod.
+  # The tunnel itself cannot start a Pod. The old CPU tunnel is no longer used.
   systemd.user.services.runpod-review-tunnel = {
     Unit.Description = "Forward the shimmers GPU review socket";
     Service = {
@@ -253,22 +189,4 @@ in
     }
   );
 
-  systemd.user.services.shimmers-llm-tunnel = {
-    Unit.Description = "SSH tunnel to the self-hosted LLM on shimmers";
-    Service = {
-      ExecStart = builtins.concatStringsSep " " [
-        "${pkgs.openssh}/bin/ssh -N"
-        "-o BatchMode=yes"
-        "-o ExitOnForwardFailure=yes"
-        "-o ServerAliveInterval=30"
-        "-o ServerAliveCountMax=3"
-        "-o StrictHostKeyChecking=accept-new"
-        "-L 127.0.0.1:${toString llmPort}:127.0.0.1:${toString llmPort}"
-        "aleph@shimme.rs"
-      ];
-      Restart = "always";
-      RestartSec = 10;
-    };
-    Install.WantedBy = [ "default.target" ];
-  };
 }

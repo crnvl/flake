@@ -8,11 +8,15 @@
 let
   name = "runpod-review";
   domain = "review-weights.shimme.rs";
-  python = pkgs.python3.withPackages (p: [
-    p.aiohttp
-    p.httpx
-  ]);
-  worker = "${python}/bin/python3 ${./.}/gateway.py";
+  package = pkgs.rustPlatform.buildRustPackage {
+    pname = "runpod-gateway";
+    version = "0.1.0";
+    src = lib.cleanSource ./.;
+    cargoLock.lockFile = ./Cargo.lock;
+    # Unit tests use local HTTP stand-ins, not Runpod or real credentials.
+    doCheck = true;
+  };
+  worker = "${package}/bin/runpod-gateway";
   # An operator can use a root-only runtime file or add the usual encrypted secret.
   secret = ../../../../hosts/shimmers/secrets/runpod-review-key.age;
   keyFile =
@@ -41,8 +45,7 @@ let
   };
   weights = builtins.fromJSON (builtins.readFile ./model.json);
   file = weights.file;
-  dir = "/var/lib/runpod-review-weights";
-  rev = weights.revision;
+  dir = "/var/lib/llm/models";
   sha = weights.sha256;
 in
 {
@@ -52,25 +55,17 @@ in
     isSystemUser = true;
     group = name;
   };
-  users.groups.runpod-review-fetch = { };
-  users.users.runpod-review-fetch = {
-    isSystemUser = true;
-    group = "runpod-review-fetch";
-  };
 
   # Explicit one-off preparation; no weight download or paid allocation during a rebuild.
   systemd.services.runpod-review-weights = {
-    description = "Cache pinned Qwen3.8 Aggressive weights on Hetzner";
-    path = [
-      pkgs.coreutils
-      pkgs.curl
-    ];
+    description = "Verify the existing Qwen3.6 GGUF for GPU inference";
+    wants = [ "llm-model-fetch.service" ];
+    after = [ "llm-model-fetch.service" ];
+    path = [ pkgs.coreutils ];
     serviceConfig = {
       Type = "oneshot";
-      User = "runpod-review-fetch";
-      Group = "runpod-review-fetch";
-      StateDirectory = "runpod-review-weights";
-      StateDirectoryMode = "0755";
+      User = name;
+      Group = name;
       UMask = "0077";
       ProtectSystem = "strict";
       NoNewPrivileges = true;
@@ -78,17 +73,12 @@ in
     };
     script = ''
       cd ${dir}
-      if test -f ${file} && echo '${sha}  ${file}' | sha256sum --status -c; then exit 0; fi
-      curl -fLsS --retry 3 -C - -o ${file}.part \
-        'https://huggingface.co/${weights.repo}/resolve/${rev}/${file}'
-      if ! echo '${sha}  ${file}.part' | sha256sum -c; then rm -f ${file}.part; exit 1; fi
-      chmod 0444 ${file}.part
-      mv -f ${file}.part ${file}
+      echo '${sha}  ${file}' | sha256sum -c
     '';
   };
 
   systemd.services.${name} = {
-    description = "On-demand Qwen3.8 Aggressive reviewer (no allocation at boot)";
+    description = "Qwen3.6 GPU inference gateway (Rust; no allocation at boot)";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     unitConfig.ConditionPathExists = keyFile;

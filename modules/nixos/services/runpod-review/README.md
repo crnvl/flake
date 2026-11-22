@@ -1,84 +1,96 @@
-# Interactive Qwen3.8 Aggressive trial through OpenCode
+# Qwen3.6 on an on-demand GPU, through OpenCode
 
-The flake installs an opt-in `~/gpu-review` workspace and commands on both
-chambers and corridors. It runs the pinned HauhauCS Qwen3.8-27B Aggressive
-Q4_K_P model on **one Secure Cloud A5000**, without changing the existing
-CPU model or `~/redteam` configuration. It is a text-only chat/reviewer, not
-an autonomous tool-using agent. Pasted text and chat history go to the Pod
-through Runpod's HTTPS proxy. The API key remains on shimmers.
+The Rust `runpod-gateway` serves the **same HauhauCS Qwen3.6-35B-A3B
+Uncensored IQ4_XS weights** previously served by llama-swap on shimmers' CPU.
+The existing `shimmers/qwen3.6-35b-a3b-uncensored` model ID stays valid.
+shimmers stores the 18.7 GB GGUF, manages the paid lease and relays requests;
+inference runs in **one Secure Cloud RTX A5000 Pod**. CPU serving is removed
+on the next server rebuild. The old files are not deleted or re-downloaded.
 
-## One-time preparation — no GPU spend
+## Setup without spending Runpod credit
 
-1. Rebuild shimmers and the desktop. The `review-weights.shimme.rs` hostname
-   must resolve to shimmers and have its ACME certificate. Only the weight
-   download is public; the chat endpoint is an SSH-forwarded Unix socket.
-2. Put the Runpod key (with `catalog:read`, `pods:read`, `pods:write`) into
-   `/etc/runpod-review/api-key` on shimmers, root-owned and mode 0600. Keep
-   Runpod auto-pay off. For a new key, enter it only into the hidden prompt:
+1. Update/rebuild shimmers and both desktop devices. Pause/release any old
+   GPU lease before updating (`gpu-review-stop`). Rust reads the Python
+   controller's state and budget history. A legacy model lease is released,
+   not reused for inference with different weights.
+2. Keep the Runpod key with `catalog:read`, `pods:read`, `pods:write` in the
+   existing root-owned `/etc/runpod-review/api-key` (mode 0600), or provision
+   `hosts/shimmers/secrets/runpod-review-key.age`. It never reaches desktops
+   or the Pod. Do not remove it while a managed Pod exists.
+3. Run **`gpu-review-prepare`** on the desktop. It verifies the checksum of
+   `/var/lib/llm/models/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ4_XS.gguf`
+   and starts the gateway. This does **not** allocate a Pod. A fresh shimmers
+   host downloads the pinned original GGUF through `llm-model-fetch` first.
+4. `review-weights.shimme.rs` must resolve to shimmers and have its ACME
+   certificate. The HTTPS download endpoint authorizes a per-lease bearer
+   and serves only that model; no directory listing or storage credentials.
+   The chat endpoint is an SSH-forwarded Unix socket, not public.
 
-   ```sh
-   sudo install -d -m 0700 /etc/runpod-review
-   sudo sh -c 'umask 077; systemd-ask-password "Runpod API key:" > /etc/runpod-review/api-key'
-   ```
-
-   Alternatively use `hosts/shimmers/secrets/runpod-review-key.age`, registered
-   in `secrets.nix`, and rebuild. Never remove the key while a Pod exists.
-3. On the desktop, run **`gpu-review-prepare`**. It downloads and verifies
-   17.9 GB to `/var/lib/runpod-review-weights` on shimmers and starts the
-   gateway. This does not create a Pod or spend Runpod credits. It can take
-   several minutes. SSH must already trust the `shimme.rs` host key.
-
-## Use it yourself
+## Interactive use
 
 ```sh
-gpu-review          # enables allocation, opens OpenCode in ~/gpu-review
-gpu-review-status   # reports paused/ready/Pod/deadline and estimated compute cost
-gpu-review-stop     # pauses future allocations and terminates the managed Pod
+gpu-review          # permits requests, opens OpenCode in ~/gpu-review
+gpu-review-status   # allocation/deadline/idle status; no paid request
+gpu-review-stop     # optional immediate release + persistent pause
 ```
 
-**Only sending a prompt spends GPU credit.** The first prompt allocates the
-Pod, transfers the weights from shimmers, and loads the model. It may be slow.
-Subsequent messages reuse the running model. Opening OpenCode, the status
-command, model discovery and the SSH tunnel do not allocate compute. No
-benchmark script runs; you choose the prompts.
+`~/gpu-review` now runs the same `redteam` agent and tools as `~/redteam`,
+not the old text-only reviewer. The Runpod key and lease controls stay on
+shimmers; OpenCode tools execute on **your desktop**, not in the GPU Pod.
+The existing model can also be selected in `/models` in other projects.
+`gpu-review` enables the gateway first; when it is paused, requests fail
+with a non-retryable error. Merely opening the launcher or listing models
+does not allocate compute. Your first prompt starts billing.
 
-The model is `runpod-review/qwen3.8-27b-aggressive`. Thinking is disabled by
-default for fast answers. In `/models`, choose its `thinking` variant to
-compare reasoning (capped at 512 reasoning tokens within a 2048-token total
-completion). Input context is 32k. These are experimental settings, not a
-claim of proven cybersecurity performance or zero refusals.
+**Privacy boundary changed:** all model prompts, code, tool outputs,
+reasoning and auxiliary summaries using this route are processed on Runpod,
+not solely on Hetzner. `~/redteam` still restricts provider selection to
+`shimmers`, but that provider is now a relay to the GPU. The optional
+publicdocs helper remains a separate opt-in public-reference service.
 
-Run `gpu-review-stop` when finished. Existing sessions cannot wake the Pod
-again until you explicitly run `gpu-review`. It stays paused across reboots.
-You may still use `opencode ~/gpu-review` when it is unpaused.
+The first response includes copying the existing GGUF from Hetzner and
+loading it. The Pod checks its checksum, enables full CUDA offload, uses
+64k context, and emits native JSON tool calls through the gateway. The
+64k context is smaller than the previous CPU server's 128k; long sessions
+may compact earlier. Each response is capped at 4096 output tokens, with
+1024 thinking tokens. Select `#instant` to disable thinking; `#thinking`
+explicitly enables it. Inference speed is not yet benchmarked on this path.
 
-## Cost guards
+## Automatic cleanup and cost guards
 
-- No A40 or expensive-card fallback: A5000 availability is checked before
-  allocation, including Secure Cloud and CUDA compatibility. Price ceiling:
-  **$0.30 per compute-hour**, actual rate checked again after allocation.
-- **Two-minute idle cleanup**, starting after the last response finishes.
-- **30-minute maximum lease**, including transfer and model load; it can
-  interrupt a long response. Container runtime is bounded too.
-- **Six GPU-hours per UTC month**, measured from allocation to deletion.
-- Only temporary 40 GB container disk; no persistent Runpod storage.
+- **Two-minute idle termination**, checked every 30 seconds. No need to run
+  the stop command each time. Active streams and queued callers hold shared
+  cross-process locks; disconnects release them and update the idle clock.
+- **30-minute maximum lease**, including transfer/startup. This deadline
+  takes priority over active work and can interrupt a request. The Pod's
+  container process also has a bounded runtime.
+- **Six GPU-hours per UTC month**, including startup and idle time, with
+  **$0.30/hour compute ceiling** checked before and after allocation. There
+  is no A40 or expensive GPU fallback. No persistent Runpod volume.
+- A separate systemd reaper works even if the Rust HTTP gateway crashes.
+  Failed deletes stay marked for retry; an ambiguous create is reconciled
+  by its durable unique name before another allocation is allowed.
 
-At the ceiling, a 30-minute lease is approximately $0.15 compute, plus disk,
-tax and cleanup delay. The reaper runs independently every 30 seconds. These
-are local controls, **not a provider-enforced spending cap**: if shimmers is
-offline, credentials fail or Runpod is unreachable, billing can continue.
-Verify in the Runpod console after your first use that termination works.
+A 30-minute lease is at most about $0.15 planned compute, plus temporary
+disk, tax and cleanup delays. These are **local controls, not a guaranteed
+provider-enforced spending cap**. If shimmers is offline, credentials fail
+or Runpod's API is unreachable, billing can continue. Keep Runpod auto-pay
+off for the trial and verify deletion in its console after first use.
 
-If a create response is lost, the lease's unique name is saved first. No
-second Pod is created until the old allocation is reconciled. Delete failures
-remain marked for the reaper to retry. For an uncertain allocation, check
-the console before clearing the lease; retain the budget history. State in
-`/var/lib/runpod-review/state.json` contains temporary tokens — never share it.
+`gpu-review-stop` pauses new allocations even when deletion fails. It stays
+paused across reboots until `gpu-review` is explicitly run again. Never
+clear `/var/lib/runpod-review/state.json` to reset the budget or abandon an
+allocation: it contains the identity and temporary tokens needed for cleanup.
+`sudo runpod-review-status` prints only safe status, not those tokens.
 
-Server equivalents: `sudo systemctl start runpod-review-pause`,
-`sudo systemctl start runpod-review-resume`, and `sudo runpod-review-status`.
-Resume does not allocate a Pod. Never delete the state directory to reset
-the budget or abandon an allocation.
+## Rust development / tests (no paid GPU)
 
-Offline tests: `python -m unittest -v test_review` from this directory with
-`aiohttp` and `httpx`. Tests use a mock API; no key or paid GPU is needed.
+```sh
+cargo test --locked
+cargo clippy --locked --all-targets -- -D warnings
+```
+
+Tests use local HTTP stand-ins. Nix builds via `rustPlatform.buildRustPackage`
+with `Cargo.lock` and runs these tests; Python is not used for Runpod lifecycle,
+proxying, status, or cleanup. `opencode-public-docs.py` is an unrelated MCP
+helper and is deliberately left alone.

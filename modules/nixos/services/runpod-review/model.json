@@ -1,7 +1,8 @@
 {
-  "repo": "HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF",
-  "file": "Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf",
-  "revision": "993a5971fda8f30dd1b7eb2654792ba4415c7460",
-  "sha256": "ba36dc3c2b2ff5e0aa5d71092a8894546996a6a119ae391803dda07cdc08516d",
-  "bytes": 17923393664
+  "id": "qwen3.6-35b-a3b-uncensored",
+  "repo": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+  "file": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ4_XS.gguf",
+  "revision": "f12a584fecbeb5f20001130d8ecd66c9327ae685",
+  "sha256": "c26708a77a26d6c0416502832a200de4135e91af8279b5e93c67fe4e4e081aae",
+  "bytes": 18728777856
 }
