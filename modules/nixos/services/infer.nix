@@ -24,8 +24,13 @@
     # The Qwen3.6 GGUF downloaded earlier for CPU inference; no re-download.
     modelDir = "/var/lib/llm/models";
     importState = "/var/lib/runpod-review/state.json";
-    monthlyGpuHours = 6;
-    defaultUserMinutes = 60;
+    # Friends prepay: admins grant hours on the portal (1 € = 1.5 h by default,
+    # adjustable there). No free monthly minutes; admins are not limited.
+    # 50 GPU-hours/month (≈ €27 at A40 prices) is a safety ceiling that admins
+    # can lower in the portal but not raise.
+    monthlyGpuHours = 50;
+    defaultUserMinutes = 0;
+    hoursPerEuro = 1.5;
   };
 
   systemd.services.infer = {
