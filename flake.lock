@@ -79,11 +79,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794328522,
-        "narHash": "sha256-h2BYMW4nTFpIqnMd8gwAPFmJAp/1wWLQ6vT0NfL5qt4=",
+        "lastModified": 1795168368,
+        "narHash": "sha256-D35n2Q2v1KrlF9LS/pFl8Z3EBMJW6qvPw5q4HMbXXLg=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "1dd30c29c88d99ce295f15e27f93c49bc5fbae07",
+        "rev": "44761d4f745b95e037458a0e57133c5700c8e320",
         "type": "github"
       },
       "original": {
@@ -211,11 +211,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794585340,
-        "narHash": "sha256-jO7WGLnwlfyQOvnEki8Rlb2vt74XaPkB47kpcObZd7I=",
+        "lastModified": 1795021042,
+        "narHash": "sha256-XlujG//pSVsAnqOtL5OsogghW2pASLXmmB169fuKc8o=",
         "owner": "oxcl",
         "repo": "nix-flake-helium-browser",
-        "rev": "1230f02322b369aae7c0c560ccfc4235ca76546a",
+        "rev": "6b7088a2caec0218ceddee38097800afb9f37b04",
         "type": "github"
       },
       "original": {
@@ -231,11 +231,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794715309,
-        "narHash": "sha256-awkBBs5ctFKgEYjpNGpi3t/VqF589n5EWfdinRb2gNI=",
+        "lastModified": 1795268568,
+        "narHash": "sha256-1RJm4DEu7YHJv94sjSY7sjqT+kHx/AUwmtUN4dtFBUo=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "a1293da7dd8e497e08d26173f97e2976b36a31ea",
+        "rev": "6857c7f7c338ad181729c52071386b0d3afa24bc",
         "type": "github"
       },
       "original": {
@@ -390,11 +390,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1794537146,
-        "narHash": "sha256-Wpz/7x/YWnDIBu7yj6ixe8j6fIMsidd9Y+o1PqPF3iM=",
+        "lastModified": 1795234589,
+        "narHash": "sha256-f/VVvxf5RsQgWVhUtefoca5ktVg0DA2bnkMOcmSnozo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d5cc6833999746cffdfe0598f7bc801a57b887a9",
+        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
         "type": "github"
       },
       "original": {
@@ -576,11 +576,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793188735,
-        "narHash": "sha256-ilCFuSwg3h4In84GtblIMwEypAVGYNOnhbbNqCbyIg0=",
+        "lastModified": 1793468176,
+        "narHash": "sha256-iOFtYL186FPFpc/RG9CWdPtuSiY5axx6sgj1CMw0+a8=",
         "ref": "refs/heads/main",
-        "rev": "f0a954160f67e503150e3c42d18e3db9e41e039d",
-        "revCount": 24,
+        "rev": "31560a0ab6ddc95757b72b4b9532f4d72cf2a881",
+        "revCount": 25,
         "type": "git",
         "url": "ssh://git@git-gay-unuo/67/unuo"
       },
@@ -597,11 +597,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793206119,
-        "narHash": "sha256-bVK9LizgcFmbaUD1NeYhOpqBb4rWb24hCN4tn7SUM7Q=",
+        "lastModified": 1793468296,
+        "narHash": "sha256-OpPCZ2u5XjQ9AXh83bL0+HVTKeQ+Iu3K5x5nuGoM5vQ=",
         "ref": "dark-ambient",
-        "rev": "126915ebeed29de1389f8ead65c7dde5bcf91af0",
-        "revCount": 57,
+        "rev": "e4d62c96a36d500181594e13e04dae0c676e8001",
+        "revCount": 58,
         "type": "git",
         "url": "ssh://git@git-gay-unuo/67/unuo"
       },
