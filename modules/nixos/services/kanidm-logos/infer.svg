@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Chip glyph drawn locally, on a dark tile matching the infer portal. -->
+  <rect width="512" height="512" rx="112" fill="#0f1117"/>
+  <g fill="none" stroke="#8fb4ff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="156" y="156" width="200" height="200" rx="28"/>
+    <rect x="212" y="212" width="88" height="88" rx="10"/>
+    <path d="M206 156v-50M256 156v-50M306 156v-50M206 406v-50M256 406v-50M306 406v-50M156 206h-50M156 256h-50M156 306h-50M406 206h-50M406 256h-50M406 306h-50"/>
+  </g>
+</svg>

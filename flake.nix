@@ -47,6 +47,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Private, with its own read-only deploy key through the "git-gay-infer"
+    # host alias (see hosts/shimmers/default.nix).
+    infer = {
+      url = "git+ssh://git@git-gay-infer/67/infer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
 
     lanzaboote = {
@@ -112,6 +119,7 @@
             inputs.proxyagain.nixosModules.default
             inputs.unuo.nixosModules.default
             inputs.unuo-dark.nixosModules.dark
+            inputs.infer.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix

@@ -95,6 +95,10 @@ in
         lily_git_users = { };
         aurral_users = { };
         navidrome_users = { };
+        # infer.shimme.rs: members may sign in and get API keys (they spend
+        # the shared Runpod allowance); admins also get the admin page.
+        infer_users = { };
+        infer_admins = { };
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -112,6 +116,8 @@ in
             "lily_git_users"
             "aurral_users"
             "navidrome_users"
+            "infer_users"
+            "infer_admins"
           ];
         };
 
@@ -398,6 +404,29 @@ in
             "profile"
             "email"
           ];
+        };
+
+        # infer (modules/nixos/services/infer.nix) sends an S256 PKCE
+        # challenge, so PKCE stays enforced. Members of infer_users can sign
+        # in; infer_admins additionally get infer_role = ["admin"].
+        infer = {
+          displayName = "infer";
+          imageFile = ./kanidm-logos/infer.svg;
+          originUrl = "https://infer.shimme.rs/auth/callback";
+          originLanding = "https://infer.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-infer-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.infer_users = [
+            "openid"
+            "profile"
+            "email"
+          ];
+
+          claimMaps.infer_role = {
+            joinType = "array";
+            valuesByGroup.infer_admins = [ "admin" ];
+          };
         };
 
         # Forgejo on git.lily.pizza, auth source named "shimmers". Forgejo

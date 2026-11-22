@@ -45,14 +45,13 @@
     ../../modules/nixos/services/catshift.nix
     ../../modules/nixos/services/exo.nix
     ../../modules/nixos/services/proxyagain.nix
-    ../../modules/nixos/services/llm.nix
-    ../../modules/nixos/services/runpod-review
+    ../../modules/nixos/services/infer.nix
   ];
 
   system.stateVersion = "26.05";
 
-  # Headroom for the LLM (see llm.nix): idle pages of the other services can
-  # move out instead of the OOM killer stepping in.
+  # Headroom for memory-heavy services: idle pages can move out instead of
+  # the OOM killer stepping in.
   swapDevices = [
     {
       device = "/var/lib/swapfile";
@@ -114,6 +113,15 @@
     mode = "0400";
   };
 
+  # Same arrangement for the private infer flake input, with the same one-time
+  # bootstrap the first time it is introduced.
+  age.secrets.infer-deploy-key = {
+    file = ./secrets/infer-deploy-key.age;
+    owner = "aleph";
+    group = "users";
+    mode = "0400";
+  };
+
   programs.ssh.extraConfig = ''
     Host git-gay-proxyagain
       HostName git.gay
@@ -126,6 +134,13 @@
       HostName git.gay
       User git
       IdentityFile ${config.age.secrets.unuo-deploy-key.path}
+      IdentitiesOnly yes
+      StrictHostKeyChecking accept-new
+
+    Host git-gay-infer
+      HostName git.gay
+      User git
+      IdentityFile ${config.age.secrets.infer-deploy-key.path}
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
   '';

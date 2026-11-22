@@ -13,6 +13,7 @@ Icons uploaded as `imageFile` for the OAuth2 resource servers listed on
 | `grafana.svg` | Grafana | [selfh.st/icons](https://github.com/selfhst/icons) |
 | `aurral.svg` | Aurral | [selfh.st/icons](https://github.com/selfhst/icons) |
 | `catshift.svg` | catshift | Cat glyph from [Lucide](https://lucide.dev) (ISC), tile drawn locally |
+| `infer.svg` | infer | Chip glyph and tile drawn locally |
 
 The icons from selfh.st/icons are licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The cat glyph

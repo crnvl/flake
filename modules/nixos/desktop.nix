@@ -58,6 +58,11 @@
         Host git-gay-proxyagain
           HostName git.gay
           User git
+
+        # Same for the private infer input (scoped deploy key on shimmers).
+        Host git-gay-infer
+          HostName git.gay
+          User git
       '';
     };
 
