@@ -24,6 +24,7 @@ class LeaseTest(unittest.TestCase):
         self.api.create.return_value = {'id': 'abcd1234', 'cloud': 'SECURE', 'cost': 0.27,
                                         'gpu': {'id': rp.GPU, 'count': 1}}
         self.control = rp.Controller(self.api, Path(tmp.name), lambda: self.now)
+        self.control.resume()
 
     def test_concurrent_cold_requests_and_idle(self):
         with concurrent.futures.ThreadPoolExecutor(4) as pool:
@@ -70,7 +71,7 @@ class LeaseTest(unittest.TestCase):
         self.assertEqual(self.control.read()['history'], [[self.now-rp.LIFETIME, self.now]])
 
     def test_monthly_budget_and_unexpected_price(self):
-        self.control.save({'lease': None, 'history': [[self.now-rp.MONTHLY, self.now]]})
+        self.control.save({'lease': None, 'history': [[self.now-rp.MONTHLY, self.now]], 'paused': False})
         with self.assertRaises(rp.Unavailable):
             self.control.ensure()
         self.api.create.assert_not_called()
@@ -79,6 +80,38 @@ class LeaseTest(unittest.TestCase):
         with self.assertRaises(rp.Unavailable):
             self.control.ensure()
         self.api.delete.assert_called_once_with('abcd1234')
+
+    def test_pause_requires_explicit_resume_and_survives_delete_failure(self):
+        self.control.ensure()
+        self.api.delete.side_effect = httpx.ConnectError('offline')
+        with self.assertRaises(httpx.ConnectError):
+            self.control.pause()
+        self.assertTrue(self.control.status()['paused'])
+        with self.assertRaises(rp.Unavailable):
+            self.control.ensure()
+        self.api.delete.side_effect = None
+        self.control.reap()
+        with self.assertRaises(rp.Unavailable):
+            self.control.ensure()
+        self.control.resume()
+        self.control.ensure()
+        self.assertEqual(self.api.create.call_count, 2)
+
+    def test_initial_state_is_paused_and_status_never_allocates(self):
+        (self.control.dir/'state.json').unlink()
+        self.assertTrue(self.control.status()['paused'])
+        with self.assertRaises(rp.Unavailable):
+            self.control.ensure()
+        self.api.create.assert_not_called()
+
+    def test_catalog_checks_secure_capacity_with_cuda_floor(self):
+        def transport(request):
+            self.assertEqual(dict(request.url.params), {'product': 'POD', 'include': 'AVAILABILITY', 'cloud': 'SECURE', 'minCudaVersion': '12.8'})
+            return httpx.Response(200, json={'gpus': [{'id': rp.GPU, 'secure': True, 'price': {'secure': .27}, 'availability': 'LOW'}]})
+        api = rp.Api('dummy-key')
+        with httpx.Client(base_url='https://api.runpod.io/v2/', transport=httpx.MockTransport(transport)) as client:
+            api.http = client
+            api.check_price()
 
 
 class GatewayTest(unittest.IsolatedAsyncioTestCase):
@@ -94,6 +127,7 @@ class GatewayTest(unittest.IsolatedAsyncioTestCase):
             api = Mock()
             api.create.return_value = {'id': 'abc1', 'cost': .27, 'cloud': 'SECURE', 'gpu': {'id': rp.GPU, 'count': 1}}
             c = rp.Controller(api, Path(temp))
+            c.resume()
             async with httpx.AsyncClient(transport=httpx.MockTransport(upstream)) as http:
                 g = gateway.Gateway(c, http)
                 app = web.Application()
@@ -121,11 +155,18 @@ class GatewayTest(unittest.IsolatedAsyncioTestCase):
         c = Mock()
         c.read.return_value = {'lease': {'deadline': time.time()+30,'download':'one-lease-only'}}
         app = web.Application()
-        app.router.add_get('/stock.gguf', gateway.Gateway(c, None).weights)
+        app.router.add_get('/model.gguf', gateway.Gateway(c, None).weights)
         async with TestClient(TestServer(app)) as client:
-            self.assertEqual((await client.get('/stock.gguf')).status, 404)
+            self.assertEqual((await client.get('/model.gguf')).status, 404)
             hdr = {'Authorization': 'Bearer one-lease-only'}
-            resp = await client.get('/stock.gguf', headers=hdr)
-            self.assertEqual(resp.headers['X-Accel-Redirect'], '/_private/stock.gguf')
+            resp = await client.get('/model.gguf', headers=hdr)
+            self.assertEqual(resp.headers['X-Accel-Redirect'], '/_private/model.gguf')
             c.read.return_value['lease']['download'] = ''
-            self.assertEqual((await client.get('/stock.gguf', headers=hdr)).status, 404)
+            self.assertEqual((await client.get('/model.gguf', headers=hdr)).status, 404)
+
+    def test_thinking_is_optional_and_bounded(self):
+        request = {'model': rp.MODEL, 'messages': [{'role': 'user', 'content': 'Review this code.'}]}
+        self.assertFalse(gateway.chat_body(request)['chat_template_kwargs']['enable_thinking'])
+        thinking = gateway.chat_body({**request, 'chat_template_kwargs': {'enable_thinking': True, 'other': 'ignored'}, 'reasoning_budget': 99999})
+        self.assertEqual(thinking['reasoning_budget'], 512)
+        self.assertEqual(thinking['chat_template_kwargs'], {'enable_thinking': True})

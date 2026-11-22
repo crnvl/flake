@@ -21,7 +21,7 @@ LOCAL_HEADER = 'X-Shimmers-GPU-Review'
 
 def chat_body(body):
     if not isinstance(body, dict) or body.get('model') != rp.MODEL:
-        raise ValueError('Select the stock GPU reviewer')
+        raise ValueError('Select the Qwen3.8 Aggressive GPU reviewer')
     # OpenCode sometimes advertises its built-ins even for a tool-less model.
     # Drop optional declarations via the explicit payload allowlist below;
     # refuse forced calls and transcripts with actual calls/results.
@@ -42,10 +42,20 @@ def chat_body(body):
         if not isinstance(text, str):
             raise ValueError('Only text messages are accepted')
         clean.append({'role': msg['role'], 'content': text})
+        if msg.get('role') == 'assistant' and 'reasoning_content' in msg:
+            if not isinstance(msg['reasoning_content'], str):
+                raise ValueError('Invalid reasoning history')
+            clean[-1]['reasoning_content'] = msg['reasoning_content']
     limit = body.get('max_tokens', body.get('max_completion_tokens', 2048))
     if type(limit) is not int or limit <= 0 or type(body.get('stream', False)) is not bool:
         raise ValueError('Invalid completion options')
     result = {'model': rp.MODEL, 'messages': clean, 'max_tokens': min(limit, 2048), 'stream': body.get('stream', False)}
+    thinking = body.get('chat_template_kwargs', {}).get('enable_thinking', False)
+    if type(thinking) is not bool:
+        raise ValueError('Invalid thinking setting')
+    result['chat_template_kwargs'] = {'enable_thinking': thinking}
+    if thinking:
+        result['reasoning_budget'] = 512
     if result['stream'] and body.get('stream_options', {}).get('include_usage') is True:
         result['stream_options'] = {'include_usage': True}
     return result
@@ -67,7 +77,7 @@ class Gateway:
             request.headers.get('Authorization', '').encode(), f'Bearer {key}'.encode()
         ):
             raise web.HTTPNotFound()
-        return web.Response(headers={'X-Accel-Redirect': '/_private/stock.gguf'})
+        return web.Response(headers={'X-Accel-Redirect': '/_private/model.gguf'})
 
     async def ready(self, lease, url, headers):
         deadline = min(lease['deadline'], lease['start'] + rp.BOOT)
@@ -96,7 +106,7 @@ class Gateway:
         except (ValueError, AttributeError, TypeError) as exc:
             raise web.HTTPBadRequest(text='Invalid text review request') from exc
         if not rp.WEIGHT.is_file() or rp.WEIGHT.stat().st_size != rp.SIZE:
-            raise web.HTTPConflict(text='Prepare the stock weights on shimmers first')
+            raise web.HTTPConflict(text='Run gpu-review-prepare to cache the weights on shimmers first')
 
         try:
             # Take this BEFORE queueing: the reaper can distinguish active/pending work
@@ -139,7 +149,7 @@ async def serve(control):
         chat = web.Application(client_max_size=1024 * 1024)
         chat.add_routes([web.get('/v1/models', gateway.models), web.post('/v1/chat/completions', gateway.chat)])
         weights = web.Application()
-        weights.add_routes([web.get('/stock.gguf', gateway.weights)])
+        weights.add_routes([web.get('/model.gguf', gateway.weights)])
         c, w = [web.AppRunner(app, access_log=None, handler_cancellation=True) for app in (chat, weights)]
         await c.setup()
         await w.setup()
@@ -151,14 +161,23 @@ async def serve(control):
 
 
 if __name__ == '__main__':
+    if sys.argv[1:] == ['status']:
+        import json
+        print(json.dumps(rp.Controller(None).status(), indent=2))
+        sys.exit(0)
     key = (Path(os.environ['CREDENTIALS_DIRECTORY']) / 'runpod-key').read_text().strip()
     if not key:
         sys.exit('Missing Runpod key')
     controller = rp.Controller(rp.Api(key))
-    if sys.argv[1:] in (['reap'], ['release']):
+    if sys.argv[1:] in (['reap'], ['release'], ['pause'], ['resume']):
         try:
-            lease = controller.read()['lease']
-            controller.reap(failed_name=lease['name'] if lease and sys.argv[1] == 'release' else None)
+            if sys.argv[1] == 'pause':
+                controller.pause()
+            elif sys.argv[1] == 'resume':
+                controller.resume()
+            else:
+                lease = controller.read()['lease']
+                controller.reap(failed_name=lease['name'] if lease and sys.argv[1] == 'release' else None)
         except (httpx.HTTPError, rp.Unavailable) as exc:
             logging.error('GPU cleanup unconfirmed (%s); timer will retry. Check Runpod console.', type(exc).__name__)
             sys.exit(1)

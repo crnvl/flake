@@ -14,10 +14,10 @@ import httpx
 
 
 GPU = 'NVIDIA RTX A5000'
-MODEL = 'qwen3.8-27b-review'
-IDLE = 600
+MODEL = 'qwen3.8-27b-aggressive'
+IDLE = 120
 BOOT = 1800
-LIFETIME = 7200
+LIFETIME = 1800
 MONTHLY = 6 * 3600   # trial allowance; includes initialization and idle time
 MAX_PRICE = 0.30     # USD/hour, compute only
 IMAGE = 'ghcr.io/ggml-org/llama.cpp@sha256:ac11e113c61a57b0b0b86414aa8e1b61b9512dcedf8083c5fdedb35b379342cf'
@@ -39,27 +39,29 @@ class Api:
                                  headers={'Authorization': 'Bearer ' + key}, trust_env=False)
 
     def check_price(self):
-        data = self.http.get('catalog/gpus', params={'product': 'POD'}).raise_for_status().json()
-        if not any(g['id'] == GPU and g.get('secure') and 0 < g['price']['secure'] <= MAX_PRICE
+        data = self.http.get('catalog/gpus', params={'product': 'POD', 'include': 'AVAILABILITY',
+                                                   'cloud': 'SECURE', 'minCudaVersion': '12.8'}).raise_for_status().json()
+        if not any(g['id'] == GPU and g.get('secure') and g.get('availability') in ('LOW', 'MEDIUM', 'HIGH')
+                   and 0 < g['price']['secure'] <= MAX_PRICE
                    for g in data['gpus']):
             raise Unavailable('A5000 unavailable within trial price ceiling')
 
     def create(self, lease):
-        # The public HTTPS origin serves exactly one file, with a per-lease bearer.
+        # The public HTTPS origin serves exactly one pinned file, with a per-lease bearer.
         # No Hetzner account, storage credentials or Runpod keys enter the Pod.
         script = f'''set -eu
 umask 077
 curl --fail --silent --show-error --proto '=https' --max-time {BOOT - 180} \\
-  -H "Authorization: Bearer $WEIGHTS_TOKEN" -o /tmp/review.gguf https://{ORIGIN}/stock.gguf
+  -H "Authorization: Bearer $WEIGHTS_TOKEN" -o /tmp/review.gguf https://{ORIGIN}/model.gguf
 echo '{SHA}  /tmp/review.gguf' | sha256sum -c -
 unset WEIGHTS_TOKEN
 exec /app/llama-server --model /tmp/review.gguf --alias {MODEL} --host 0.0.0.0 --port 8080 \\
   --parallel 1 --ctx-size 32768 --n-gpu-layers 99 --flash-attn on --cache-type-k q8_0 --cache-type-v q8_0 \\
-  --reasoning off --no-ui --no-slots --log-disable'''
+  --reasoning off --reasoning-format deepseek --no-ui --no-slots --log-disable'''
         return self.http.post('pods', json={
             'name': lease['name'], 'cloud': 'SECURE', 'gpu': {'id': GPU, 'count': 1, 'minCudaVersion': '12.8'},
             'image': IMAGE, 'disk': 40, 'mounts': {}, 'ports': ['8080/http'],
-            'entrypoint': ['/bin/sh', '-c'], 'cmd': [script],
+            'entrypoint': ['/usr/bin/timeout', '--signal=TERM', str(LIFETIME - 30), '/bin/sh', '-c'], 'cmd': [script],
             'env': {'WEIGHTS_TOKEN': lease['download'], 'LLAMA_API_KEY': lease['bearer']},
         }).raise_for_status().json()
 
@@ -96,7 +98,7 @@ class Controller:
         try:
             return json.loads((self.dir / 'state.json').read_text())
         except FileNotFoundError:
-            return {'lease': None, 'history': []}
+            return {'lease': None, 'history': [], 'paused': True}
 
     def save(self, state):
         tmp = self.dir / 'state.tmp'
@@ -115,6 +117,8 @@ class Controller:
         with self.lock('gate'):
             state = self.read()
             now = self.now()
+            if state.get('paused', True):
+                raise Unavailable('GPU review is paused; run gpu-review on your desktop to enable it')
             lease = state['lease']
             if lease:
                 if not lease.get('id') or lease.get('closing') or now >= lease['deadline']:
@@ -139,6 +143,7 @@ class Controller:
                     self.save(state)
                 raise Unavailable(f'Runpod rejected or could not confirm allocation ({exc.response.status_code})') from None
             lease['id'] = pod['id']
+            lease['rate'] = pod.get('cost')
             self.save(state)
             if not (re.fullmatch('[a-zA-Z0-9]+', lease['id']) and pod.get('cloud') == 'SECURE'
                     and pod.get('gpu', {}).get('id') == GPU and pod['gpu'].get('count') == 1
@@ -146,6 +151,34 @@ class Controller:
                 self._close(state)
                 raise Unavailable('Allocated Pod did not match the requested GPU or price')
             return lease
+
+    def resume(self):
+        with self.lock('gate'):
+            state = self.read()
+            if state['lease'] and (state['lease'].get('closing') or self.now() >= state['lease']['deadline']):
+                raise Unavailable('Previous Pod needs cleanup before resuming')
+            state['paused'] = False
+            self.save(state)
+
+    def pause(self):
+        with self.lock('gate'):
+            state = self.read()
+            state['paused'] = True
+            self.save(state)  # stop new allocations even if the DELETE fails
+            if state['lease']:
+                self._close(state)
+
+    def status(self):
+        with self.lock('gate'):
+            state = self.read()
+            lease = state['lease']
+            return {'paused': state.get('paused', True), 'gpu': GPU,
+                    'pod': lease.get('id') if lease else None,
+                    'remaining_seconds': max(0, round(lease['deadline'] - self.now())) if lease else 0,
+                    'ready': bool(lease and lease.get('ready')), 'closing': bool(lease and lease.get('closing')),
+                    'idle_timeout_seconds': IDLE, 'maximum_lease_seconds': LIFETIME,
+                    'hourly_price_ceiling_usd': MAX_PRICE,
+                    'estimated_compute_usd': round(max(0, self.now()-lease['start']) * (lease.get('rate') or MAX_PRICE) / 3600, 4) if lease else 0}
 
     def touch(self, lease, *, ready=False):
         with self.lock('gate'):

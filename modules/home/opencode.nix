@@ -112,7 +112,7 @@ in
   # Explicitly opt in to billed, remote text inference only in this workspace.
   home.file."gpu-review/opencode.json".text = builtins.toJSON (
     let
-      model = "runpod-review/qwen3.8-27b-review";
+      model = "runpod-review/qwen3.8-27b-aggressive";
     in
     {
       "$schema" = "https://opencode.ai/config.json";
@@ -123,16 +123,25 @@ in
         package = "@opencode/ai/providers/openai-compatible";
         settings = {
           baseURL = "http://127.0.0.1:18091/v1";
-          headerTimeout = 2100000; # first request may need to copy 16.6 GB
+          headerTimeout = 1860000; # includes copying 17.9 GB to a fresh Pod
         };
         headers."X-Shimmers-GPU-Review" = "1";
-        models."qwen3.8-27b-review" = {
-          name = "Stock Qwen3.8 27B · Runpod A5000";
+        models."qwen3.8-27b-aggressive" = {
+          name = "Qwen3.8 27B Aggressive · Runpod A5000 (paid)";
           capabilities = {
             tools = false;
             input = [ "text" ];
             output = [ "text" ];
+            reasoning.supported = true;
           };
+          compatibility.reasoningField = "reasoning_content";
+          body.chat_template_kwargs.enable_thinking = false;
+          variants = [
+            {
+              id = "thinking";
+              body.chat_template_kwargs.enable_thinking = true;
+            }
+          ];
           limit = {
             context = 32768;
             output = 2048;
@@ -169,6 +178,31 @@ in
       };
     }
   );
+
+  home.packages = [
+    (pkgs.writeShellScriptBin "gpu-review-prepare" ''
+      exec ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
+        'sudo systemctl start runpod-review-weights && sudo systemctl start runpod-review'
+    '')
+    (pkgs.writeShellScriptBin "gpu-review" ''
+      set -eu
+      ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
+        'sudo systemctl start runpod-review && sudo systemctl start runpod-review-resume'
+      ${pkgs.systemd}/bin/systemctl --user restart runpod-review-tunnel
+      printf '%s\n' 'GPU review: your first prompt starts a paid A5000. Run gpu-review-stop when done.' >&2
+      exec ${config.programs.opencode.package}/bin/opencode ${lib.escapeShellArg "${config.home.homeDirectory}/gpu-review"} "$@"
+    '')
+    (pkgs.writeShellScriptBin "gpu-review-stop" ''
+      set -eu
+      ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
+        'sudo systemctl start runpod-review-pause && sudo runpod-review-status'
+      ${pkgs.systemd}/bin/systemctl --user stop runpod-review-tunnel
+    '')
+    (pkgs.writeShellScriptBin "gpu-review-status" ''
+      exec ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
+        'sudo runpod-review-status'
+    '')
+  ];
 
   # Keep this separate from the existing CPU tunnel: a port conflict here must
   # not take down local-model access. The tunnel itself cannot start a Pod.

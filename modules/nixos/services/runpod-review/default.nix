@@ -60,7 +60,7 @@ in
 
   # Explicit one-off preparation; no weight download or paid allocation during a rebuild.
   systemd.services.runpod-review-weights = {
-    description = "Prepare pinned stock Qwen3.8 reviewer weights on Hetzner";
+    description = "Cache pinned Qwen3.8 Aggressive weights on Hetzner";
     path = [
       pkgs.coreutils
       pkgs.curl
@@ -80,7 +80,7 @@ in
       cd ${dir}
       if test -f ${file} && echo '${sha}  ${file}' | sha256sum --status -c; then exit 0; fi
       curl -fLsS --retry 3 -C - -o ${file}.part \
-        'https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/resolve/${rev}/${file}'
+        'https://huggingface.co/${weights.repo}/resolve/${rev}/${file}'
       if ! echo '${sha}  ${file}.part' | sha256sum -c; then rm -f ${file}.part; exit 1; fi
       chmod 0444 ${file}.part
       mv -f ${file}.part ${file}
@@ -88,7 +88,7 @@ in
   };
 
   systemd.services.${name} = {
-    description = "On-demand stock GPU reviewer (no allocation at boot)";
+    description = "On-demand Qwen3.8 Aggressive reviewer (no allocation at boot)";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     unitConfig.ConditionPathExists = keyFile;
@@ -124,16 +124,35 @@ in
       ExecStart = "${worker} release";
     };
   };
+  systemd.services.runpod-review-pause = {
+    description = "Pause GPU allocations and immediately release the current Pod";
+    unitConfig.ConditionPathExists = keyFile;
+    serviceConfig = unit // {
+      Type = "oneshot";
+      ExecStart = "${worker} pause";
+    };
+  };
+  systemd.services.runpod-review-resume = {
+    description = "Permit GPU review requests (does not allocate a Pod)";
+    unitConfig.ConditionPathExists = keyFile;
+    serviceConfig = unit // {
+      Type = "oneshot";
+      ExecStart = "${worker} resume";
+    };
+  };
+  environment.systemPackages = [
+    (pkgs.writeShellScriptBin "runpod-review-status" "exec ${worker} status")
+  ];
 
-  # Only the stock weights are downloadable; the credential is lease-specific and
+  # Only the pinned weights are downloadable; the credential is lease-specific and
   # is never embedded in the URL. No public chat, filesystem listing or control API.
   services.nginx.virtualHosts.${domain} = {
     enableACME = true;
     forceSSL = true;
     extraConfig = "access_log off;";
     locations."/".return = "404";
-    locations."= /stock.gguf".proxyPass = "http://127.0.0.1:18092";
-    locations."= /_private/stock.gguf" = {
+    locations."= /model.gguf".proxyPass = "http://127.0.0.1:18092";
+    locations."= /_private/model.gguf" = {
       alias = "${dir}/${file}";
       extraConfig = ''
         internal;

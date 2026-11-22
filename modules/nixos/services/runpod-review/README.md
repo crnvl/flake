@@ -1,76 +1,84 @@
-# shimmers GPU review trial
+# Interactive Qwen3.8 Aggressive trial through OpenCode
 
-`~/gpu-review` on chambers/corridors uses a stock Qwen3.8-27B text reviewer.
-The first chat request leases **one Secure Cloud RTX A5000**. Discovery and
-opening the SSH tunnel are free. Review inputs (including pasted code and
-conversation history) go through Runpod's HTTPS proxy to the Pod. There is
-no shell, MCP, tool execution or automatic fallback in the review workspace.
+The flake installs an opt-in `~/gpu-review` workspace and commands on both
+chambers and corridors. It runs the pinned HauhauCS Qwen3.8-27B Aggressive
+Q4_K_P model on **one Secure Cloud A5000**, without changing the existing
+CPU model or `~/redteam` configuration. It is a text-only chat/reviewer, not
+an autonomous tool-using agent. Pasted text and chat history go to the Pod
+through Runpod's HTTPS proxy. The API key remains on shimmers.
 
-## Prepare (no paid requests)
+## One-time preparation — no GPU spend
 
-1. Rebuild shimmers and the desktop. Point `review-weights.shimme.rs` at
-   shimmers (the existing wildcard normally suffices) and allow ACME to issue
-   its certificate. The chat endpoint itself is only an SSH-forwarded socket.
-2. On shimmers, run `sudo systemctl start runpod-review-weights`. This is a
-   one-time 16.6 GB verified download to `/var/lib/runpod-review-weights`, not
-   a Pod allocation. Wait for success before using the reviewer.
-3. Create a Runpod API key with `catalog:read`, `pods:read`, `pods:write`.
-   Leave automatic balance reload off for the $10 trial. On **shimmers**, store
-   the raw key in a root-owned mode-0600 file (enter it only in the hidden prompt):
+1. Rebuild shimmers and the desktop. The `review-weights.shimme.rs` hostname
+   must resolve to shimmers and have its ACME certificate. Only the weight
+   download is public; the chat endpoint is an SSH-forwarded Unix socket.
+2. Put the Runpod key (with `catalog:read`, `pods:read`, `pods:write`) into
+   `/etc/runpod-review/api-key` on shimmers, root-owned and mode 0600. Keep
+   Runpod auto-pay off. For a new key, enter it only into the hidden prompt:
 
    ```sh
    sudo install -d -m 0700 /etc/runpod-review
    sudo sh -c 'umask 077; systemd-ask-password "Runpod API key:" > /etc/runpod-review/api-key'
-   sudo systemctl start runpod-review
-   systemctl is-active runpod-review runpod-review-reap.timer
    ```
 
-   Alternatively, provision `hosts/shimmers/secrets/runpod-review-key.age` (raw
-   key, recipient policy in `secrets.nix`) and rebuild. Only the control service
-   and cleanup jobs on shimmers receive this credential. Do not remove it while
-   a managed Pod exists; the reaper needs it to terminate the Pod.
-4. On the desktop, `systemctl --user restart runpod-review-tunnel` (use a
-   previously verified SSH host key for `shimme.rs`). Check
-   `curl -fsS http://127.0.0.1:18091/v1/models`. This must work before testing
-   chat and does **not** contact Runpod. Verify that
-   `curl -sS -o /dev/null -w '%{http_code}\n' https://review-weights.shimme.rs/stock.gguf`
-   returns 404 without a token.
+   Alternatively use `hosts/shimmers/secrets/runpod-review-key.age`, registered
+   in `secrets.nix`, and rebuild. Never remove the key while a Pod exists.
+3. On the desktop, run **`gpu-review-prepare`**. It downloads and verifies
+   17.9 GB to `/var/lib/runpod-review-weights` on shimmers and starts the
+   gateway. This does not create a Pod or spend Runpod credits. It can take
+   several minutes. SSH must already trust the `shimme.rs` host key.
 
-## First paid test
-
-Run `opencode ~/gpu-review` and send a short review prompt. While the request
-is pending look for `shimmers-review-…` in the Runpod console. Each fresh Pod
-pulls only the pinned stock GGUF over HTTPS with a single-lease bearer,
-verifies the hash, then serves an authenticated 32k single-slot GPU model.
-Only temporary container storage is requested. Cold start includes the
-transfer and load; no persistent Runpod volume is needed. If capacity or the
-price check fails there is no upgrade to a more expensive card. Runpod's HTTP
-proxy can time out if the engine takes over 100s to send its first bytes;
-start the trial with a short prompt.
-
-The timer runs every 30s. It **terminates** the Pod 10 minutes after the last
-request completes (including streaming), or after 30 minutes of unsuccessful
-startup. Hard limits take precedence over active requests: two hours per
-lease and six hours total per UTC month. At the $0.30/hour compute ceiling
-six hours is about $1.80, plus disk, tax and timer/API delays. These are local
-controls, not a provider-enforced spending limit: if shimmers is offline,
-its credentials fail or Runpod is unreachable, billing can continue. Check
-the console after the first test to confirm the Pod disappears.
-
-For immediate release, stop the gateway to prevent new requests and run:
+## Use it yourself
 
 ```sh
-sudo systemctl stop runpod-review
-sudo systemctl start runpod-review-release
+gpu-review          # enables allocation, opens OpenCode in ~/gpu-review
+gpu-review-status   # reports paused/ready/Pod/deadline and estimated compute cost
+gpu-review-stop     # pauses future allocations and terminates the managed Pod
 ```
 
-Restart `runpod-review` when needed. A delete failure leaves the lease marked
-for retry. If a creation response was lost, the reaper searches by its unique
-persisted name; there are no blind create retries. If Runpod never created it,
-the controller stays blocked. Stop the gateway, confirm the named Pod is absent
-in the console, and clear **only** `lease` to `null` in
-`/var/lib/runpod-review/state.json` under the `gate` file lock (preserve
-`history`). That file contains temporary access tokens; do not share it.
+**Only sending a prompt spends GPU credit.** The first prompt allocates the
+Pod, transfers the weights from shimmers, and loads the model. It may be slow.
+Subsequent messages reuse the running model. Opening OpenCode, the status
+command, model discovery and the SSH tunnel do not allocate compute. No
+benchmark script runs; you choose the prompts.
 
-Offline lifecycle tests: run `python -m unittest -v test_review` from this
-directory with `aiohttp` and `httpx` installed. No credentials or GPU required.
+The model is `runpod-review/qwen3.8-27b-aggressive`. Thinking is disabled by
+default for fast answers. In `/models`, choose its `thinking` variant to
+compare reasoning (capped at 512 reasoning tokens within a 2048-token total
+completion). Input context is 32k. These are experimental settings, not a
+claim of proven cybersecurity performance or zero refusals.
+
+Run `gpu-review-stop` when finished. Existing sessions cannot wake the Pod
+again until you explicitly run `gpu-review`. It stays paused across reboots.
+You may still use `opencode ~/gpu-review` when it is unpaused.
+
+## Cost guards
+
+- No A40 or expensive-card fallback: A5000 availability is checked before
+  allocation, including Secure Cloud and CUDA compatibility. Price ceiling:
+  **$0.30 per compute-hour**, actual rate checked again after allocation.
+- **Two-minute idle cleanup**, starting after the last response finishes.
+- **30-minute maximum lease**, including transfer and model load; it can
+  interrupt a long response. Container runtime is bounded too.
+- **Six GPU-hours per UTC month**, measured from allocation to deletion.
+- Only temporary 40 GB container disk; no persistent Runpod storage.
+
+At the ceiling, a 30-minute lease is approximately $0.15 compute, plus disk,
+tax and cleanup delay. The reaper runs independently every 30 seconds. These
+are local controls, **not a provider-enforced spending cap**: if shimmers is
+offline, credentials fail or Runpod is unreachable, billing can continue.
+Verify in the Runpod console after your first use that termination works.
+
+If a create response is lost, the lease's unique name is saved first. No
+second Pod is created until the old allocation is reconciled. Delete failures
+remain marked for the reaper to retry. For an uncertain allocation, check
+the console before clearing the lease; retain the budget history. State in
+`/var/lib/runpod-review/state.json` contains temporary tokens — never share it.
+
+Server equivalents: `sudo systemctl start runpod-review-pause`,
+`sudo systemctl start runpod-review-resume`, and `sudo runpod-review-status`.
+Resume does not allocate a Pod. Never delete the state directory to reset
+the budget or abandon an allocation.
+
+Offline tests: `python -m unittest -v test_review` from this directory with
+`aiohttp` and `httpx`. Tests use a mock API; no key or paid GPU is needed.

@@ -1,6 +1,7 @@
 {
-  "file": "Qwen3.8-27B-UD-Q4_K_M.gguf",
-  "revision": "4af51b3542f775b0a8e4b310bfb3f17e01c306c9",
-  "sha256": "1bce504dfecd84153666928a41d8a66706f0158d3a317bc5196b72819d7dc529",
-  "bytes": 16564259744
+  "repo": "HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF",
+  "file": "Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-Q4_K_P.gguf",
+  "revision": "993a5971fda8f30dd1b7eb2654792ba4415c7460",
+  "sha256": "ba36dc3c2b2ff5e0aa5d71092a8894546996a6a119ae391803dda07cdc08516d",
+  "bytes": 17923393664
 }
