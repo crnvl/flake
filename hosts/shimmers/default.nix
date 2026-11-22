@@ -45,6 +45,7 @@
     ../../modules/nixos/services/catshift.nix
     ../../modules/nixos/services/exo.nix
     ../../modules/nixos/services/proxyagain.nix
+    ../../modules/nixos/services/katzentempel.nix
     ../../modules/nixos/services/infer.nix
   ];
 
