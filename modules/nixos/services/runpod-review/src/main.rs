@@ -53,7 +53,7 @@ impl Error {
     }
     fn paused() -> Self {
         Self {
-            message: "GPU is paused; run gpu-review to enable your requests",
+            message: "GPU is explicitly paused; run gpu-review-resume, then send your prompt in OpenCode",
             status: StatusCode::FORBIDDEN,
         }
     }
@@ -281,7 +281,10 @@ async fn chat(
         || headers.get(header::HOST).and_then(|h| h.to_str().ok()) != Some("127.0.0.1:18091")
         || headers.get(HEADER).and_then(|h| h.to_str().ok()) != Some("1")
     {
-        return Err(Error::paused()); // never allow a website to cause paid allocations through localhost
+        return Err(Error {
+            message: "GPU requests require the trusted local OpenCode endpoint",
+            status: StatusCode::FORBIDDEN,
+        }); // never allow a website to cause paid allocations through localhost
     }
     let body = chat_body(body, &app.controller.model.id)?;
     if fs::metadata(&app.weight).map_or(true, |m| {
@@ -398,6 +401,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await?;
         }
         "serve" => {
+            controller.initialize_on_demand().await?;
             let app = App::new(controller)?;
             match fs::remove_file(SOCKET) {
                 Ok(()) => (),

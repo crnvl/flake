@@ -85,6 +85,8 @@ in
     serviceConfig = unit // {
       RuntimeDirectory = name;
       RuntimeDirectoryMode = "0750";
+      # First start enables launcher-free requests once; later starts preserve pause.
+      # Starting this daemon never creates a paid Pod.
       ExecStart = "${worker} serve";
       Restart = "on-failure";
       RestartSec = 5;

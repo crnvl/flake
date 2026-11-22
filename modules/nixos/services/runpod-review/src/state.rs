@@ -67,6 +67,8 @@ pub struct State {
     pub history: Vec<[f64; 2]>,
     #[serde(default = "yes")]
     pub paused: bool,
+    #[serde(default)]
+    pub on_demand_initialized: bool,
 }
 fn yes() -> bool {
     true
@@ -77,6 +79,7 @@ impl Default for State {
             lease: None,
             history: vec![],
             paused: true,
+            on_demand_initialized: false,
         }
     }
 }
@@ -160,27 +163,46 @@ impl Controller {
         self.api.as_ref().ok_or_else(Error::internal)
     }
 
+    // One-time opt-in when deploying launcher-free OpenCode integration. Keep
+    // existing leases/tokens/budget intact; never unpause again on a restart.
+    pub async fn initialize_on_demand(&self) -> Result<(), Error> {
+        let _gate = self.gate().await?;
+        let mut state = self.read()?;
+        if !state.on_demand_initialized {
+            state.paused = false;
+            state.on_demand_initialized = true;
+            self.save(&state)?;
+        }
+        Ok(())
+    }
+
     pub async fn ensure(&self) -> Result<Lease, Error> {
         let _gate = self.gate().await?;
         let mut state = self.read()?;
         if state.paused {
             return Err(Error::paused());
         }
-        let now = (self.clock)();
         if let Some(lease) = &state.lease {
-            if lease.id.is_none() || lease.closing || now >= lease.deadline {
+            if lease.id.is_none() {
                 return Err(Error::unavailable(
-                    "Previous Pod needs cleanup; no new Pod requested",
+                    "Previous allocation is unconfirmed; cleanup must reconcile it before another Pod can start",
                 ));
             }
-            if lease.model.as_deref() != Some(self.model.id.as_str()) {
+            if lease.closing || (self.clock)() >= lease.deadline {
+                // Close under the allocation gate. Only confirmed deletion can
+                // clear this lease; failures/cancellation block any replacement.
                 self.close(&mut state).await?;
-                return Err(Error::unavailable(
-                    "Previous-model Pod released; send a new request to use Qwen3.6",
-                ));
+            } else {
+                if lease.model.as_deref() != Some(self.model.id.as_str()) {
+                    self.close(&mut state).await?;
+                    return Err(Error::unavailable(
+                        "Previous-model Pod released; send a new request to use Qwen3.6",
+                    ));
+                }
+                return Ok(lease.clone());
             }
-            return Ok(lease.clone());
         }
+        let now = (self.clock)(); // include cleanup time in history before budgeting a new lease
         let date = Utc
             .timestamp_opt(now as i64, 0)
             .single()
@@ -319,6 +341,7 @@ impl Controller {
         let _gate = self.gate().await?;
         let mut state = self.read()?;
         state.paused = true;
+        state.on_demand_initialized = true; // an explicit pause always beats first-time setup
         self.save(&state)?;
         self.close(&mut state).await
     }
@@ -335,13 +358,14 @@ impl Controller {
             ));
         }
         state.paused = false;
+        state.on_demand_initialized = true;
         self.save(&state)
     }
     pub fn status(&self) -> Result<Value, Error> {
         let state = self.read()?;
         let l = state.lease.as_ref();
         Ok(
-            json!({"paused":state.paused, "gpu":l.map_or(api::GPU, |l| l.gpu.as_str()), "gpu_preference":api::GPU_PREFERENCE, "model":self.model.id,
+            json!({"paused":state.paused, "on_demand_initialized":state.on_demand_initialized, "gpu":l.map_or(api::GPU, |l| l.gpu.as_str()), "gpu_preference":api::GPU_PREFERENCE, "model":self.model.id,
                 "pod":l.and_then(|l| l.id.as_ref()), "ready":l.is_some_and(|l| l.ready),
                 "closing":l.is_some_and(|l| l.closing), "idle_timeout_seconds":IDLE,
                 "maximum_lease_seconds":LIFETIME, "hourly_price_ceiling_usd":api::MAX_RATE,

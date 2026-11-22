@@ -70,6 +70,8 @@ in
           baseURL = "http://127.0.0.1:18091/v1";
           # The first request copies the existing GGUF to a fresh Pod.
           headerTimeout = 1860000;
+          # Keep-alive prompts must not wake another paid Pod after idle cleanup.
+          cache.warming = false;
         };
         headers."X-Shimmers-GPU-Review" = "1";
         models."qwen3.6-35b-a3b-uncensored" = {
@@ -129,11 +131,16 @@ in
       printf '%s\n' 'GPU: your first prompt starts a paid Pod (A5000 preferred, A40 fallback). Run gpu-review-stop for immediate release.' >&2
       exec ${config.programs.opencode.package}/bin/opencode ${lib.escapeShellArg "${config.home.homeDirectory}/gpu-review"} "$@"
     '')
+    (pkgs.writeShellScriptBin "gpu-review-resume" ''
+      set -eu
+      ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
+        'sudo systemctl start runpod-review && sudo systemctl start runpod-review-resume'
+      ${pkgs.systemd}/bin/systemctl --user start runpod-review-tunnel
+    '')
     (pkgs.writeShellScriptBin "gpu-review-stop" ''
       set -eu
       ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
         'sudo systemctl start runpod-review-pause && sudo runpod-review-status'
-      ${pkgs.systemd}/bin/systemctl --user stop runpod-review-tunnel
     '')
     (pkgs.writeShellScriptBin "gpu-review-status" ''
       exec ${pkgs.openssh}/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes aleph@shimme.rs \
@@ -141,7 +148,8 @@ in
     '')
   ];
 
-  # The tunnel itself cannot start a Pod. The old CPU tunnel is no longer used.
+  # Always available to regular OpenCode. The tunnel cannot start a Pod and stays
+  # up during an explicit pause so callers get a non-retryable 403, not a retry loop.
   systemd.user.services.runpod-review-tunnel = {
     Unit.Description = "Forward the shimmers GPU review socket";
     Service = {
