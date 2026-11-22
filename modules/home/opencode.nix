@@ -9,6 +9,19 @@ let
   # The same Qwen3.6 model ID, now served by https://infer.shimme.rs
   # (modules/nixos/services/infer.nix) with a personal API key.
   llmModel = "shimmers/qwen3.6-35b-a3b-uncensored";
+  loopGuard =
+    pkgs.runCommand "opencode-shimmers-loop-guard"
+      {
+        nativeBuildInputs = [ pkgs.nodejs ];
+        OPENCODE_BIN = "${config.programs.opencode.package}/bin/opencode";
+      }
+      ''
+        # Both tests are offline; the integration test uses an isolated OpenCode
+        # server and mock HTTP model, never infer.shimme.rs or real credentials.
+        node --test ${./opencode-loop-guard}/guard.test.js ${./opencode-loop-guard}/smoke.test.js
+        mkdir -p "$out"
+        cp ${./opencode-loop-guard}/{package.json,index.js,guard.js} "$out/"
+      '';
   docsPython = pkgs.python3.withPackages (p: [
     p.mcp
     p.httpx
@@ -64,6 +77,14 @@ in
 
       autoupdate = false; # nix manages the package
 
+      # Pause unchanged tool loops locally before spending on another model call.
+      plugins = [
+        {
+          package = "${config.xdg.configHome}/opencode/plugins/shimmers-loop-guard";
+          options.providerID = "shimmers";
+        }
+      ];
+
       providers.shimmers = {
         name = "shimme.rs infer (GPU, paid)";
         package = "@opencode/ai/providers/openai-compatible";
@@ -110,6 +131,8 @@ in
       };
     };
   };
+
+  xdg.configFile."opencode/plugins/shimmers-loop-guard".source = loopGuard;
 
   home.file."redteam/opencode.json".text = builtins.toJSON (
     docsWorkspace // { default_agent = "redteam"; }
