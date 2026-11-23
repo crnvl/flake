@@ -29,7 +29,7 @@ test("pauses after three unchanged tool steps, not two", () => {
   assert.ok(!stored.includes("grep example") && !stored.includes("unhelpful output"))
 })
 
-test("changing arguments, output or tool breaks a streak", () => {
+test("genuinely changed arguments, output or tool do not count as identical results", () => {
   for (const change of [
     { input: { command: "different" } },
     { result: { content: "progress" } },
@@ -42,9 +42,102 @@ test("changing arguments, output or tool breaks a streak", () => {
     guard.observe(result(2))
     guard.observe(result(3, change))
     assert.equal(guard.begin("ses_a"), undefined)
-    guard.observe(result(4))
+  }
+})
+
+test("actual V2 shell output ignores changing timing, truncation paths and bookkeeping IDs", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  for (let step = 1; step <= 3; step++) {
+    guard.observe(result(step, {
+      input: { command: "grep example bundle", description: `search ${step}`, timeout: step * 1000 },
+      result: {
+        output: { output: "same stdout", exitCode: 0, wallTimeSeconds: step / 7, outputPath: `/tmp/${step}`, shellID: `shell_${step}`, pid: step },
+        content: [{ type: "text", text: `preview stored at /tmp/${step}` }],
+      },
+    }))
+  }
+  assert.equal(guard.begin("ses_a"), "shell")
+})
+
+test("keeps shell exit status, working directory, command quoting and changing stdout meaningful", () => {
+  for (const change of [
+    { input: { command: "grep example bundle", workdir: "/other" } },
+    { input: { command: "echo 'a  b'" } },
+    { result: { output: { output: "changed stdout", exitCode: 0 } } },
+    { result: { output: { output: "same stdout", exitCode: 1 } } },
+  ]) {
+    const guard = new LoopGuard()
+    guard.begin("ses_a")
+    for (let step = 1; step <= 2; step++) guard.observe(result(step, {
+      result: { output: { output: "same stdout", exitCode: 0, wallTimeSeconds: step } },
+    }))
+    guard.observe(result(3, change))
     assert.equal(guard.begin("ses_a"), undefined)
   }
+})
+
+test("catches alternating A/B loops and interleaved calls within one model step", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  for (let step = 1; step <= 3; step++) {
+    guard.observe(result(step, { input: { command: "A" } }))
+    guard.observe(result(step, { input: { command: "B" } }))
+  }
+  assert.equal(guard.begin("ses_a"), "shell")
+  assert.match(guard.reason("ses_a"), /3 times/)
+})
+
+test("same action with fluctuating output is bounded at five attempts", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  for (let step = 1; step <= 4; step++) {
+    guard.observe(result(step, { result: { content: `still waiting ${step}` } }))
+    assert.equal(guard.begin("ses_a"), undefined)
+  }
+  guard.observe(result(5, { result: { content: "still waiting 5" } }))
+  assert.equal(guard.begin("ses_a"), "shell")
+  assert.match(guard.reason("ses_a"), /output changed/)
+})
+
+test("repeated identical errors also stop", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  for (let step = 1; step <= 3; step++) guard.observe(result(step, {
+    status: "error", error: { message: "command not found", metadata: { at: step } },
+  }))
+  assert.equal(guard.begin("ses_a"), "shell")
+  assert.match(guard.reason("ses_a"), /same error/)
+})
+
+test("an unrelated call cannot erase a pending warning", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  guard.observe(result(1))
+  guard.observe(result(2))
+  guard.observe(result(2, { input: { command: "different command in the same step" } }))
+  assert.equal(guard.warn("ses_a"), true)
+  assert.equal(guard.warn("ses_a"), false)
+})
+
+test("a rolling window forgets old results and does not penalize new work", () => {
+  const guard = new LoopGuard({ window: 4 })
+  guard.begin("ses_a")
+  guard.observe(result(1))
+  guard.observe(result(2))
+  for (let step = 3; step <= 10; step++) guard.observe(result(step, { input: { command: `new work ${step}` } }))
+  guard.observe(result(11))
+  assert.equal(guard.begin("ses_a"), undefined)
+  assert.equal(guard.sessions.get("ses_a").steps.length, 4)
+})
+
+test("background launches are not completed output", () => {
+  const guard = new LoopGuard()
+  guard.begin("ses_a")
+  for (let step = 1; step <= 5; step++) guard.observe(result(step, {
+    result: { content: "command running", metadata: { status: "running" } },
+  }))
+  assert.equal(guard.begin("ses_a"), undefined)
 })
 
 test("ignores metadata and object key ordering but preserves array ordering", () => {
@@ -113,7 +206,7 @@ test("plugin persists a notice, interrupts before dispatch and resets on user in
     },
   }
   const cleanup = await plugin.setup(ctx)
-  const request = { sessionID: "ses_a", model: { providerID: "shimmers" } }
+  const request = { sessionID: "ses_a", model: { providerID: "shimmers" }, system: [] }
   await hooks.context(request)
   for (let step = 1; step <= 3; step++) hooks["execute.after"](result(step))
   await assert.rejects(hooks.context(request), /Tool loop guard paused/)
@@ -126,4 +219,23 @@ test("plugin persists a notice, interrupts before dispatch and resets on user in
   await hooks.context({ ...request, model: { providerID: "github-copilot" } })
   assert.equal(actions.length, 2)
   await cleanup()
+})
+
+test("warns after a repeat, giving the model a chance to change strategy", async () => {
+  const hooks = {}
+  const hook = async (name, callback) => {
+    hooks[name] = callback
+    return { dispose: async () => {} }
+  }
+  await plugin.setup({ options: {}, session: { hook }, tool: { hook } })
+  const request = () => ({ sessionID: "ses_a", model: { providerID: "shimmers" }, system: [] })
+  await hooks.context(request())
+  hooks["execute.after"](result(1))
+  hooks["execute.after"](result(2))
+  const warned = request()
+  await hooks.context(warned)
+  assert.match(warned.system[0].text, /materially different approach/)
+  const next = request()
+  await hooks.context(next)
+  assert.equal(next.system.length, 0, "warning is transient, not duplicated on retries")
 })

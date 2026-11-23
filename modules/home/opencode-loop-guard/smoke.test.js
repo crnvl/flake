@@ -13,6 +13,8 @@ import { setTimeout as delay } from "node:timers/promises"
 test("real OpenCode pauses after three unchanged results and resumes only on a new prompt", { timeout: 60000 }, async () => {
   const root = await mkdtemp(join(process.env.TMPDIR ?? "/tmp/opencode", "loop-guard-smoke-"))
   const modelCalls = []
+  let scenario = "identical"
+  let offset = 0
   const mock = createServer(async (request, response) => {
     if (request.url !== "/v1/chat/completions") {
       response.writeHead(404).end()
@@ -22,13 +24,23 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
     for await (const chunk of request) chunks.push(chunk)
     const body = JSON.parse(Buffer.concat(chunks).toString())
     modelCalls.push(body)
-    const name = body.tools.find((tool) => tool.function.name === "loop_probe")?.function.name
+    if (modelCalls.length - offset > 20) {
+      response.writeHead(200, { "content-type": "text/event-stream" })
+      response.end(`data: ${JSON.stringify({ id: "limit", object: "chat.completion.chunk", choices: [{ index: 0, delta: { content: "Fixture safety stop" }, finish_reason: "stop" }] })}\n\ndata: [DONE]\n\n`)
+      return
+    }
+    const shellScenario = scenario === "shell"
+    const name = body.tools.find((tool) => tool.function.name === (shellScenario ? "shell" : "loop_probe"))?.function.name
     if (!name) {
       response.writeHead(400).end(JSON.stringify({ error: { message: "fixture tool missing" } }))
       return
     }
     response.writeHead(200, { "content-type": "text/event-stream" })
-    const call = { index: 0, id: `call_${modelCalls.length}`, type: "function", function: { name, arguments: '{"value":"unchanged"}' } }
+    const step = modelCalls.length - offset
+    const args = shellScenario
+      ? { command: "grep example bundle", description: `attempt ${step}`, timeout: step * 1000 }
+      : { value: scenario === "alternating" ? (step % 2 ? "A" : "B") : scenario }
+    const call = { index: 0, id: `call_${modelCalls.length}`, type: "function", function: { name, arguments: JSON.stringify(args) } }
     response.end([
       { id: "test", object: "chat.completion.chunk", choices: [{ index: 0, delta: { role: "assistant", tool_calls: [call] }, finish_reason: null }] },
       { id: "test", object: "chat.completion.chunk", choices: [{ index: 0, delta: {}, finish_reason: "tool_calls" }], usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 } },
@@ -58,7 +70,21 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
         name: "loop_probe", description: "Offline loop test",
         input: { type: "object", properties: { value: { type: "string" } }, required: ["value"] },
         options: { codemode: false },
-        execute: async () => ({ content: "identical result", metadata: { timestamp: Date.now() } }),
+        execute: async (input) => {
+          if (input.value === "errors") throw new Error("fixture failed with the same error")
+          return { content: "identical result", metadata: { timestamp: Date.now() } }
+        },
+      }))
+      await ctx.tool.transform((editor) => editor.add({
+        name: "shell", description: "Mock of the V2 shell; executes no commands",
+        input: { type: "object", properties: { command: { type: "string" }, description: { type: "string" }, timeout: { type: "number" } }, required: ["command"] },
+        output: { type: "object", additionalProperties: true },
+        options: { codemode: false },
+        execute: async () => ({
+          content: [{ type: "text", text: "identical stdout" }],
+          output: { output: "identical stdout", exitCode: 0, wallTimeSeconds: Math.random(), shellID: String(Math.random()), outputPath: String(Math.random()) },
+          metadata: { status: "completed" },
+        }),
       }))
     },
   }`)
@@ -98,8 +124,9 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
   const url = `http://127.0.0.1:${port}`
   const headers = { authorization: `Basic ${Buffer.from("opencode:offline-loop-guard-test").toString("base64")}` }
   async function api(path, body) {
-    const response = await fetch(url + path, body === undefined ? { headers } : {
+    const response = await fetch(url + path, body === undefined ? { headers, signal: AbortSignal.timeout(15000) } : {
       method: "POST", headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
     })
     assert.ok(response.ok, `${path}: ${response.status} ${await response.clone().text()}\n${logs}`)
     if (response.status === 204) return
@@ -133,6 +160,23 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
     await api(`/api/session/${session.id}/prompt`, { text: "Try again; I am explicitly resuming the test." })
     await api(`/api/experimental/session/${session.id}/wait`, {})
     assert.equal(modelCalls.length, 6, logs)
+    // The original guard missed all of these even though it passed the simple
+    // fixture above: real V2 shell timing fields, A/B cycles and tool failures.
+    for (const [mode, expectedCalls] of [["shell", 3], ["alternating", 5], ["errors", 3]]) {
+      scenario = mode
+      offset = modelCalls.length
+      const session = await api("/api/session", { title: `Loop guard ${mode}` })
+      await api(`/api/session/${session.id}/prompt`, { text: `Test ${mode} loop.` })
+      await api(`/api/experimental/session/${session.id}/wait`, {})
+      assert.equal(modelCalls.length - offset, expectedCalls, `${mode}\n${logs}`)
+      const history = await api(`/api/session/${session.id}/context`)
+      assert.ok(JSON.stringify(history).includes("Tool loop guard:"), `${mode}: ${JSON.stringify(history)}\n${logs}`)
+      assert.ok(history.some((message) => message.type === "idle" && message.outcome === "interrupted"), `${mode}: ${JSON.stringify(history)}`)
+      const warning = modelCalls.slice(offset).some((body) => JSON.stringify(body.messages).includes("Loop guard warning:"))
+      assert.ok(warning, `${mode}: should warn before pausing`)
+      await delay(200)
+      assert.equal(modelCalls.length - offset, expectedCalls, "must not resume itself")
+    }
   } finally {
     child.kill("SIGTERM")
     await once(child, "exit")

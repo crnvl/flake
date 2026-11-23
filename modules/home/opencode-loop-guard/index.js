@@ -14,11 +14,21 @@ export default {
     }))
     registrations.push(await ctx.tool.hook("execute.after", (event) => {
       if (!guard.observe(event)) return
-      // Put a visible explanation on the third saved tool result. The synthetic
+      // Put a visible explanation on the saved tool result. The synthetic
       // notice below remains pending until the user explicitly resumes the run.
+      if (event.status === "error") {
+        // Keep the host's Tool.Error type but use a curated message: the host
+        // otherwise displays the nested cause instead and hides this notice.
+        event.error = new event.error.constructor({
+          message: `${event.error.message}\n\nTool loop guard: ${guard.reason(event.sessionID)} `
+            + "The run will pause. Send a new instruction to continue or switch models.",
+          metadata: event.error.metadata,
+        })
+        return
+      }
       const content = event.result.content ?? JSON.stringify(event.result.output, null, 2)
-      const notice = "Tool loop guard: three identical tool calls returned the same "
-        + "result. The run will pause before another model request. Send a new "
+      const notice = `Tool loop guard: ${guard.reason(event.sessionID)} `
+        + "The run will pause before another model request. Send a new "
         + "instruction to continue or switch models."
       event.result = {
         ...event.result,
@@ -33,9 +43,18 @@ export default {
         return
       }
       const tool = guard.begin(event.sessionID)
-      if (!tool) return
-      const text = `Tool loop guard paused this run: ${tool} returned the same result `
-        + `for identical arguments in three consecutive tool steps. No further model `
+      if (!tool) {
+        if (guard.warn(event.sessionID)) {
+          event.system.push({
+            type: "text",
+            text: "Loop guard warning: you have repeated an action. Inspect its existing result. "
+              + "Do not repeat it unless there is new evidence or the user explicitly requests it. "
+              + "Choose a materially different approach, explain what blocks progress, or ask the user.",
+          })
+        }
+        return
+      }
+      const text = `Tool loop guard paused this run: ${guard.reason(event.sessionID)} No further model `
         + `request was sent. Send a new instruction to continue, choose a different `
         + `approach, or switch models. Do not repeat the same unchanged tool call.`
 
