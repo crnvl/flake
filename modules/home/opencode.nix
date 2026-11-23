@@ -80,7 +80,9 @@ in
       # Pause unchanged tool loops locally before spending on another model call.
       plugins = [
         {
-          package = "${config.xdg.configHome}/opencode/plugins/shimmers-loop-guard";
+          # A new immutable path on every upgrade avoids Bun retaining the old
+          # package entrypoint through a retargeted Home Manager symlink.
+          package = "${loopGuard}";
           options.providerID = "shimmers";
         }
       ];
@@ -131,8 +133,6 @@ in
       };
     };
   };
-
-  xdg.configFile."opencode/plugins/shimmers-loop-guard".source = loopGuard;
 
   home.file."redteam/opencode.json".text = builtins.toJSON (
     docsWorkspace // { default_agent = "redteam"; }

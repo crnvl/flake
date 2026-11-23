@@ -5,12 +5,12 @@ import test from "node:test"
 import { spawn } from "node:child_process"
 import { once } from "node:events"
 import { createServer } from "node:http"
-import { mkdtemp, mkdir, writeFile, symlink, rm } from "node:fs/promises"
+import { mkdtemp, mkdir, writeFile, readFile, copyFile, chmod, rm } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { setTimeout as delay } from "node:timers/promises"
 
-test("real OpenCode pauses after three unchanged results and resumes only on a new prompt", { timeout: 60000 }, async () => {
+test("real OpenCode pauses after three unchanged results and resumes only on a new prompt", { timeout: 60000 }, async (t) => {
   const root = await mkdtemp(join(process.env.TMPDIR ?? "/tmp/opencode", "loop-guard-smoke-"))
   const modelCalls = []
   let scenario = "identical"
@@ -46,6 +46,9 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
       { id: "test", object: "chat.completion.chunk", choices: [{ index: 0, delta: {}, finish_reason: "tool_calls" }], usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 } },
     ].map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`).join("") + "data: [DONE]\n\n")
   })
+  // Setup can fail before the child/finally block below (e.g. a read-only Nix
+  // source). Never leave a listening fixture server hanging the test process.
+  t.after(() => { mock.closeAllConnections(); mock.close() })
   mock.listen(0, "127.0.0.1")
   await once(mock, "listening")
   const mockPort = mock.address().port
@@ -58,9 +61,21 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
   const configHome = join(root, "config")
   const fixture = join(root, "fixture")
   await mkdir(join(configHome, "opencode"), { recursive: true })
-  await mkdir(join(configHome, "opencode", "plugins"))
-  const guardPath = join(configHome, "opencode", "plugins", "shimmers-loop-guard")
-  await symlink(resolve(fileURLToPath(new URL(".", import.meta.url))), guardPath)
+  // Match Nix deployment: each revision has a unique immutable directory and
+  // config points directly at it, never through a retargeted package symlink.
+  const guardPath = join(root, "guard-v1")
+  const guardUpgrade = join(root, "guard-v2")
+  for (const target of [guardPath, guardUpgrade]) {
+    await mkdir(target)
+    for (const file of ["index.js", "guard.js", "package.json"]) {
+      await copyFile(resolve(fileURLToPath(new URL(file, import.meta.url))), join(target, file))
+    }
+  }
+  const upgraded = (await readFile(join(guardUpgrade, "index.js"), "utf8"))
+    .replace("Tool loop guard paused this run:", "Tool loop guard revision 2 paused this run:")
+  // copyFile preserves the Nix store's read-only mode.
+  await chmod(join(guardUpgrade, "index.js"), 0o600)
+  await writeFile(join(guardUpgrade, "index.js"), upgraded)
   await mkdir(fixture)
   await writeFile(join(fixture, "index.js"), `export default {
     id: "loop-guard.test-fixture",
@@ -160,6 +175,11 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
     await api(`/api/session/${session.id}/prompt`, { text: "Try again; I am explicitly resuming the test." })
     await api(`/api/experimental/session/${session.id}/wait`, {})
     assert.equal(modelCalls.length, 6, logs)
+    const configPath = join(configHome, "opencode", "opencode.json")
+    const config = JSON.parse(await readFile(configPath, "utf8"))
+    config.plugins[0].package = guardUpgrade
+    await writeFile(configPath, JSON.stringify(config))
+    await api("/api/location/reload", {})
     // The original guard missed all of these even though it passed the simple
     // fixture above: real V2 shell timing fields, A/B cycles and tool failures.
     for (const [mode, expectedCalls] of [["shell", 3], ["alternating", 5], ["errors", 3]]) {
@@ -172,6 +192,8 @@ test("real OpenCode pauses after three unchanged results and resumes only on a n
       const history = await api(`/api/session/${session.id}/context`)
       assert.ok(JSON.stringify(history).includes("Tool loop guard:"), `${mode}: ${JSON.stringify(history)}\n${logs}`)
       assert.ok(history.some((message) => message.type === "idle" && message.outcome === "interrupted"), `${mode}: ${JSON.stringify(history)}`)
+      const inbox = await api(`/api/session/${session.id}/inbox`)
+      assert.ok(JSON.stringify(inbox).includes("Tool loop guard revision 2 paused this run:"), "upgrade must activate the new entrypoint, not cached revision 1")
       const warning = modelCalls.slice(offset).some((body) => JSON.stringify(body.messages).includes("Loop guard warning:"))
       assert.ok(warning, `${mode}: should warn before pausing`)
       await delay(200)

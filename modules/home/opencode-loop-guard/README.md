@@ -4,6 +4,10 @@ Home Manager installs this local, dependency-free server plugin on chambers and
 corridors. It is enabled globally for the `shimmers` provider, including the
 `redteam` and `public-docs` workspaces. Copilot is unchanged.
 
+The global config references the plugin's immutable Nix store directory directly.
+Each upgrade changes that path so OpenCode reloads a new entrypoint, rather than
+reusing Bun's cached package resolution through a retargeted Home Manager symlink.
+
 Within a rolling window of twelve tool steps, it pauses after either:
 
 - **Three repeats of the same tool/action/result**, even with other commands in
@@ -40,3 +44,5 @@ results. It checks exact repeats, real V2 shell output with varying bookkeeping,
 alternating calls and tool errors. It also checks that the warning reaches the
 model, interruption does not auto-resume, and a new user prompt resets the guard.
 Nix builds run both tests; no npm install or paid model request is needed.
+The smoke test also upgrades to a different plugin directory in the same running
+OpenCode server and checks that the new entrypoint is actually active.
