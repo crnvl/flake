@@ -124,6 +124,25 @@ def generate_activity(days_range=500):
     }
 
 
+def apply_rewrite(path, data, request_data, session_id):
+    """Dispatch a response to the matching rewrite.
+
+    Redemption must be tested before the generic ``bounties/`` matcher:
+    ``/bounties/redeem/`` would otherwise be treated as a bounty list.
+    """
+    if "bounties-list" in path:
+        return rewrite_bounties_list(data, session_id)
+    if "/redeem/" in path or path.endswith("/redeem"):
+        return rewrite_redeem(data, request_data, session_id)
+    if "bounties/" in path:
+        return rewrite_bounties(data, session_id)
+    if "activity-feed" in path:
+        return rewrite_activity_feed(data, session_id)
+    if "customer-relationships/client/" in path:
+        return rewrite_customer_relationships(data, session_id)
+    return None
+
+
 def rewrite_bounties_list(data, session_id):
     """Mark every in_shop entry as redeemable; set cr_points from session state."""
     if not isinstance(data, dict):
@@ -131,7 +150,10 @@ def rewrite_bounties_list(data, session_id):
     for entry in data.get("in_shop", []):
         entry["is_redeemable"] = True
         entry["is_activateable"] = True
+        entry["is_activated"] = True
         entry["cr_points"] = get_points_for_session(session_id)
+        entry["shipping"] = False
+        entry["variations"] = entry.get("variations") or []
         set_bounty_price(entry["id"], entry.get("needed_points", 0))
     return json.dumps(data).encode("utf-8")
 
@@ -146,6 +168,9 @@ def rewrite_bounties(data, session_id):
             continue
         bounty["is_redeemable"] = True
         bounty["is_activateable"] = True
+        bounty["is_activated"] = True
+        bounty["shipping"] = False
+        bounty["variations"] = bounty.get("variations") or []
         if bounty.get("show_progress_bar"):
             bounty["cr_points"] = pts
             bounty["cr_rank"] = 0
@@ -190,13 +215,13 @@ def rewrite_activity_feed(data, session_id):
 def rewrite_redeem(data, request_data, session_id):
     """Force success to true; deduct points and add activity entry."""
     if not isinstance(data, dict):
-        return None
-    data["success"] = True
+        data = {}
     try:
         body = json.loads(request_data) if request_data else {}
     except Exception:
         body = {}
     bounty_id = body.get("bounty_id")
+    data["success"] = True
     if bounty_id:
         cost = get_bounty_price(bounty_id)
         current = get_points_for_session(session_id)
@@ -324,22 +349,17 @@ def create_app(upstream=None, trust_proxy=None):
             except Exception:
                 data = None
             if data is not None:
-                if "bounties-list" in request.path:
-                    rewritten = rewrite_bounties_list(data, session_id)
-                elif "bounties/" in request.path and "bounties-list" not in request.path:
-                    rewritten = rewrite_bounties(data, session_id)
-                elif "activity-feed" in request.path:
-                    rewritten = rewrite_activity_feed(data, session_id)
-                elif "redeem" in request.path:
-                    rewritten = rewrite_redeem(data, request_data, session_id)
-                elif "customer-relationships/client/" in request.path:
-                    rewritten = rewrite_customer_relationships(data, session_id)
+                rewritten = apply_rewrite(request.path, data, request_data, session_id)
+            elif "/redeem/" in request.path:
+                rewritten = rewrite_redeem({}, request_data, session_id)
             if rewritten is not None:
                 import gzip as _gzip
                 compressed = _gzip.compress(rewritten)
                 outgoing.append(("Content-Encoding", "gzip"))
+                outgoing = [(k, v) for k, v in outgoing if k.lower() != "content-length"]
                 outgoing.append(("Content-Length", str(len(compressed))))
-                return Response(compressed, status=result.status_code, headers=outgoing)
+                response_status = 200 if "redeem" in request.path else result.status_code
+                return Response(compressed, status=response_status, headers=outgoing)
             # No rewrite: gzip-compress the original content and return.
             import gzip as _gzip
             compressed = _gzip.compress(content)
@@ -359,21 +379,14 @@ def create_app(upstream=None, trust_proxy=None):
             data = None
 
         if data is not None:
-            if "bounties-list" in request.path:
-                rewritten = rewrite_bounties_list(data, session_id)
-            elif "bounties/" in request.path and "bounties-list" not in request.path:
-                rewritten = rewrite_bounties(data, session_id)
-            elif "activity-feed" in request.path:
-                rewritten = rewrite_activity_feed(data, session_id)
-            elif "redeem" in request.path:
-                rewritten = rewrite_redeem(data, request_data, session_id)
-            elif "customer-relationships/client/" in request.path:
-                rewritten = rewrite_customer_relationships(data, session_id)
-
+            rewritten = apply_rewrite(request.path, data, request_data, session_id)
+        elif "/redeem/" in request.path:
+            rewritten = rewrite_redeem({}, request_data, session_id)
         if rewritten is not None:
             outgoing = [(k, v) for k, v in outgoing if k.lower() != "content-length"]
             outgoing.append(("Content-Length", str(len(rewritten))))
-            return Response(rewritten, status=result.status_code, headers=outgoing)
+            response_status = 200 if "redeem" in request.path else result.status_code
+            return Response(rewritten, status=response_status, headers=outgoing)
 
         # Non-rewritten, non-gzip: return decompressed content directly.
         outgoing = [(k, v) for k, v in outgoing if k.lower() != "content-length"]
