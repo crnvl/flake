@@ -159,13 +159,17 @@ def rewrite_bounties_list(data, session_id):
 
 
 def rewrite_bounties(data, session_id):
-    """Fill progress-bar fields on each bounty so the bar shows full."""
-    if not isinstance(data, list):
-        return None
+    """Fill progress-bar fields on each bounty so the bar shows full.
+
+    ``/bounties/`` returns a JSON:API envelope (``{"data": [{"attributes":
+    {...}}]}``), while some endpoints return a plain list. Handle both; the
+    Prämien progress bar reads ``cr_points`` from the attributes object.
+    """
     pts = get_points_for_session(session_id)
-    for bounty in data:
+
+    def fill(bounty):
         if not isinstance(bounty, dict):
-            continue
+            return
         bounty["is_redeemable"] = True
         bounty["is_activateable"] = True
         bounty["is_activated"] = True
@@ -178,7 +182,19 @@ def rewrite_bounties(data, session_id):
             bounty["redeem_count"] = 0
             if bounty.get("ranks") is None:
                 bounty["ranks"] = 1
-    return json.dumps(data).encode("utf-8")
+
+    if isinstance(data, dict) and isinstance(data.get("data"), list):
+        for item in data["data"]:
+            if not isinstance(item, dict):
+                continue
+            attributes = item.get("attributes")
+            fill(attributes if isinstance(attributes, dict) else item)
+        return json.dumps(data).encode("utf-8")
+    if isinstance(data, list):
+        for bounty in data:
+            fill(bounty)
+        return json.dumps(data).encode("utf-8")
+    return None
 
 
 def rewrite_activity_feed(data, session_id):
