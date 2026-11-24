@@ -23,6 +23,9 @@
       clientSecretFile = config.age.secrets.kanidm-oauth2-slots-secret.path;
     };
     discord.webhookFile = config.age.secrets.slots-discord-webhook.path;
+    # With a handful of players a 20x win is rare; from 10x the lobby's live
+    # feed and ticker have something to show.
+    feedMinWinX = 10;
   };
 
   # The live feed is a long-lived event stream; the app tells nginx not to
