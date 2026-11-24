@@ -27,6 +27,10 @@
       # Jellyfin can't play the title. cache=loose already caches without
       # leases.
       "nolease"
+      # If the connection wedges mid-reconnect, new mounts would otherwise
+      # reuse the dead socket and fail with EHOSTDOWN until a reboot.
+      "nosharesock"
+      "echo_interval=15"
       "nofail"
       "_netdev"
       "x-systemd.automount"
