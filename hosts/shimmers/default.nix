@@ -47,6 +47,7 @@
     ../../modules/nixos/services/proxyagain.nix
     ../../modules/nixos/services/katzentempel.nix
     ../../modules/nixos/services/infer.nix
+    ../../modules/nixos/services/slots.nix
   ];
 
   system.stateVersion = "26.05";
@@ -123,6 +124,15 @@
     mode = "0400";
   };
 
+  # Same arrangement for the private slots flake input (the gambling repo),
+  # with the same one-time bootstrap the first time it is introduced.
+  age.secrets.slots-deploy-key = {
+    file = ./secrets/slots-deploy-key.age;
+    owner = "aleph";
+    group = "users";
+    mode = "0400";
+  };
+
   programs.ssh.extraConfig = ''
     Host git-gay-proxyagain
       HostName git.gay
@@ -142,6 +152,13 @@
       HostName git.gay
       User git
       IdentityFile ${config.age.secrets.infer-deploy-key.path}
+      IdentitiesOnly yes
+      StrictHostKeyChecking accept-new
+
+    Host git-gay-slots
+      HostName git.gay
+      User git
+      IdentityFile ${config.age.secrets.slots-deploy-key.path}
       IdentitiesOnly yes
       StrictHostKeyChecking accept-new
   '';

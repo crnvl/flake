@@ -28,6 +28,9 @@ let
           }
         ]
     + "</ul>";
+
+  # People who should not get slots.shimme.rs (see the slots_users group).
+  slotsExcluded = [ ];
 in
 {
   age.secrets =
@@ -99,6 +102,11 @@ in
         # the shared Runpod allowance); admins also get the admin page.
         infer_users = { };
         infer_admins = { };
+        # slots.shimme.rs: play-money slot machines. Everyone with an account
+        # may play; list a name in slotsExcluded above to leave them out.
+        slots_users.members = lib.subtractLists slotsExcluded (
+          lib.attrNames config.services.kanidm.provision.persons
+        );
       };
 
       # create creds: sudo kanidm person credential create-reset-token aleph
@@ -428,6 +436,22 @@ in
             joinType = "array";
             valuesByGroup.infer_admins = [ "admin" ];
           };
+        };
+
+        # slots (modules/nixos/services/slots.nix) sends an S256 PKCE
+        # challenge, so PKCE stays enforced. It only asks for a name.
+        slots = {
+          displayName = "slots";
+          imageFile = ./kanidm-logos/slots.svg;
+          originUrl = "https://slots.shimme.rs/auth/callback";
+          originLanding = "https://slots.shimme.rs";
+          basicSecretFile = config.age.secrets.kanidm-oauth2-slots-secret.path;
+          preferShortUsername = true;
+
+          scopeMaps.slots_users = [
+            "openid"
+            "profile"
+          ];
         };
 
         # Forgejo on git.lily.pizza, auth source named "shimmers". Forgejo

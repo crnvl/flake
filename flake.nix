@@ -54,6 +54,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Private, with its own read-only deploy key through the "git-gay-slots"
+    # host alias (see hosts/shimmers/default.nix).
+    slots = {
+      url = "git+ssh://git@git-gay-slots/67/gambling";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     niri.url = "github:sodiboo/niri-flake";
 
     lanzaboote = {
@@ -120,6 +127,7 @@
             inputs.unuo.nixosModules.default
             inputs.unuo-dark.nixosModules.dark
             inputs.infer.nixosModules.default
+            inputs.slots.nixosModules.default
             ./hosts/${hostname}
             ./modules/nixos/common.nix
             ./modules/nixos/server.nix

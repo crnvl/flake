@@ -480,6 +480,7 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-2311": "nixpkgs-2311",
         "proxyagain": "proxyagain",
+        "slots": "slots",
         "unuo": "unuo",
         "unuo-dark": "unuo-dark",
         "vpn-confinement": "vpn-confinement"
@@ -542,6 +543,26 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "type": "github"
+      }
+    },
+    "slots": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795522517,
+        "narHash": "sha256-OvjawYY8DHGSG4uPVxMClOJjxGczdUz9eTttoTU1b/8=",
+        "ref": "refs/heads/main",
+        "rev": "04244cce5b1c94263ee2a88a35208f467ee509c7",
+        "revCount": 4,
+        "type": "git",
+        "url": "ssh://git@git-gay-slots/67/gambling"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@git-gay-slots/67/gambling"
       }
     },
     "systems": {

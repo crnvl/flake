@@ -63,6 +63,11 @@
         Host git-gay-infer
           HostName git.gay
           User git
+
+        # Same for the private slots input (scoped deploy key on shimmers).
+        Host git-gay-slots
+          HostName git.gay
+          User git
       '';
     };
 
