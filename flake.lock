@@ -552,11 +552,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795536701,
-        "narHash": "sha256-PtZ9AYhXsurSAf0qhvPR4rR5wYgcfjTkyoxMN99dTx4=",
+        "lastModified": 1795539291,
+        "narHash": "sha256-vCy0qOoERXtaUt3wVGldR3twsy1ndho1jqE2aUeTo88=",
         "ref": "refs/heads/main",
-        "rev": "8e5bf06ba147a26c8ee113e96fadfbba24de6405",
-        "revCount": 25,
+        "rev": "fcf72976c43bdce91bc7d2d17eeb4236f5b84208",
+        "revCount": 26,
         "type": "git",
         "url": "ssh://git@git-gay-slots/67/gambling"
       },
