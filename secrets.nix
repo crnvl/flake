@@ -43,6 +43,7 @@ let
       "proxyagain-deploy-key"
       "infer-deploy-key"
       "slots-deploy-key"
+      "slots-discord-webhook"
       "unuo-deploy-key"
       "vaultwarden-borg-passphrase"
       "nextcloud-admin-password"

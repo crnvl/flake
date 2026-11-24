@@ -9,6 +9,10 @@
     group = "kanidm";
   };
 
+  # The Discord webhook slots announces big wins and leaderboard changes to.
+  # Read via LoadCredential (as root), like the client secret.
+  age.secrets.slots-discord-webhook.file = ../../../hosts/shimmers/secrets/slots-discord-webhook.age;
+
   services.slots = {
     enable = true;
     domain = "slots.shimme.rs";
@@ -18,6 +22,7 @@
       # Read via LoadCredential (as root), so kanidm's copy is shared.
       clientSecretFile = config.age.secrets.kanidm-oauth2-slots-secret.path;
     };
+    discord.webhookFile = config.age.secrets.slots-discord-webhook.path;
   };
 
   # The live feed is a long-lived event stream; the app tells nginx not to
