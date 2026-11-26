@@ -1318,6 +1318,44 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "lucky"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73bf69"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Lucky hour"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lossback"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b4a7d6"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Loss-back"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "refill"
             },
             "properties": [
@@ -1569,6 +1607,44 @@
               {
                 "id": "displayName",
                 "value": "Weekly race"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lucky"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73bf69"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Lucky hour"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lossback"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b4a7d6"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Loss-back"
               }
             ]
           },
@@ -2244,6 +2320,25 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "deuces"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b8322a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Deuces Wild"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "blackjack"
             },
             "properties": [
@@ -2728,29 +2823,33 @@
                         "text": "Video Poker",
                         "index": 14
                       },
+                      "deuces": {
+                        "text": "Deuces Wild",
+                        "index": 15
+                      },
                       "blackjack": {
                         "text": "Blackjack",
-                        "index": 15
+                        "index": 16
                       },
                       "dice": {
                         "text": "Dice",
-                        "index": 16
+                        "index": 17
                       },
                       "limbo": {
                         "text": "Limbo",
-                        "index": 17
+                        "index": 18
                       },
                       "keno": {
                         "text": "Keno",
-                        "index": 18
+                        "index": 19
                       },
                       "scratch": {
                         "text": "Scratch Cards",
-                        "index": 19
+                        "index": 20
                       },
                       "run": {
                         "text": "Vault Run",
-                        "index": 20
+                        "index": 21
                       }
                     }
                   }
@@ -3199,6 +3298,25 @@
               {
                 "id": "displayName",
                 "value": "Video Poker"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deuces"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b8322a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Deuces Wild"
               }
             ]
           },
@@ -3685,6 +3803,25 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "deuces"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b8322a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Deuces Wild"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "blackjack"
             },
             "properties": [
@@ -4150,6 +4287,25 @@
               {
                 "id": "displayName",
                 "value": "Video Poker"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deuces"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b8322a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Deuces Wild"
               }
             ]
           },
@@ -4988,6 +5144,44 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "lucky"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#73bf69"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Lucky hour"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lossback"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#b4a7d6"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Loss-back"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "refill"
                 },
                 "properties": [
@@ -5246,6 +5440,44 @@
                   {
                     "id": "displayName",
                     "value": "Weekly race"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lucky"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#73bf69"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Lucky hour"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "lossback"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#b4a7d6"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Loss-back"
                   }
                 ]
               },
@@ -5622,6 +5854,25 @@
                   {
                     "id": "displayName",
                     "value": "Video Poker"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "deuces"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#b8322a"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Deuces Wild"
                   }
                 ]
               },
