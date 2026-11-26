@@ -1,23 +1,17 @@
-diff -ruN a/backend/services/trackMatching/postDownloadValidator.ts b/backend/services/trackMatching/postDownloadValidator.ts
 --- a/backend/services/trackMatching/postDownloadValidator.ts
 +++ b/backend/services/trackMatching/postDownloadValidator.ts
-@@ -37,6 +37,7 @@
+@@ -37,6 +37,7 @@ import {
    verifyDownloadedRecording,
  } from "./nativeMatcher.ts";
  import { judgeRelease } from "./releaseJudge.ts";
 +import { buildRequestVariantProfile } from "./semanticPolicy.ts";
  import { manifestIndexFor, type ReleaseManifest } from "../releaseManifest.ts";
  import { isRequestedYoutubeAlbum, readYoutubeFile } from "./youtubeEvidence.ts";
- import { scoreTextMatch } from "../providers/brainzmashRanking.ts";
-@@ -327,6 +328,44 @@
-       filePath,
-       quality: quality.quality,
-       actual: { tags: actual, durationMs: actualDurationMs },
-+      actualDurationMs,
-+      parsedTags: actual,
-+    };
-+  }
-+
+ import { scoreTextMatch } from "../providers/metadataRanking.ts";
+@@ -331,6 +332,44 @@ export async function validateDownloadedTrackFile({
+     };
+   }
+ 
 +  // nixos: reject the clean (edited) version by its tags, which often carry
 +  // the rating when file and folder names don't. Counts as a failed
 +  // download, so aurral moves on to the next source. A request that asks
@@ -51,15 +45,19 @@ diff -ruN a/backend/services/trackMatching/postDownloadValidator.ts b/backend/se
 +      filePath,
 +      quality: quality.quality,
 +      actual: { tags: actual, durationMs: actualDurationMs },
-       actualDurationMs,
-       parsedTags: actual,
-     };
-diff -ruN a/backend/services/trackMatching/semanticPolicy.ts b/backend/services/trackMatching/semanticPolicy.ts
++      actualDurationMs,
++      parsedTags: actual,
++    };
++  }
++
+   // A manual search is an explicit identity decision by the user. Keep the
+   // technical audio checks above, but do not let automatic title, artist,
+   // album, duration, variant, or matcher policy overrule that choice.
 --- a/backend/services/trackMatching/semanticPolicy.ts
 +++ b/backend/services/trackMatching/semanticPolicy.ts
-@@ -102,7 +102,13 @@
-       ?.value || null;
-   if (mixVariant === "remix") variants.remix = true;
+@@ -155,7 +155,13 @@ export function extractVariants(value: string | null | undefined) {
+   const mix = readMix(groups, versionGroups);
+   if (mix?.value === "remix") variants.remix = true;
    const monoStereo = /\bmono\b/.test(text) ? "mono" : /\bstereo\b/.test(text) ? "stereo" : null;
 -  const contentRating = /\b(?:clean|edited|censored)\b/.test(text)
 +  // nixos: only a version descriptor marks the clean version ("(Clean)",
@@ -72,7 +70,7 @@ diff -ruN a/backend/services/trackMatching/semanticPolicy.ts b/backend/services/
      ? "clean"
      : /\bexplicit\b/.test(text)
        ? "explicit"
-@@ -216,7 +222,7 @@
+@@ -273,7 +279,7 @@ export function compareVariantProfiles(
      contradictions.push("content-rating-clean");
      score -= 80;
    } else if (actual.contentRating) {

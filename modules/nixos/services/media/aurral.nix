@@ -9,13 +9,12 @@
 let
   domain = "aurral.shimme.rs";
   port = 3001;
-  # On the storage box under media/music, next to Lidarr's library rather
-  # than inside it: aurral leaves anything in a Lidarr root folder alone, so
-  # it would never clean up or retag its own files there. aurral has this
-  # stored as its downloadFolderPath (settings, in its DB). The folder itself
-  # was created once by hand: tmpfiles would touch the automounted storage
-  # box early in boot.
+  # Lidarr's root folder, a read-only folder in aurral.
   libraryFolder = "/mnt/chroma/media/music/library";
+  # aurral's own Library folder (its downloadFolderPath setting, in its DB),
+  # on the storage box next to Lidarr's rather than inside it, so aurral can
+  # clean up and retag its own files. Created once by hand: tmpfiles would
+  # touch the automounted storage box early in boot.
   playlistFolder = "/mnt/chroma/media/music/playlists";
   maxWorkerConcurrency = 8;
   workerConcurrency = 6;
@@ -37,22 +36,23 @@ in
     inherit port;
     environmentFile = config.age.secrets.aurral-env.path;
 
-    # New users get aurral's playlist section (the accessFlow permission) by
-    # default: seeing and playing playlists in aurral needs it. It also lets
-    # them create flows and import playlists, which download through slskd
-    # and SABnzbd. aurral has no setting for new users' permissions, so this
-    # flips the built-in default; each new account stores its permissions on
-    # creation, so existing accounts are unaffected.
+    # 3.1 rather than nixpkgs' 2.13: 2.x got its metadata from BrainzMash,
+    # which now refuses aurral (HTTP 500), and its Last.fm discovery breaks
+    # on Dec 1. 3.1 uses AurralBrainz (data.aurral.org) instead
+    # (lklynet/aurral#2026). Same build as nixpkgs' 3.0.1, only newer.
+    #
+    # New users get aurral's playlist section (the accessPlaylists
+    # permission) by default: seeing and playing playlists in aurral needs
+    # it. It also lets them create flows and import playlists, which download
+    # through slskd and SABnzbd. Admins can set this in Settings > Users >
+    # Default permissions too, which wins over the built-in default changed
+    # here; each new account stores its permissions on creation, so existing
+    # accounts are unaffected.
     #
     # aurral-explicit.patch: downloads always take the explicit version. A
     # source named or tagged as the clean/edited version counts as a
     # mismatch, so aurral moves on to the next one; if only clean copies
     # turn up, the track is skipped rather than censored.
-    #
-    # aurral-album-artist-path.patch: an album requested from one artist's
-    # page can belong to another MusicBrainz artist. Lidarr adds that one
-    # from the requesting artist's settings, and aurral used to send the
-    # folder along, so What So Not ended up in "Buunshin (1)".
     #
     # aurral-worker-queue.patch: the download worker took the next job
     # without checking it could run it. When the head of the queue was
@@ -66,31 +66,35 @@ in
     # Soulseek searches are still started at most every 5 seconds overall.
     # The value itself is set by aurral-worker-settings below.
     #
-    # Stopgap until aurral is on 3.1+: BrainzMash, the metadata server 2.x
-    # uses, now answers aurral with HTTP 500 (upstream moved to its own server,
-    # lklynet/aurral#2026). A track whose album can't be read waited 30
-    # minutes for it before searching, so the whole queue crawled. Now it
-    # searches right away and matches on artist, title and duration.
-    #
     # All are applied to the installed files; tests are skipped since only
     # those change and the rest is upstream's code, tested in nixpkgs.
-    package = pkgs.aurral.overrideAttrs (old: {
-      doCheck = false;
-      postInstall = (old.postInstall or "") + ''
-        substituteInPlace $out/lib/aurral/backend/db/helpers/users.ts \
-          --replace-fail "accessFlow: false," "accessFlow: true,"
-        substituteInPlace $out/lib/aurral/backend/services/downloadJobs/downloadWorker.ts \
-          --replace-fail "const MAX_CONCURRENCY = 3;" "const MAX_CONCURRENCY = ${toString maxWorkerConcurrency};"
-        substituteInPlace $out/lib/aurral/backend/routes/playlists/handlers/worker.ts \
-          --replace-fail "parsed > 3" "parsed > ${toString maxWorkerConcurrency}" \
-          --replace-fail "between 1 and 3" "between 1 and ${toString maxWorkerConcurrency}"
-        substituteInPlace $out/lib/aurral/backend/services/releaseResolver.ts \
-          --replace-fail "export const MAX_RELEASE_WAITS = 30;" "export const MAX_RELEASE_WAITS = 0;"
-        patch -d $out/lib/aurral -p1 < ${./aurral-explicit.patch}
-        patch -d $out/lib/aurral -p1 < ${./aurral-album-artist-path.patch}
-        patch -d $out/lib/aurral -p1 < ${./aurral-worker-queue.patch}
-      '';
-    });
+    package = pkgs.aurral.overrideAttrs (
+      finalAttrs: old: {
+        version = "3.1.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "lklynet";
+          repo = "aurral";
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-rORCv0O9OvgfIC4qQeNZMaISu3ciiwecWNTYIQ0NFas=";
+        };
+        pnpmDeps = old.pnpmDeps.overrideAttrs {
+          inherit (finalAttrs) src;
+          outputHash = "sha256-o9BTUedHn9nuUPWaXTKSKa/pvEB7Pq2Fw8ehgi6h0RU=";
+        };
+        doCheck = false;
+        postInstall = (old.postInstall or "") + ''
+          substituteInPlace $out/lib/aurral/backend/db/helpers/users.ts \
+            --replace-fail "accessPlaylists: false," "accessPlaylists: true,"
+          substituteInPlace $out/lib/aurral/backend/services/downloadJobs/downloadWorker.ts \
+            --replace-fail "const MAX_CONCURRENCY = 3;" "const MAX_CONCURRENCY = ${toString maxWorkerConcurrency};"
+          substituteInPlace $out/lib/aurral/backend/routes/playlists/handlers/worker.ts \
+            --replace-fail "parsed > 3" "parsed > ${toString maxWorkerConcurrency}" \
+            --replace-fail "between 1 and 3" "between 1 and ${toString maxWorkerConcurrency}"
+          patch -d $out/lib/aurral -p1 < ${./aurral-explicit.patch}
+          patch -d $out/lib/aurral -p1 < ${./aurral-worker-queue.patch}
+        '';
+      }
+    );
 
     environment = {
       # Only nginx on loopback sits in front of it.
@@ -119,9 +123,16 @@ in
     after = [ "kanidm.service" ];
     wants = [ "kanidm.service" ];
 
-    # Lidarr reports library files under its root folder; the same path
-    # inside aurral's chroot lets it verify and play them. Read-only:
-    # imports stay Lidarr's job.
+    # aurral is PID 1 in its private PID namespace, and 3.x runs plugins and
+    # downloads as child processes, so something has to reap the orphans
+    # (as nixpkgs' newer module does).
+    serviceConfig.ExecStart = lib.mkForce "${lib.getExe pkgs.catatonit} -- ${lib.getExe config.services.aurral.package}";
+
+    # Lidarr's root folder. Since 3.0 aurral runs the Library itself and
+    # keeps Lidarr's folder as a read-only folder: it plays those files but
+    # never renames, retags or deletes them. Albums still come in through
+    # Lidarr with the official Lidarr plugin (Settings > Plugins), which
+    # hands requests to Lidarr and then finds them in this folder.
     serviceConfig.BindReadOnlyPaths = [ libraryFolder ];
     # Playlist downloads go through slskd and SABnzbd, which download inside
     # the VPN namespace; aurral then moves (and retags) the finished files
@@ -198,85 +209,12 @@ in
     serviceConfig.Type = "oneshot";
   };
 
-  # Lidarr tells aurral about every import. That's the only way a requested
-  # album gets marked available in aurral's request history (and its
-  # "Request available" notification goes out). Lidarr sits in the VPN
-  # namespace and can't open connections to the host, so it goes through
-  # the public vhost. Runs as root to read aurral's API key from its DB
-  # (like aurral-retry-failed), inside the namespace to reach Lidarr, and
-  # like lidarr-settings on every Lidarr start and daily to undo UI edits.
-  systemd.services.aurral-lidarr-webhook = {
-    description = "point Lidarr's import webhook at aurral";
-    after = [
-      "aurral.service"
-      "lidarr.service"
-    ];
-    wants = [ "aurral.service" ];
-    wantedBy = [ "lidarr.service" ];
-    startAt = "daily";
-    path = with pkgs; [
-      curl
-      jq
-      sqlite
-    ];
-    script = ''
-      aurral_key="$(sqlite3 -readonly /var/lib/aurral/aurral.db \
-        "SELECT json_extract(value, '$.general.apiKey') FROM settings WHERE key = 'integrations'")"
-      if [ -z "$aurral_key" ]; then
-        echo "aurral has no API key yet" >&2
-        exit 1
-      fi
-      hook=https://${domain}/api/webhooks/lidarr
-
-      api() { # <method> <path> [json body]
-        local args=(
-          --fail-with-body --silent --show-error --max-time 60
-          --retry 30 --retry-delay 2 --retry-connrefused
-          --request "$1" --header "X-Api-Key: $LIDARR__AUTH__APIKEY"
-        )
-        if [ "$#" -ge 3 ]; then
-          args+=(--header "Content-Type: application/json" --data-binary "$3")
-        fi
-        curl "''${args[@]}" "http://localhost:8686/api/v1/$2"
-      }
-
-      current="$(api GET notification | jq -c --arg u "$hook" \
-        'first(.[] | select(.implementation == "Webhook" and any(.fields[]; .name == "url" and .value == $u))) // empty')"
-      [ -n "$current" ] || current="$(api GET notification/schema | jq -c 'first(.[] | select(.implementation == "Webhook"))')"
-      wanted="$(jq -c --arg u "$hook" --arg k "$aurral_key" '
-        .name = "aurral"
-        | with_entries(if (.key | test("^on[A-Z]")) then .value = (.key == "onReleaseImport") else . end)
-        | .fields |= map(
-            if .name == "url" then .value = $u
-            elif .name == "method" then .value = 1
-            elif .name == "headers" then .value = [{ key: "X-Api-Key", value: $k }]
-            else . end)
-      ' <<< "$current")"
-      if [ "$(jq '.id // 0' <<< "$current")" = 0 ]; then
-        api POST "notification?forceSave=true" "$wanted" > /dev/null
-        echo "added the aurral webhook"
-      elif [ "$(jq -S . <<< "$current")" != "$(jq -S . <<< "$wanted")" ]; then
-        api PUT "notification/$(jq -r .id <<< "$current")?forceSave=true" "$wanted" > /dev/null
-        echo "updated the aurral webhook"
-      fi
-    '';
-    serviceConfig = {
-      Type = "oneshot";
-      EnvironmentFile = config.age.secrets.lidarr-env.path;
-    };
-  };
-
-  my.vpn.confinedServices = [ "aurral-lidarr-webhook" ];
-
-  # Playback: aurral registers its playlist folder as a second Navidrome
-  # library, by the path it sees it under, and syncs its playlists into it.
-  # Its Navidrome URL (in its settings) is http://127.0.0.1:4533 rather than
-  # music.shimme.rs: the public vhost sits behind oauth2-proxy, which turns
-  # aurral's API login into a redirect. Navidrome only trusts the Remote-User
-  # header when it is actually sent, so a plain password login from loopback
-  # still works. Streams are proxied by aurral's backend, so the loopback URL
-  # never reaches a browser. The storage box mount makes everything 0664/0775,
-  # so Navidrome can read it despite PrivateUsers (see navidrome.nix).
+  # Playback: aurral's Library folder (its playlist folder here) is a second
+  # Navidrome library, registered by aurral 2.x. Since 3.0 aurral no longer
+  # syncs playlists through Navidrome's API; it writes an M3U per playlist
+  # and flow to _playlists in that folder, and Navidrome imports those on
+  # its scans. The storage box mount makes everything 0664/0775, so
+  # Navidrome can read it despite PrivateUsers (see navidrome.nix).
   systemd.services.navidrome.serviceConfig.BindReadOnlyPaths = [
     "-${playlistFolder}"
   ];
@@ -284,9 +222,8 @@ in
   services.nginx.virtualHosts.${domain} = lib.mkMerge [
     (mkProxyHost { inherit port; })
     {
-      # Onboarding is unauthenticated until finished (creates the admin and
-      # takes arbitrary Lidarr URLs to test), so only allow it over an SSH
-      # tunnel straight to the port.
+      # Onboarding is unauthenticated until finished (creates the admin), so
+      # only allow it over an SSH tunnel straight to the port.
       locations."/api/onboarding".return = "403";
     }
   ];

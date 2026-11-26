@@ -179,8 +179,8 @@ let
 in
 {
   # Contains LIDARR__AUTH__APIKEY=... so the API key is pinned declaratively
-  # and can be shared (aurral-lidarr-webhook reads it) without copying it out
-  # of the UI.
+  # and can be shared (aurral's Lidarr plugin uses it) without copying it
+  # out of the UI.
   age.secrets.lidarr-env.file = ../../../../hosts/shimmers/secrets/lidarr-env.age;
 
   services.lidarr = {

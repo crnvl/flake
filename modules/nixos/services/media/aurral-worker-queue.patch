@@ -1,6 +1,6 @@
 --- a/backend/services/downloadJobs/downloadTracker.ts
 +++ b/backend/services/downloadJobs/downloadTracker.ts
-@@ -1567,7 +1567,11 @@
+@@ -1774,14 +1774,22 @@ export class DownloadTracker {
      return true;
    }
  
@@ -10,10 +10,9 @@
 +    lastPlaylistType: string | null = null,
 +    accepts: (job: DownloadJob) => unknown = () => true,
 +  ) {
-     let fallbackIndex = -1;
-     for (let index = 0; index < queue.length; index += 1) {
-       const nextId = queue[index];
-@@ -1575,7 +1579,11 @@
+     let fallback: DownloadJob | null = null;
+     for (const nextId of queue) {
+       if (!this.pendingSet.has(nextId)) {
          continue;
        }
        const job = this.jobs.get(nextId);
@@ -26,7 +25,7 @@
          continue;
        }
        if (lastPlaylistType && String(job.playlistType || "") === String(lastPlaylistType || "")) {
-@@ -1626,10 +1634,18 @@
+@@ -1825,10 +1833,18 @@ export class DownloadTracker {
        }) &&
        accepts(job);
      this.pendingFreshQueue = this._compactPendingQueue(this.pendingFreshQueue);
