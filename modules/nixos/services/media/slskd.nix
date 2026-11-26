@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   # Contains:
@@ -62,6 +67,40 @@
     };
 
     unitConfig.RequiresMountsFor = [ "/mnt/chroma" ];
+  };
+
+  # slskd reconnects by itself after a clean disconnect, but its server
+  # connection can also hang in "Disconnecting" and then never reconnect (on
+  # 2026-11-26 it sat like that for 17 hours). Every search fails meanwhile,
+  # so aurral's and Lidarr's queues stall. Restarts slskd once it has not
+  # been logged in for 5 minutes straight. Runs on the host and reaches the
+  # API through the namespace's port mapping.
+  systemd.services.slskd-login-watchdog = {
+    description = "restart slskd when it stays logged out of Soulseek";
+    after = [ "slskd.service" ];
+    startAt = "*:0/5";
+    path = with pkgs; [
+      curl
+      jq
+    ];
+    script = ''
+      systemctl is-active --quiet slskd.service || exit 0
+      for _ in $(seq 10); do
+        if curl --silent --max-time 10 --header "X-API-Key: $SLSKD_API_KEY" \
+          http://${config.vpnNamespaces.wg.namespaceAddress}:5030/api/v0/server \
+          | jq -e .isLoggedIn > /dev/null; then
+          exit 0
+        fi
+        sleep 30
+      done
+      systemctl is-active --quiet slskd.service || exit 0
+      echo "slskd has not been logged in to Soulseek for 5 minutes, restarting it"
+      systemctl restart slskd.service
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      EnvironmentFile = config.age.secrets.slskd-env.path;
+    };
   };
 
   # The state dir itself must be created with the right owner up front:

@@ -1,0 +1,49 @@
+--- a/backend/services/downloadJobs/downloadTracker.ts
++++ b/backend/services/downloadJobs/downloadTracker.ts
+@@ -1567,7 +1567,11 @@
+     return true;
+   }
+ 
+-  _pickPendingFromQueue(queue: string[], lastPlaylistType: string | null = null) {
++  _pickPendingFromQueue(
++    queue: string[],
++    lastPlaylistType: string | null = null,
++    accepts: (job: DownloadJob) => unknown = () => true,
++  ) {
+     let fallbackIndex = -1;
+     for (let index = 0; index < queue.length; index += 1) {
+       const nextId = queue[index];
+@@ -1575,7 +1579,11 @@
+         continue;
+       }
+       const job = this.jobs.get(nextId);
+-      if (!job || job.status !== "pending") {
++      // nixos: skip jobs the worker can't take right now (already running,
++      // waiting for metadata) instead of returning them. Otherwise the caller
++      // falls back to the oldest pending job, which can be one that only
++      // defers itself, and a worker slot spins on it while the queue waits.
++      if (!job || job.status !== "pending" || !accepts(job)) {
+         continue;
+       }
+       if (lastPlaylistType && String(job.playlistType || "") === String(lastPlaylistType || "")) {
+@@ -1626,10 +1634,18 @@
+       }) &&
+       accepts(job);
+     this.pendingFreshQueue = this._compactPendingQueue(this.pendingFreshQueue);
+-    const nextFresh = this._pickPendingFromQueue(this.pendingFreshQueue, lastPlaylistType);
++    const nextFresh = this._pickPendingFromQueue(
++      this.pendingFreshQueue,
++      lastPlaylistType,
++      canProcess,
++    );
+     if (canProcess(nextFresh)) return nextFresh;
+     this.pendingRetryQueue = this._compactPendingQueue(this.pendingRetryQueue);
+-    const nextRetry = this._pickPendingFromQueue(this.pendingRetryQueue, lastPlaylistType);
++    const nextRetry = this._pickPendingFromQueue(
++      this.pendingRetryQueue,
++      lastPlaylistType,
++      canProcess,
++    );
+     if (canProcess(nextRetry)) return nextRetry;
+     if (this.pendingSet.size > 0) {
+       for (const id of this.pendingSet) {

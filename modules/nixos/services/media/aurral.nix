@@ -17,6 +17,8 @@ let
   # box early in boot.
   libraryFolder = "/mnt/chroma/media/music/library";
   playlistFolder = "/mnt/chroma/media/music/playlists";
+  maxWorkerConcurrency = 8;
+  workerConcurrency = 6;
 in
 {
   # Raw client secret for kanidm's basicSecretFile.
@@ -52,6 +54,24 @@ in
     # from the requesting artist's settings, and aurral used to send the
     # folder along, so What So Not ended up in "Buunshin (1)".
     #
+    # aurral-worker-queue.patch: the download worker took the next job
+    # without checking it could run it. When the head of the queue was
+    # already running or waiting for metadata, a free slot fell back to the
+    # oldest pending job, and a library track that only waits for a playlist
+    # copy deferred itself thousands of times an hour, so a slot spun on it
+    # while the playlist queue sat there.
+    #
+    # The worker's concurrency (how many tracks search and resolve at once)
+    # is capped at 3 upstream; raised so a 1000+ track import goes faster.
+    # Soulseek searches are still started at most every 5 seconds overall.
+    # The value itself is set by aurral-worker-settings below.
+    #
+    # Stopgap until aurral is on 3.1+: BrainzMash, the metadata server 2.x
+    # uses, now answers aurral with HTTP 500 (upstream moved to its own server,
+    # lklynet/aurral#2026). A track whose album can't be read waited 30
+    # minutes for it before searching, so the whole queue crawled. Now it
+    # searches right away and matches on artist, title and duration.
+    #
     # All are applied to the installed files; tests are skipped since only
     # those change and the rest is upstream's code, tested in nixpkgs.
     package = pkgs.aurral.overrideAttrs (old: {
@@ -59,8 +79,16 @@ in
       postInstall = (old.postInstall or "") + ''
         substituteInPlace $out/lib/aurral/backend/db/helpers/users.ts \
           --replace-fail "accessFlow: false," "accessFlow: true,"
+        substituteInPlace $out/lib/aurral/backend/services/downloadJobs/downloadWorker.ts \
+          --replace-fail "const MAX_CONCURRENCY = 3;" "const MAX_CONCURRENCY = ${toString maxWorkerConcurrency};"
+        substituteInPlace $out/lib/aurral/backend/routes/playlists/handlers/worker.ts \
+          --replace-fail "parsed > 3" "parsed > ${toString maxWorkerConcurrency}" \
+          --replace-fail "between 1 and 3" "between 1 and ${toString maxWorkerConcurrency}"
+        substituteInPlace $out/lib/aurral/backend/services/releaseResolver.ts \
+          --replace-fail "export const MAX_RELEASE_WAITS = 30;" "export const MAX_RELEASE_WAITS = 0;"
         patch -d $out/lib/aurral -p1 < ${./aurral-explicit.patch}
         patch -d $out/lib/aurral -p1 < ${./aurral-album-artist-path.patch}
+        patch -d $out/lib/aurral -p1 < ${./aurral-worker-queue.patch}
       '';
     });
 
@@ -135,6 +163,36 @@ in
       curl --fail-with-body --silent --show-error --max-time 900 \
         --request POST --header "X-Api-Key: $key" \
         http://127.0.0.1:${toString port}/api/playlists/research-missing
+      echo
+    '';
+    serviceConfig.Type = "oneshot";
+  };
+
+  # The worker's concurrency lives in aurral's DB. Set on every aurral start,
+  # and daily to undo changes made in the UI (which only offers up to 3).
+  systemd.services.aurral-worker-settings = {
+    description = "set aurral's download worker concurrency";
+    after = [ "aurral.service" ];
+    requires = [ "aurral.service" ];
+    wantedBy = [ "aurral.service" ];
+    startAt = "daily";
+    path = with pkgs; [
+      curl
+      sqlite
+    ];
+    script = ''
+      key="$(sqlite3 -readonly /var/lib/aurral/aurral.db \
+        "SELECT json_extract(value, '$.general.apiKey') FROM settings WHERE key = 'integrations'")"
+      if [ -z "$key" ]; then
+        echo "aurral has no API key yet" >&2
+        exit 1
+      fi
+      curl --fail-with-body --silent --show-error --max-time 60 \
+        --retry 30 --retry-delay 2 --retry-connrefused --retry-all-errors \
+        --request PUT --header "X-Api-Key: $key" \
+        --header "Content-Type: application/json" \
+        --data '{"concurrency": ${toString workerConcurrency}}' \
+        http://127.0.0.1:${toString port}/api/playlists/worker/settings
       echo
     '';
     serviceConfig.Type = "oneshot";
