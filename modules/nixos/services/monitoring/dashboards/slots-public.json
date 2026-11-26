@@ -4296,7 +4296,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Balances, levels and stickers are recorded from when the dashboard was set up; rounds and who played go back to the first round.",
+        "content": "How many play, and how far they have come. Who they are stays on the private dashboard.",
         "code": {
           "language": "plaintext",
           "showLineNumbers": false,
@@ -4411,607 +4411,6 @@
     },
     {
       "id": 30,
-      "type": "timeseries",
-      "title": "Rounds by player",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 16,
-        "x": 8,
-        "y": 92
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "sum by (user)(sum_over_time(slots_player_rounds{user=~\".*\"}[$__interval] offset -$__interval))",
-          "legendFormat": "{{user}}",
-          "instant": false,
-          "range": true
-        }
-      ],
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "table",
-          "placement": "right",
-          "calcs": [
-            "sum"
-          ],
-          "sortBy": "Total",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc",
-          "hideZeros": true
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "bars",
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "fillOpacity": 85,
-            "gradientMode": "none",
-            "spanNulls": true,
-            "showPoints": "never",
-            "pointSize": 4,
-            "barAlignment": 1,
-            "stacking": {
-              "mode": "normal",
-              "group": "A"
-            },
-            "axisPlacement": "auto",
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "transparent",
-                "value": null
-              }
-            ]
-          },
-          "min": 0,
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "maxDataPoints": 60,
-      "interval": "5m"
-    },
-    {
-      "id": 31,
-      "type": "table",
-      "title": "Leaderboard",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "h": 13,
-        "w": 24,
-        "x": 0,
-        "y": 101
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_balance{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_level{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "C",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_xp{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "D",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_rounds_total{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "E",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_wagered_total{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "F",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_won_total{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "G",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_biggest_win{user=~\".*\"}[15m]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        },
-        {
-          "refId": "H",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_stickers{user=~\".*\"}[1h]))",
-          "legendFormat": "",
-          "instant": true,
-          "range": false,
-          "format": "table"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "joinByField",
-          "options": {
-            "byField": "user",
-            "mode": "outer"
-          }
-        },
-        {
-          "id": "filterFieldsByName",
-          "options": {
-            "include": {
-              "pattern": "^(user|Value #.*)$"
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "indexByName": {
-              "user": 0,
-              "Value #A": 1,
-              "Value #B": 2,
-              "Value #C": 3,
-              "Value #D": 4,
-              "Value #E": 5,
-              "Value #F": 6,
-              "Value #G": 7,
-              "Value #H": 8
-            },
-            "renameByName": {
-              "Value #A": "Balance",
-              "Value #B": "Level",
-              "Value #C": "XP",
-              "Value #D": "Rounds",
-              "Value #E": "Wagered",
-              "Value #F": "Won",
-              "Value #G": "Biggest win",
-              "Value #H": "Stickers",
-              "user": "Player"
-            }
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "md",
-        "footer": {
-          "show": false,
-          "reducer": [
-            "sum"
-          ],
-          "fields": ""
-        },
-        "sortBy": [
-          {
-            "displayName": "Balance",
-            "desc": true
-          }
-        ]
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Balance"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Level"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "none"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "XP"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Rounds"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Wagered"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Won"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Biggest win"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "short"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Stickers"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "none"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Player"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": []
-              },
-              {
-                "id": "custom.width",
-                "value": 170
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Balance"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "gauge",
-                  "mode": "basic",
-                  "valueDisplayMode": "text"
-                }
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "#e0b400"
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 220
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": 32,
-      "type": "bargauge",
-      "title": "Up or down in the time range",
-      "description": "What each player's rounds paid them less what they staked.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 8,
-        "x": 0,
-        "y": 114
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "sort_desc(sum by (user)(sum_over_time(slots_player_net_coins{user=~\".*\"}[$__range])))",
-          "legendFormat": "{{user}}",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "options": {
-        "orientation": "horizontal",
-        "displayMode": "basic",
-        "valueMode": "color",
-        "namePlacement": "left",
-        "showUnfilled": true,
-        "sizing": "manual",
-        "minVizHeight": 20,
-        "maxVizHeight": 22,
-        "minVizWidth": 8,
-        "text": {
-          "titleSize": 13,
-          "valueSize": 14
-        },
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": null,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#f2495c",
-                "value": null
-              },
-              {
-                "color": "#73bf69",
-                "value": 0
-              }
-            ]
-          },
-          "mappings": []
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 33,
-      "type": "timeseries",
-      "title": "Balances",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 16,
-        "x": 8,
-        "y": 114
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max by (user) (last_over_time(slots_player_balance{user=~\".*\"}[$__interval] offset -$__interval))",
-          "legendFormat": "{{user}}",
-          "instant": false,
-          "range": true
-        }
-      ],
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "table",
-          "placement": "right",
-          "calcs": [
-            "lastNotNull"
-          ],
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc",
-          "hideZeros": true
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "opacity",
-            "spanNulls": true,
-            "showPoints": "never",
-            "pointSize": 4,
-            "barAlignment": 1,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            },
-            "axisPlacement": "auto",
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "transparent",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 34,
       "type": "bargauge",
       "title": "Players on each level",
       "description": "How many players have reached each level.",
@@ -5022,8 +4421,8 @@
       "gridPos": {
         "h": 9,
         "w": 8,
-        "x": 0,
-        "y": 126
+        "x": 8,
+        "y": 92
       },
       "targets": [
         {
@@ -5082,7 +4481,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 31,
       "type": "timeseries",
       "title": "New players",
       "description": "",
@@ -5093,8 +4492,8 @@
       "gridPos": {
         "h": 9,
         "w": 8,
-        "x": 8,
-        "y": 126
+        "x": 16,
+        "y": 92
       },
       "targets": [
         {
@@ -5188,78 +4587,7 @@
       "interval": "5m"
     },
     {
-      "id": 36,
-      "type": "bargauge",
-      "title": "Stickers collected",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 126
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "sort_desc(max by (user) (last_over_time(slots_player_stickers{user=~\".*\"}[1h])))",
-          "legendFormat": "{{user}}",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "options": {
-        "orientation": "horizontal",
-        "displayMode": "gradient",
-        "valueMode": "color",
-        "namePlacement": "left",
-        "showUnfilled": true,
-        "sizing": "manual",
-        "minVizHeight": 20,
-        "maxVizHeight": 22,
-        "minVizWidth": 8,
-        "text": {
-          "titleSize": 13,
-          "valueSize": 14
-        },
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "min": 0,
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#ff7383",
-                "value": null
-              }
-            ]
-          },
-          "mappings": []
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 37,
+      "id": 32,
       "type": "row",
       "title": "Extras: gamble, rewards claimed, games in progress",
       "collapsed": true,
@@ -5267,11 +4595,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 135
+        "y": 101
       },
       "panels": [
         {
-          "id": 38,
+          "id": 33,
           "type": "timeseries",
           "title": "Gamble",
           "description": "Red or black after a win. A fair bet: the net should wander around zero.",
@@ -5283,7 +4611,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 136
+            "y": 102
           },
           "targets": [
             {
@@ -5401,7 +4729,7 @@
           "interval": "5m"
         },
         {
-          "id": 39,
+          "id": 34,
           "type": "timeseries",
           "title": "Rewards claimed",
           "description": "",
@@ -5413,7 +4741,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 136
+            "y": 102
           },
           "targets": [
             {
@@ -5682,7 +5010,7 @@
           "interval": "5m"
         },
         {
-          "id": 40,
+          "id": 35,
           "type": "bargauge",
           "title": "Coins handed out, by kind",
           "description": "",
@@ -5694,7 +5022,7 @@
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 145
+            "y": 111
           },
           "targets": [
             {
@@ -5944,7 +5272,7 @@
           }
         },
         {
-          "id": 41,
+          "id": 36,
           "type": "bargauge",
           "title": "Games in progress",
           "description": "Mines fields, hands, climbs and runs waiting for a player.",
@@ -5956,7 +5284,7 @@
             "h": 10,
             "w": 8,
             "x": 8,
-            "y": 145
+            "y": 111
           },
           "targets": [
             {
@@ -6415,7 +5743,7 @@
           }
         },
         {
-          "id": 42,
+          "id": 37,
           "type": "stat",
           "title": "Replays kept",
           "description": "Rounds big enough for the live feed, kept to be watched again.",
@@ -6427,7 +5755,7 @@
             "h": 10,
             "w": 4,
             "x": 16,
-            "y": 145
+            "y": 111
           },
           "targets": [
             {
@@ -6481,7 +5809,7 @@
           }
         },
         {
-          "id": 43,
+          "id": 38,
           "type": "stat",
           "title": "Richest player holds",
           "description": "",
@@ -6493,7 +5821,7 @@
             "h": 10,
             "w": 4,
             "x": 20,
-            "y": 145
+            "y": 111
           },
           "targets": [
             {
