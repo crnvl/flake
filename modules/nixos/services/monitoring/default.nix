@@ -166,6 +166,11 @@ in
                 alert = "SystemdUnitFailed";
                 expr = ''systemd_unit_state{state="failed"} == 1'';
                 for = "5m";
+                # Periodic oneshot timers briefly leave the "failed" state
+                # (entering "activating") on each retry; hold the alert across
+                # those runs so a sustained outage doesn't resolve and re-fire
+                # on every timer tick.
+                keep_firing_for = "15m";
                 labels.severity = "warning";
                 annotations = {
                   summary = "A background service ({{ $labels.name }}) has failed.";

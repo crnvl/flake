@@ -46,24 +46,30 @@ def key(artist, title):
     return f"{norm(artist)}\t{norm(title)}"
 
 
-def http(url, data=None, headers=None):
+def http(url, data=None, headers=None, label=None):
     body = urllib.parse.urlencode(data).encode() if data is not None else None
     req = urllib.request.Request(url, data=body, headers=headers or {})
+    name = label or url.split("?")[0]
+    last_err = None
     for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=60) as resp:
                 return json.load(resp)
         except urllib.error.HTTPError as err:
+            try:
+                payload = json.load(err)
+            except ValueError:
+                payload = err.reason
+            detail = f"HTTP {err.code} ({payload})"
             if err.code < 500 and err.code != 429:
-                try:
-                    payload = json.load(err)
-                except ValueError:
-                    payload = err.reason
-                raise RuntimeError(f"{url.split('?')[0]}: {payload}") from err
-        except (urllib.error.URLError, TimeoutError):
-            pass
-        time.sleep(2 ** attempt)
-    raise RuntimeError(f"{url.split('?')[0]}: giving up after retries")
+                raise RuntimeError(f"{name}: {detail}") from err
+            last_err = (detail, err)
+        except (urllib.error.URLError, TimeoutError) as err:
+            last_err = (str(err), err)
+        if attempt < 4:
+            time.sleep(2 ** attempt)
+    detail, err = last_err
+    raise RuntimeError(f"{name}: giving up after retries ({detail})") from err
 
 
 def lastfm(method, sk=None, post=False, **params):
@@ -73,20 +79,21 @@ def lastfm(method, sk=None, post=False, **params):
         sig = "".join(k + params[k] for k in sorted(params)) + SECRET
         params["api_sig"] = hashlib.md5(sig.encode()).hexdigest()
     params["format"] = "json"
+    label = f"last.fm {method}"
     if post:
-        result = http(LASTFM, data=params)
+        result = http(LASTFM, data=params, label=label)
         time.sleep(0.25)
     else:
-        result = http(LASTFM + "?" + urllib.parse.urlencode(params))
+        result = http(LASTFM + "?" + urllib.parse.urlencode(params), label=label)
     if "error" in result:
-        raise RuntimeError(f"last.fm {method}: {result.get('message')}")
+        raise RuntimeError(f"{label}: {result.get('message')}")
     return result
 
 
 def navidrome(user, endpoint, **params):
     params = {"v": "1.16.1", "c": "lastfm-loves", "f": "json", **params}
     url = f"{NAVIDROME}/{endpoint}?" + urllib.parse.urlencode(params, doseq=True)
-    result = http(url, headers={"Remote-User": user})["subsonic-response"]
+    result = http(url, headers={"Remote-User": user}, label=f"navidrome {endpoint}")["subsonic-response"]
     if result["status"] != "ok":
         raise RuntimeError(f"navidrome {endpoint}: {result.get('error')}")
     return result
