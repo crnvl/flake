@@ -302,6 +302,14 @@ in
             "infer_users"
           ];
         };
+
+        ellie = {
+          displayName = "ellie";
+          mailAddresses = [ "ellie@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       # Icons shown in the Kanidm app list; see ./kanidm-logos.
