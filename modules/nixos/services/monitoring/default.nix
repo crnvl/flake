@@ -15,6 +15,13 @@ let
   # https://status.shimme.rs/ redirects straight to it.
   publicDashboardToken = "3d7dabda6fbb466290e14b1a59568743";
 
+  # The slots dashboard's public copy (dashboards/slots-public.json), shared
+  # at https://insights.slots.shimme.rs/ under this token. Unlike the status
+  # page it is shared by grafana-setup below, so nothing is pasted by hand:
+  # any 32 hex digits will do.
+  slotsInsightsDomain = "insights.slots.shimme.rs";
+  slotsInsightsToken = "b259a437585ba214394bfdc838e5dbb1";
+
   # Friendly names end up as the "service" label, so panels can use
   # {{service}} in their legend instead of the raw instance URL.
   httpsProbes = {
@@ -120,6 +127,15 @@ in
     owner = "kanidm";
     group = "grafana";
     mode = "0440";
+  };
+
+  # Grafana's own admin account. It was created with the default password,
+  # which the admin_password setting cannot change afterwards; grafana-setup
+  # changes it once. Read it with agenix if you ever need it.
+  age.secrets.grafana-admin-password = {
+    file = ../../../../hosts/shimmers/secrets/grafana-admin-password.age;
+    owner = "grafana";
+    group = "grafana";
   };
 
   age.secrets.grafana-secret-key = {
@@ -361,6 +377,8 @@ in
       security = {
         cookie_secure = true;
         secret_key = "$__file{${config.age.secrets.grafana-secret-key.path}}";
+        # Only used when the admin account is first created; see grafana-setup.
+        admin_password = "$__file{${config.age.secrets.grafana-admin-password.path}}";
       };
 
       # Shared dashboards, exposed read-only via status.shimme.rs below.
@@ -465,4 +483,86 @@ in
 
   # Public status page.
   services.nginx.virtualHosts.${statusDomain} = mkPublicDashboardHost publicDashboardToken;
+
+  # Public slots dashboard.
+  services.nginx.virtualHosts.${slotsInsightsDomain} = mkPublicDashboardHost slotsInsightsToken;
+
+  # What grafana can only be told through its API: the admin password (see
+  # age.secrets.grafana-admin-password) and which dashboards are shared.
+  # Idempotent, so it simply runs after every start of grafana.
+  systemd.services.grafana-setup = {
+    description = "grafana: admin password and shared dashboards";
+    after = [ "grafana.service" ];
+    requires = [ "grafana.service" ];
+    wantedBy = [
+      "grafana.service"
+      "multi-user.target"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      LoadCredential = [ "admin-password:${config.age.secrets.grafana-admin-password.path}" ];
+      PrivateTmp = true;
+      ExecStart = lib.getExe (
+        pkgs.writeShellApplication {
+          name = "grafana-setup";
+          runtimeInputs = [
+            pkgs.curl
+            pkgs.jq
+          ];
+          text = ''
+            api=http://127.0.0.1:3000
+            password=$(cat "$CREDENTIALS_DIRECTORY/admin-password")
+
+            # Credentials go to curl in files, not on its command line, where
+            # every user on the host could read them.
+            mine=$(mktemp)
+            default=$(mktemp)
+            printf 'user = "admin:%s"\n' "$password" > "$mine"
+            printf 'user = "admin:admin"\n' > "$default"
+            as() {
+              local auth=$1
+              shift
+              curl --fail --silent --show-error --config "$auth" "$@"
+            }
+
+            for _ in $(seq 60); do
+              curl --fail --silent --output /dev/null "$api/api/health" && break
+              sleep 2
+            done
+
+            # Asking is expected to fail until the password has been set,
+            # and the sharing below until it has been shared: quietly.
+            if ! as "$mine" --output /dev/null "$api/api/user" 2> /dev/null; then
+              echo "replacing grafana's default admin password"
+              jq -n --arg new "$password" \
+                '{oldPassword: "admin", newPassword: $new, confirmNew: $new}' |
+                as "$default" --output /dev/null -X PUT -H 'Content-Type: application/json' \
+                  --data @- "$api/api/user/password"
+            fi
+
+            share() {
+              local uid=$1 token=$2
+              for _ in $(seq 30); do
+                as "$mine" --output /dev/null "$api/api/dashboards/uid/$uid" && break
+                sleep 2
+              done
+              if as "$mine" "$api/api/dashboards/uid/$uid/public-dashboards" 2> /dev/null |
+                jq -e '.accessToken' > /dev/null; then
+                return 0
+              fi
+              echo "sharing dashboard $uid"
+              jq -n --arg token "$token" \
+                '{isEnabled: true, share: "public", accessToken: $token,
+                  timeSelectionEnabled: true, annotationsEnabled: true}' |
+                as "$mine" --output /dev/null -X POST -H 'Content-Type: application/json' \
+                  --data @- "$api/api/dashboards/uid/$uid/public-dashboards"
+            }
+
+            share slots-public ${slotsInsightsToken}
+          '';
+        }
+      );
+    };
+  };
 }

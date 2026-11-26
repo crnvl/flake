@@ -20,6 +20,7 @@ let
       "oauth2-proxy-cookie-secret"
       "navidrome-lastfm-env"
       "grafana-secret-key"
+      "grafana-admin-password"
       "alertmanager-env"
       "mullvad-wg.conf"
       "caelo-env"
