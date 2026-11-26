@@ -65,6 +65,14 @@ in
       # navidrome-lastfm-env below; each user links their own Last.fm
       # account in the web UI (Personal > Scrobble to Last.fm).
       LastFM.Enabled = true;
+
+      # aurral writes its playlists as M3U files into its library folder (see
+      # aurral.nix). Navidrome imports those as owned by its first admin
+      # ("admin"), and private by default, so the people who made them in
+      # aurral couldn't see them. Public by default instead; that applies to
+      # playlists made in Navidrome too, which each user can still make
+      # private.
+      DefaultPlaylistPublicVisibility = true;
     };
   };
 
