@@ -48,6 +48,7 @@
     ../../modules/nixos/services/katzentempel.nix
     ../../modules/nixos/services/infer.nix
     ../../modules/nixos/services/slots.nix
+    ../../modules/nixos/services/fdroid.nix
   ];
 
   system.stateVersion = "26.05";
