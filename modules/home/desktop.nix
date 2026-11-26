@@ -4,6 +4,7 @@
   imports = [
     ./artcraft.nix
     ./battery.nix
+    ./claude-code.nix
     ./gpg.nix
     ./music.nix
     ./niri.nix
