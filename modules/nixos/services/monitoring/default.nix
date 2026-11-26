@@ -30,6 +30,8 @@ let
     "Share" = "https://share.shimme.rs";
     # The portal/API process only; never touches (or wakes) the paid GPU.
     "Infer" = "https://infer.shimme.rs/healthz";
+    # Answers without signing in; the dashboard's site stat reads this too.
+    "Slots" = "https://slots.shimme.rs/healthz";
     "Webmail" = "https://mail.shimme.rs";
     "Grafana" = "https://${domain}";
   }

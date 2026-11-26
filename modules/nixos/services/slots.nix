@@ -26,6 +26,10 @@
     # With a handful of players a 20x win is rare; from 10x the lobby's live
     # feed and ticker have something to show.
     feedMinWinX = 10;
+    # The numbers behind the slots dashboard in grafana (monitoring/
+    # dashboards/slots.json, written by docs/grafana/dashboard.py in the
+    # slots repo), history included.
+    victoriametricsUrl = "http://127.0.0.1:8428";
   };
 
   # The live feed is a long-lived event stream; the app tells nginx not to
@@ -36,7 +40,10 @@
   };
 
   systemd.services.slots = {
-    after = [ "kanidm.service" ];
+    after = [
+      "kanidm.service"
+      "victoriametrics.service"
+    ];
     wants = [ "kanidm.service" ];
   };
 }
