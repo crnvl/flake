@@ -310,6 +310,22 @@ in
             "jellyfin_users"
           ];
         };
+
+        mia = {
+          displayName = "mia";
+          mailAddresses = [ "mia@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
+
+        celly = {
+          displayName = "celly";
+          mailAddresses = [ "celly@shimme.rs" ];
+          groups = [
+            "jellyfin_users"
+          ];
+        };
       };
 
       # Icons shown in the Kanidm app list; see ./kanidm-logos.
