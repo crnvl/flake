@@ -1547,6 +1547,44 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "backroom_takings"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c9a0ff"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Back room takings"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "backroom_visit"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffc93c"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "High rollers"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "challenge"
             },
             "properties": [
@@ -1988,6 +2026,44 @@
               {
                 "id": "displayName",
                 "value": "Back room chest"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "backroom_takings"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c9a0ff"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Back room takings"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "backroom_visit"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffc93c"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "High rollers"
               }
             ]
           },
@@ -8058,7 +8134,7 @@
     {
       "id": 52,
       "type": "row",
-      "title": "Beside the tables: tokens, the back room, the shop, the events",
+      "title": "Notifications: who asked for what, and what came of it",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -8081,7 +8157,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**Tokens** are earned by the back room and by taking part, and are never coins; violet is tokens. The counts below are how things stand, read every five minutes, from the day these features went live.",
+        "content": "From src/push.rs: the devices players turned notifications on for, what was to be told and what came of it (sent; failed when no device took it; or held back because the kind was off, the site was open, the player paused or hit their daily cap), and the taps on them. What quiet hours put off is not counted until it goes out.",
         "code": {
           "language": "plaintext",
           "showLineNumbers": false,
@@ -8091,6 +8167,1078 @@
     },
     {
       "id": 54,
+      "type": "stat",
+      "title": "Devices",
+      "description": "Browsers and phones that take notifications.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_push_devices{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#5794f2",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 55,
+      "type": "stat",
+      "title": "Players",
+      "description": "Players with at least one such device.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_push_players{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#5794f2",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 56,
+      "type": "stat",
+      "title": "Sent",
+      "description": "Notifications that reached at least one device in the time range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum(sum_over_time(slots_push_told{status=\"sent\"}[$__range])) or vector(0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#73bf69",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 57,
+      "type": "stat",
+      "title": "Tapped",
+      "description": "Taps for every notification sent, in the time range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "(sum(sum_over_time(slots_push_clicks{}[$__range])) or vector(0)) / ((sum(sum_over_time(slots_push_told{status=\"sent\"}[$__range])) or vector(0)) > 0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#b877d9",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [],
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 58,
+      "type": "stat",
+      "title": "Paused now",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_push_paused{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 59,
+      "type": "stat",
+      "title": "Failed devices",
+      "description": "Deliveries a push service refused, or that never got there. A device the service says is gone is dropped.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 168
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum(sum_over_time(slots_push_failed_devices{}[$__range])) or vector(0)",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 60,
+      "type": "timeseries",
+      "title": "Sent, by kind",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 173
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (kind)(sum_over_time(slots_push_told{status=\"sent\"}[$__interval] offset -$__interval))",
+          "legendFormat": "{{kind}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": true
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "spanNulls": true,
+            "showPoints": "never",
+            "pointSize": 4,
+            "barAlignment": 1,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "maxDataPoints": 40,
+      "interval": "5m"
+    },
+    {
+      "id": 61,
+      "type": "bargauge",
+      "title": "What came of them",
+      "description": "active: the site was open, so it showed in the page. off: the player switched the kind off. capped: over their daily cap. paused: they paused all.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 12,
+        "y": 173
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(sum by (status)(sum_over_time(slots_push_told{}[$__range])))",
+          "legendFormat": "{{status}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "sizing": "manual",
+        "minVizHeight": 20,
+        "maxVizHeight": 22,
+        "minVizWidth": 8,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 14
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#5794f2",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 62,
+      "type": "bargauge",
+      "title": "Taps, by kind",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 173
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(sum by (kind)(sum_over_time(slots_push_clicks{}[$__range])))",
+          "legendFormat": "{{kind}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "sizing": "manual",
+        "minVizHeight": 20,
+        "maxVizHeight": 22,
+        "minVizWidth": 8,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 14
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#b877d9",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 63,
+      "type": "bargauge",
+      "title": "Switched from the default",
+      "description": "Players who switched a kind off that is on by default (off), or on that is off by default (on). A kind many switch off is one nobody wants.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 182
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(max by (kind,choice) (last_over_time(slots_push_switched{}[15m])) > 0)",
+          "legendFormat": "{{kind}} {{choice}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "sizing": "manual",
+        "minVizHeight": 20,
+        "maxVizHeight": 22,
+        "minVizWidth": 8,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 14
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 64,
+      "type": "stat",
+      "title": "Quiet hours off",
+      "description": "Players who want notifications at night too.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 12,
+        "y": 182
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_push_quiet_off{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 65,
+      "type": "stat",
+      "title": "Cap changed",
+      "description": "Players who picked another daily cap than 4.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 182
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_push_cap_changed{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8e8e8e",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 66,
+      "type": "bargauge",
+      "title": "Clips and shared links",
+      "description": "Replays passed on: clip_video and clip_gif are clips made, clip_share one sent through the phone's share sheet, clip_download one saved, link_copy a replay link copied, shared_visit someone arriving through such a link.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 191
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(sum by (what)(sum_over_time(slots_player_seen{user=~\".*\",what=~\"app[.](clip|link|shared)_.*\"}[$__range])))",
+          "legendFormat": "{{what}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "sizing": "manual",
+        "minVizHeight": 20,
+        "maxVizHeight": 22,
+        "minVizWidth": 8,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 14
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#b877d9",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 67,
+      "type": "stat",
+      "title": "Stills for link previews",
+      "description": "Replays with a still: the picture Discord, WhatsApp, Telegram and X show beside the link. The first clip of a replay leaves it.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 191
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "last_over_time(slots_replay_posters{}[15m])",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#b877d9",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 68,
+      "type": "stat",
+      "title": "Link previews served",
+      "description": "A replay's link opened without a session, in the time range: the services that draw previews, and friends not signed in yet. Counted since the server last started.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 191
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum(increase(slots_link_previews_total[$__range]))",
+          "legendFormat": "",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "text": {
+          "valueSize": 36
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#b877d9",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [],
+          "decimals": 0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 69,
+      "type": "row",
+      "title": "Beside the tables: tokens, the back room, the shop, the events",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 199
+      },
+      "panels": []
+    },
+    {
+      "id": 70,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 200
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Tokens** are earned by the back room and by taking part, and are never coins; violet is tokens. The counts below are how things stand, read every five minutes, from the day these features went live.",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      }
+    },
+    {
+      "id": 71,
       "type": "stat",
       "title": "Tokens held",
       "description": "All players' tokens together.",
@@ -8102,7 +9250,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8156,7 +9304,7 @@
       }
     },
     {
-      "id": 55,
+      "id": 72,
       "type": "stat",
       "title": "Tokens earned",
       "description": "In the dashboard's time range.",
@@ -8168,7 +9316,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8223,7 +9371,7 @@
       }
     },
     {
-      "id": 56,
+      "id": 73,
       "type": "stat",
       "title": "Tokens spent",
       "description": "On the back room's chest and in the shop, in the dashboard's time range.",
@@ -8235,7 +9383,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8290,7 +9438,7 @@
       }
     },
     {
-      "id": 57,
+      "id": 74,
       "type": "stat",
       "title": "Machines earning",
       "description": "Machines standing on back room floors right now.",
@@ -8302,7 +9450,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8356,7 +9504,7 @@
       }
     },
     {
-      "id": 58,
+      "id": 75,
       "type": "stat",
       "title": "Bought in the shop",
       "description": "Cosmetics owned, for coins or tokens, by everyone together.",
@@ -8368,7 +9516,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8422,7 +9570,7 @@
       }
     },
     {
-      "id": 59,
+      "id": 76,
       "type": "stat",
       "title": "Prestige stars",
       "description": "Stars held by everyone together.",
@@ -8434,7 +9582,7 @@
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 168
+        "y": 202
       },
       "targets": [
         {
@@ -8488,7 +9636,7 @@
       }
     },
     {
-      "id": 60,
+      "id": 77,
       "type": "timeseries",
       "title": "Tokens earned and spent",
       "description": "Earned above the line, by what for; spent below it.",
@@ -8500,7 +9648,7 @@
         "h": 10,
         "w": 16,
         "x": 0,
-        "y": 172
+        "y": 206
       },
       "targets": [
         {
@@ -8816,7 +9964,7 @@
       "interval": "5m"
     },
     {
-      "id": 61,
+      "id": 78,
       "type": "piechart",
       "title": "Where tokens come from",
       "description": "Tokens earned in the time range, by kind.",
@@ -8828,7 +9976,7 @@
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 172
+        "y": 206
       },
       "targets": [
         {
@@ -9109,7 +10257,7 @@
       }
     },
     {
-      "id": 62,
+      "id": 79,
       "type": "timeseries",
       "title": "Tokens held by everyone",
       "description": "When this only climbs, there is too little to spend tokens on.",
@@ -9121,7 +10269,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 182
+        "y": 216
       },
       "targets": [
         {
@@ -9212,7 +10360,7 @@
       }
     },
     {
-      "id": 63,
+      "id": 80,
       "type": "timeseries",
       "title": "Back rooms",
       "description": "What players have built with coins. A machine starts on level 1, so levels above the number of machines are levels that were bought.",
@@ -9224,7 +10372,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 182
+        "y": 216
       },
       "targets": [
         {
@@ -9344,7 +10492,7 @@
       }
     },
     {
-      "id": 64,
+      "id": 81,
       "type": "timeseries",
       "title": "Runner, chests and tips",
       "description": "The day's counts start again at midnight, the server's time.",
@@ -9356,7 +10504,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 182
+        "y": 216
       },
       "targets": [
         {
@@ -9515,7 +10663,7 @@
       }
     },
     {
-      "id": 65,
+      "id": 82,
       "type": "bargauge",
       "title": "Machines on the floors",
       "description": "Which games stand in back rooms right now.",
@@ -9527,7 +10675,7 @@
         "h": 10,
         "w": 8,
         "x": 0,
-        "y": 191
+        "y": 225
       },
       "targets": [
         {
@@ -10006,7 +11154,773 @@
       }
     },
     {
-      "id": 66,
+      "id": 83,
+      "type": "timeseries",
+      "title": "Coins from the back room",
+      "description": "The machines take coins by the hour into the safe (at most 12,500 a floor), and the day's chest grows with the floor. None of it grows with betting. What was collected is under Where coins come from, as Back room takings.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 225
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(last_over_time(slots_backroom_coins_an_hour{}[$__interval] offset -$__interval))",
+          "legendFormat": "the floors take an hour",
+          "instant": false,
+          "range": true
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(last_over_time(slots_backroom_takings_waiting{}[$__interval] offset -$__interval))",
+          "legendFormat": "waiting in safes",
+          "instant": false,
+          "range": true
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(last_over_time(slots_backroom_chest_worth{}[$__interval] offset -$__interval))",
+          "legendFormat": "a chest is worth (average)",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": true
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "opacity",
+            "spanNulls": true,
+            "showPoints": "never",
+            "pointSize": 4,
+            "barAlignment": 1,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "the floors take an hour"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e0b400"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "waiting in safes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#9d6bff"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 84,
+      "type": "timeseries",
+      "title": "High rollers",
+      "description": "Floors a high roller visits today, the ones there now and not met yet, and the visits met. A visit lasts two hours; one not met is gone.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 225
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (state) (last_over_time(slots_backroom_visits_today{}[$__interval] offset -$__interval))",
+          "legendFormat": "{{state}}",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc",
+          "hideZeros": true
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "opacity",
+            "spanNulls": true,
+            "showPoints": "never",
+            "pointSize": 4,
+            "barAlignment": 1,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "offered"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#73bf69"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "here"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e0b400"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "met"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#f2495c"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 85,
+      "type": "bargauge",
+      "title": "Back room takings by game",
+      "description": "What the machines of each game take in coins an hour across all floors, before each floor's cap.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 235
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(max by (game) (last_over_time(slots_backroom_takings_of{}[15m])))",
+          "legendFormat": "{{game}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "sizing": "manual",
+        "minVizHeight": 20,
+        "maxVizHeight": 22,
+        "minVizWidth": 8,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 14
+        },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#5794f2",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [],
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gummy"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e05fd0"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Gummy Galaxy"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "book"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e0b400"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Book of Shimmers"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "neon"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#00c8ff"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Neon Sevens"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "dragon"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e02f44"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Dragon's Hoard"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ways"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#37872d"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Jungle Ways"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "lagoon"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1f9fb4"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Lucky Lagoon"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trail"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8ab8ff"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Summit Trail"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pirate"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#a0522d"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Pirate's Bounty"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "crash"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ff7f50"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Crash"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "plinko"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fade2a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Plinko"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mines"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#56a64b"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Mines"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "roulette"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c4162a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Roulette"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "hilo"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#a352cc"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Hi-Lo"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "towers"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#c8a46e"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Towers"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "poker"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3274d9"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Video Poker"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "deuces"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#b8322a"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Deuces Wild"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "blackjack"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1a7311"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Blackjack"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "dice"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#96d98d"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Dice"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "limbo"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffb357"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Limbo"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "keno"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#ffa6b0"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Keno"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scratch"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d683ce"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Scratch Cards"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5a6b8c"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Vault Run"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 86,
       "type": "timeseries",
       "title": "Shop sales",
       "description": "Cosmetics sold in each step. What they cost is under Where coins are spent and Tokens earned and spent.",
@@ -10018,7 +11932,7 @@
         "h": 10,
         "w": 8,
         "x": 8,
-        "y": 191
+        "y": 235
       },
       "targets": [
         {
@@ -10138,7 +12052,7 @@
       "interval": "5m"
     },
     {
-      "id": 67,
+      "id": 87,
       "type": "bargauge",
       "title": "What the shop has sold",
       "description": "How many players own each thing. What nobody owns is not listed: too dear, or not wanted.",
@@ -10150,7 +12064,7 @@
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 191
+        "y": 235
       },
       "targets": [
         {
@@ -10210,7 +12124,7 @@
       }
     },
     {
-      "id": 68,
+      "id": 88,
       "type": "timeseries",
       "title": "Daily seed and tournament",
       "description": "How many turn up. The seed's count starts again at midnight; the tournament's stands until the next one begins.",
@@ -10222,7 +12136,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 201
+        "y": 245
       },
       "targets": [
         {
@@ -10392,7 +12306,7 @@
       }
     },
     {
-      "id": 69,
+      "id": 89,
       "type": "timeseries",
       "title": "Shared goal",
       "description": "The week's meter against what it asks for: a tenth more than the week before managed, at least 1,500 and at most 10,000 rounds for each player then. Only rounds staked 1,000 coins or more count. Reached early every week, the target is too low.",
@@ -10404,7 +12318,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 201
+        "y": 245
       },
       "targets": [
         {
@@ -10522,7 +12436,7 @@
       }
     },
     {
-      "id": 70,
+      "id": 90,
       "type": "timeseries",
       "title": "Goal chests and bounties",
       "description": "This week's. Bounties that are never taken ask for too much; ones gone on Monday ask for too little.",
@@ -10534,7 +12448,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 201
+        "y": 245
       },
       "targets": [
         {
@@ -10643,7 +12557,7 @@
       }
     },
     {
-      "id": 71,
+      "id": 91,
       "type": "bargauge",
       "title": "Season: how far players have claimed",
       "description": "Players by the highest tier of the season's track they have claimed.",
@@ -10655,7 +12569,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 210
+        "y": 254
       },
       "targets": [
         {
@@ -10715,7 +12629,7 @@
       }
     },
     {
-      "id": 72,
+      "id": 92,
       "type": "bargauge",
       "title": "Mastery: ranks paid by game",
       "description": "Players paid for each rank on each game. Above Bronze a rank takes the game's feats (a big win, so many good wins), not rounds alone: games that stop at Bronze are ground at, not enjoyed.",
@@ -10727,7 +12641,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 210
+        "y": 254
       },
       "targets": [
         {
@@ -10787,7 +12701,7 @@
       }
     },
     {
-      "id": 73,
+      "id": 93,
       "type": "timeseries",
       "title": "Season, prestige and stickers",
       "description": "",
@@ -10799,7 +12713,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 210
+        "y": 254
       },
       "targets": [
         {
@@ -10919,7 +12833,7 @@
       }
     },
     {
-      "id": 74,
+      "id": 94,
       "type": "timeseries",
       "title": "The shop's weekly rotation",
       "description": "Three token-priced things are in the shop each week and leave on Monday. Sales that jump on Mondays mean the rotation is what gets tokens spent.",
@@ -10931,7 +12845,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 219
+        "y": 263
       },
       "targets": [
         {
@@ -11049,7 +12963,7 @@
       }
     },
     {
-      "id": 75,
+      "id": 95,
       "type": "timeseries",
       "title": "Crafting the missing ones",
       "description": "Pages a sticker short are what crafting is for: when they stay high while dust piles up, crafting costs too much or is not found.",
@@ -11061,7 +12975,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 219
+        "y": 263
       },
       "targets": [
         {
@@ -11170,7 +13084,7 @@
       }
     },
     {
-      "id": 76,
+      "id": 96,
       "type": "bargauge",
       "title": "Sticker trades",
       "description": "Every offer ever made, by how it ended; open ones are waiting.",
@@ -11182,7 +13096,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 219
+        "y": 263
       },
       "targets": [
         {
@@ -11242,7 +13156,7 @@
       }
     },
     {
-      "id": 77,
+      "id": 97,
       "type": "timeseries",
       "title": "First steps: how far new players get",
       "description": "New players on the three first steps. A step many reach and few claim is not seen; a chest that waits and is never opened is a player who did not come back.",
@@ -11254,7 +13168,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 228
+        "y": 272
       },
       "targets": [
         {
@@ -11427,7 +13341,7 @@
       }
     },
     {
-      "id": 78,
+      "id": 98,
       "type": "timeseries",
       "title": "Game of the day",
       "description": "The quiet game picked each day, with tokens for playing it. If its rounds do not rise above what the game gets on other days, the tokens are not worth the trip.",
@@ -11439,7 +13353,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 228
+        "y": 272
       },
       "targets": [
         {
@@ -11537,7 +13451,7 @@
       }
     },
     {
-      "id": 79,
+      "id": 99,
       "type": "timeseries",
       "title": "Playing together",
       "description": "Reactions on the feed's wins, records taken from someone else, and how often the feed, the weekly boards and the ghosts were opened (ghosts_passed: a run past yesterday's best). The opens count from the server's last start.",
@@ -11549,7 +13463,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 237
+        "y": 281
       },
       "targets": [
         {
@@ -11649,7 +13563,7 @@
       "interval": "5m"
     },
     {
-      "id": 80,
+      "id": 100,
       "type": "bargauge",
       "title": "Reactions by emoji",
       "description": "In the dashboard's time range.",
@@ -11661,7 +13575,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 237
+        "y": 281
       },
       "targets": [
         {
@@ -11721,7 +13635,7 @@
       }
     },
     {
-      "id": 81,
+      "id": 101,
       "type": "bargauge",
       "title": "Week's bests taken, by game",
       "description": "A round that took the week's best multiplier on its game from another player, from 10x up. Games where it never happens have nobody chasing them.",
@@ -11733,7 +13647,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 237
+        "y": 281
       },
       "targets": [
         {
@@ -12212,7 +14126,7 @@
       }
     },
     {
-      "id": 82,
+      "id": 102,
       "type": "row",
       "title": "Extras: gamble, rewards claimed, games in progress",
       "collapsed": true,
@@ -12220,11 +14134,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 246
+        "y": 290
       },
       "panels": [
         {
-          "id": 83,
+          "id": 103,
           "type": "timeseries",
           "title": "Gamble",
           "description": "Red or black after a win. A fair bet: the net should wander around zero.",
@@ -12236,7 +14150,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 247
+            "y": 291
           },
           "targets": [
             {
@@ -12354,7 +14268,7 @@
           "interval": "5m"
         },
         {
-          "id": 84,
+          "id": 104,
           "type": "timeseries",
           "title": "Rewards claimed",
           "description": "",
@@ -12366,7 +14280,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 247
+            "y": 291
           },
           "targets": [
             {
@@ -12689,6 +14603,44 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "backroom_takings"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#c9a0ff"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Back room takings"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "backroom_visit"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#ffc93c"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "High rollers"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "challenge"
                 },
                 "properties": [
@@ -12787,7 +14739,7 @@
           "interval": "5m"
         },
         {
-          "id": 85,
+          "id": 105,
           "type": "bargauge",
           "title": "Coins handed out, by kind",
           "description": "",
@@ -12799,7 +14751,7 @@
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 256
+            "y": 300
           },
           "targets": [
             {
@@ -13105,6 +15057,44 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "backroom_takings"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#c9a0ff"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "Back room takings"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "backroom_visit"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "#ffc93c"
+                    }
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "High rollers"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "challenge"
                 },
                 "properties": [
@@ -13201,7 +15191,7 @@
           }
         },
         {
-          "id": 86,
+          "id": 106,
           "type": "bargauge",
           "title": "Games in progress",
           "description": "Mines fields, hands, climbs and runs waiting for a player.",
@@ -13213,7 +15203,7 @@
             "h": 10,
             "w": 8,
             "x": 8,
-            "y": 256
+            "y": 300
           },
           "targets": [
             {
@@ -13691,7 +15681,7 @@
           }
         },
         {
-          "id": 87,
+          "id": 107,
           "type": "stat",
           "title": "Replays kept",
           "description": "Rounds big enough for the live feed, kept to be watched again.",
@@ -13703,7 +15693,7 @@
             "h": 10,
             "w": 4,
             "x": 16,
-            "y": 256
+            "y": 300
           },
           "targets": [
             {
@@ -13757,7 +15747,7 @@
           }
         },
         {
-          "id": 88,
+          "id": 108,
           "type": "stat",
           "title": "Richest player holds",
           "description": "",
@@ -13769,7 +15759,7 @@
             "h": 10,
             "w": 4,
             "x": 20,
-            "y": 256
+            "y": 300
           },
           "targets": [
             {
